@@ -31,29 +31,29 @@ from ..properties.node_sockets import *
 from ..properties.node_material import get_socket_paramsets
 
 from . import (create_luxcore_name_vol, create_luxcore_name, export_emission_luxcore,
-               warning_luxcore_node, export_volume_luxcore, luxrender_node, luxrender_material_node)
+               warning_luxcore_node, export_volume_luxcore, pbrtv3_node, pbrtv3_material_node)
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volume_output_node(luxrender_node):
+class pbrtv3_volume_output_node(pbrtv3_node):
     """Volume output node"""
-    bl_idname = 'luxrender_volume_output_node'
+    bl_idname = 'pbrtv3_volume_output_node'
     bl_label = 'Volume Output'
     bl_icon = 'WORLD'
     bl_width_min = 120
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Volume')
-        self.inputs.new('luxrender_color_socket', 'Emission Color')
+        self.inputs.new('pbrtv3_color_socket', 'Emission Color')
         self.inputs['Emission Color'].default_value = [0, 0, 0]
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
         if UseLuxCore():
-            current_vol_index = context.scene.luxrender_volumes.volumes_index
-            if current_vol_index >= 0 and context.scene.luxrender_volumes.volumes:
-                current_vol = context.scene.luxrender_volumes.volumes[current_vol_index]
+            current_vol_index = context.scene.pbrtv3_volumes.volumes_index
+            if current_vol_index >= 0 and context.scene.pbrtv3_volumes.volumes:
+                current_vol = context.scene.pbrtv3_volumes.volumes[current_vol_index]
 
                 layout.prop(current_vol, 'priority', text='Priority')
 
@@ -83,16 +83,16 @@ class luxrender_volume_output_node(luxrender_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volume_type_node_clear(luxrender_material_node):
+class pbrtv3_volume_type_node_clear(pbrtv3_material_node):
     """Clear volume node"""
-    bl_idname = 'luxrender_volume_clear_node'
+    bl_idname = 'pbrtv3_volume_clear_node'
     bl_label = 'Clear Volume'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
     def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_AC_absorption_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_fresnel_socket', 'IOR')
+        self.inputs.new('pbrtv3_AC_absorption_socket', 'Absorption Color')
 
         self.outputs.new('NodeSocketShader', 'Volume')
 
@@ -118,9 +118,9 @@ class luxrender_volume_type_node_clear(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volume_type_node_homogeneous(luxrender_material_node):
+class pbrtv3_volume_type_node_homogeneous(pbrtv3_material_node):
     '''Homogeneous volume node'''
-    bl_idname = 'luxrender_volume_homogeneous_node'
+    bl_idname = 'pbrtv3_volume_homogeneous_node'
     bl_label = 'Homogeneous Volume'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -130,12 +130,12 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
                                                  'scale)', default=False)
 
     def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
-        self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
-        self.inputs.new('luxrender_float_socket', 'Scattering Scale')
+        self.inputs.new('pbrtv3_fresnel_socket', 'IOR')
+        self.inputs.new('pbrtv3_SC_absorption_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_SC_color_socket', 'Scattering Color')
+        self.inputs.new('pbrtv3_float_socket', 'Scattering Scale')
         self.inputs['Scattering Scale'].default_value = 1
-        self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
+        self.inputs.new('pbrtv3_SC_asymmetry_socket', 'Asymmetry')
 
         self.outputs.new('NodeSocketShader', 'Volume')
 
@@ -179,9 +179,9 @@ class luxrender_volume_type_node_homogeneous(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
+class pbrtv3_volume_type_node_heterogeneous(pbrtv3_material_node):
     """Heterogeneous volume node"""
-    bl_idname = 'luxrender_volume_heterogeneous_node'
+    bl_idname = 'pbrtv3_volume_heterogeneous_node'
     bl_label = 'Heterogeneous Volume'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -196,12 +196,12 @@ class luxrender_volume_type_node_heterogeneous(luxrender_material_node):
                                                  default=False)
 
     def init(self, context):
-        self.inputs.new('luxrender_fresnel_socket', 'IOR')
-        self.inputs.new('luxrender_SC_absorption_socket', 'Absorption Color')
-        self.inputs.new('luxrender_SC_color_socket', 'Scattering Color')
-        self.inputs.new('luxrender_float_socket', 'Scattering Scale')
+        self.inputs.new('pbrtv3_fresnel_socket', 'IOR')
+        self.inputs.new('pbrtv3_SC_absorption_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_SC_color_socket', 'Scattering Color')
+        self.inputs.new('pbrtv3_float_socket', 'Scattering Scale')
         self.inputs['Scattering Scale'].default_value = 1
-        self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
+        self.inputs.new('pbrtv3_SC_asymmetry_socket', 'Asymmetry')
 
         self.outputs.new('NodeSocketShader', 'Volume')
 

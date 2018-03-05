@@ -84,7 +84,7 @@ class _lrmdb_state(lrmdb_client):
             return
 
         try:
-            context.active_object.active_material.luxrender_material.load_lbm2(
+            context.active_object.active_material.pbrtv3_material.load_lbm2(
                 context,
                 md,
                 context.active_object.active_material,
@@ -201,7 +201,7 @@ class LrmdbActionButton(object):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
+class PBRTv3_OT_lrmdb_login(bpy.types.Operator):
     """Log in to the LuxRender Materials Database"""
 
     bl_idname = 'luxrender.lrmdb_login'
@@ -237,7 +237,7 @@ class LUXRENDER_OT_lrmdb_login(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
+class PBRTv3_OT_lrmdb_logout(bpy.types.Operator):
     """Log out of the LuxRender Materials Database"""
 
     bl_idname = 'luxrender.lrmdb_logout'
@@ -257,7 +257,7 @@ class LUXRENDER_OT_lrmdb_logout(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_lrmdb(bpy.types.Operator):
+class PBRTv3_OT_lrmdb(bpy.types.Operator):
     """Start the LuxRender Materials Database Interface"""
 
     bl_idname = 'luxrender.lrmdb'
@@ -291,18 +291,18 @@ class LUXRENDER_OT_lrmdb(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine == 'LUXRENDER_RENDER'
+        return context.scene.render.engine == 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_upload_material(bpy.types.Operator):
+class PBRTv3_OT_upload_material(bpy.types.Operator):
     bl_idname = 'luxrender.lrmdb_upload'
     bl_label = 'Upload material to LRMDB'
 
     def execute(self, context):
         try:
             blender_mat = context.material
-            luxrender_mat = context.material.luxrender_material
+            pbrtv3_mat = context.material.pbrtv3_material
 
             LM = LuxManager("material_save", 'LBM2')
             LuxManager.SetActive(LM)
@@ -314,22 +314,22 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
             export_materials.ExportedTextures.clear()
 
             # This causes lb25 to embed all external data ...
-            context.scene.luxrender_engine.is_saving_lbm2 = True
+            context.scene.pbrtv3_engine.is_saving_lbm2 = True
 
             # Include interior/exterior for this material
-            for volume in context.scene.luxrender_volumes.volumes:
-                if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+            for volume in context.scene.pbrtv3_volumes.volumes:
+                if volume.name in [pbrtv3_mat.Interior_volume, pbrtv3_mat.Exterior_volume]:
                     material_context.makeNamedVolume(volume.name, *volume.api_output(material_context))
 
-            cr = context.scene.luxrender_testing.clay_render
-            context.scene.luxrender_testing.clay_render = False
-            luxrender_mat.export(context.scene, material_context, blender_mat)
-            context.scene.luxrender_testing.clay_render = cr
+            cr = context.scene.pbrtv3_testing.clay_render
+            context.scene.pbrtv3_testing.clay_render = False
+            pbrtv3_mat.export(context.scene, material_context, blender_mat)
+            context.scene.pbrtv3_testing.clay_render = cr
 
             material_context.set_material_name(blender_mat.name)
             material_context.update_material_metadata(
-                interior=luxrender_mat.Interior_volume,
-                exterior=luxrender_mat.Exterior_volume
+                interior=pbrtv3_mat.Interior_volume,
+                exterior=pbrtv3_mat.Exterior_volume
             )
 
             result = material_context.upload(lrmdb_state)
@@ -339,7 +339,7 @@ class LUXRENDER_OT_upload_material(bpy.types.Operator):
                 self.report({'WARNING'}, 'Upload failed!')
 
             # .. and must be reset!
-            context.scene.luxrender_engine.is_saving_lbm2 = False
+            context.scene.pbrtv3_engine.is_saving_lbm2 = False
 
             LM.reset()
             LuxManager.SetActive(None)

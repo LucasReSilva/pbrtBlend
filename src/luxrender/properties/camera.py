@@ -37,7 +37,7 @@ from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import UseLuxCore
 
 
@@ -53,9 +53,9 @@ def CameraVolumeParameter(attr, name):
         {
             'type': 'prop_search',
             'attr': attr,
-            'src': lambda s, c: s.scene.luxrender_volumes,
+            'src': lambda s, c: s.scene.pbrtv3_volumes,
             'src_attr': 'volumes',
-            'trg': lambda s, c: c.luxrender_camera,
+            'trg': lambda s, c: c.pbrtv3_camera,
             'trg_attr': '%s_volume' % attr,
             'name': name,
             'icon': 'MOD_FLUIDSIM'
@@ -79,7 +79,7 @@ def ArbitraryClippingPlane():
             'attr': 'clipping_plane_selector',
             'src': lambda s, c: s.scene,
             'src_attr': 'objects',
-            'trg': lambda s, c: c.luxrender_camera,
+            'trg': lambda s, c: c.pbrtv3_camera,
             'trg_attr': 'clipping_plane_obj',
             'name': 'Plane'
         },
@@ -87,7 +87,7 @@ def ArbitraryClippingPlane():
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_camera(declarative_property_group):
+class pbrtv3_camera(declarative_property_group):
     """
     Storage class for LuxRender Camera settings.
     """
@@ -435,10 +435,10 @@ class luxrender_camera(declarative_property_group):
         # See border render handling code elsewhere in this file (do a search for "border")
         if (scene.render.use_border and not (
                     not scene.render.use_crop_to_border and (
-                        not scene.luxrender_engine.render or (
-                                    scene.luxrender_engine.export_type == 'EXT' and
-                                    scene.luxrender_engine.binary_name == 'luxrender' and
-                                    not scene.luxrender_engine.monitor_external)))) or (
+                        not scene.pbrtv3_engine.render or (
+                                    scene.pbrtv3_engine.export_type == 'EXT' and
+                                    scene.pbrtv3_engine.binary_name == 'luxrender' and
+                                    not scene.pbrtv3_engine.monitor_external)))) or (
                                     luxcore_export):
             x1, x2, y1, y2 = [
                 scene.render.border_min_x, scene.render.border_max_x,
@@ -482,7 +482,7 @@ class luxrender_camera(declarative_property_group):
         """
 
         cam = scene.camera.data
-        xr, yr = self.luxrender_film.resolution(scene)
+        xr, yr = self.pbrtv3_film.resolution(scene)
 
         params = ParamSet()
 
@@ -538,8 +538,8 @@ class luxrender_camera(declarative_property_group):
         return cam_type, params
 
 @PBRTv3Addon.addon_register_class
-class luxrender_film(declarative_property_group):
-    ef_attach_to = ['luxrender_camera']
+class pbrtv3_film(declarative_property_group):
+    ef_attach_to = ['pbrtv3_camera']
 
     controls = [
         'lbl_internal',
@@ -793,10 +793,10 @@ class luxrender_film(declarative_property_group):
         return xr, yr
 
     def get_gamma(self):
-        if self.luxrender_colorspace.preset:
-            return getattr(colorspace_presets, self.luxrender_colorspace.preset_name).gamma
+        if self.pbrtv3_colorspace.preset:
+            return getattr(colorspace_presets, self.pbrtv3_colorspace.preset_name).gamma
         else:
-            return self.luxrender_colorspace.gamma
+            return self.pbrtv3_colorspace.gamma
 
     def api_output(self):
         """
@@ -834,12 +834,12 @@ class luxrender_film(declarative_property_group):
             # user asked for padded-to-full-frame output, there are a few cases where Lux needs to do this
             # itself since the rendered image will not be returned to Blender
             if not scene.render.use_crop_to_border:
-                # If run-renderer (scene.luxrender_engine.render) is disabled or we are in un-monitored external mode,
+                # If run-renderer (scene.pbrtv3_engine.render) is disabled or we are in un-monitored external mode,
                 # we do not return the image to Blender and Lux must pad the image itself
-                if not scene.luxrender_engine.render or (
-                                    scene.luxrender_engine.export_type == 'EXT' and
-                                    scene.luxrender_engine.binary_name == 'luxrender' and
-                                    not scene.luxrender_engine.monitor_external):
+                if not scene.pbrtv3_engine.render or (
+                                    scene.pbrtv3_engine.export_type == 'EXT' and
+                                    scene.pbrtv3_engine.binary_name == 'luxrender' and
+                                    not scene.pbrtv3_engine.monitor_external):
                     # Subtract scene.render.border Y values from 1 to translate between Blender and Lux conventions
                     cropwindow = [
                         scene.render.border_min_x, scene.render.border_max_x,
@@ -862,10 +862,10 @@ class luxrender_film(declarative_property_group):
             params.add_integer('yresolution', yr)
 
         # ColourSpace
-        if self.luxrender_colorspace.preset:
-            cs_object = getattr(colorspace_presets, self.luxrender_colorspace.preset_name)
+        if self.pbrtv3_colorspace.preset:
+            cs_object = getattr(colorspace_presets, self.pbrtv3_colorspace.preset_name)
         else:
-            cs_object = self.luxrender_colorspace
+            cs_object = self.pbrtv3_colorspace
 
         params.add_float('gamma', self.get_gamma())
         params.add_float('colorspace_white', [cs_object.cs_whiteX, cs_object.cs_whiteY])
@@ -874,14 +874,14 @@ class luxrender_film(declarative_property_group):
         params.add_float('colorspace_blue', [cs_object.cs_blueX, cs_object.cs_blueY])
 
         # Camera Response Function
-        if self.luxrender_colorspace.use_crf == 'file' and self.luxrender_colorspace.crf_file:
+        if self.pbrtv3_colorspace.use_crf == 'file' and self.pbrtv3_colorspace.crf_file:
             if scene.camera.library is not None:
-                local_crf_filepath = bpy.path.abspath(self.luxrender_colorspace.crf_file, scene.camera.library.filepath)
+                local_crf_filepath = bpy.path.abspath(self.pbrtv3_colorspace.crf_file, scene.camera.library.filepath)
             else:
-                local_crf_filepath = self.luxrender_colorspace.crf_file
+                local_crf_filepath = self.pbrtv3_colorspace.crf_file
 
             local_crf_filepath = efutil.filesystem_path(local_crf_filepath)
-            if scene.luxrender_engine.allow_file_embed():
+            if scene.pbrtv3_engine.allow_file_embed():
                 from ..util import bencode_file2string
 
                 params.add_string('cameraresponse', os.path.basename(local_crf_filepath))
@@ -890,8 +890,8 @@ class luxrender_film(declarative_property_group):
             else:
                 params.add_string('cameraresponse', local_crf_filepath)
 
-        if self.luxrender_colorspace.use_crf == 'preset':
-            params.add_string('cameraresponse', self.luxrender_colorspace.crf_preset)
+        if self.pbrtv3_colorspace.use_crf == 'preset':
+            params.add_string('cameraresponse', self.pbrtv3_colorspace.crf_preset)
 
         # Output types
         params.add_string('filename', get_output_filename(scene))
@@ -905,7 +905,7 @@ class luxrender_film(declarative_property_group):
         else:
             output_channels = 'RGB'
 
-        if scene.luxrender_engine.export_type == 'INT' and scene.luxrender_engine.integratedimaging:
+        if scene.pbrtv3_engine.export_type == 'INT' and scene.pbrtv3_engine.integratedimaging:
             # Set up params to enable z buffer
             # we use the colorspace gamma, else autolinear gives wrong estimation,
             # gamma 1.0 per pixel is recalculated in pylux after
@@ -942,7 +942,7 @@ class luxrender_film(declarative_property_group):
 
         params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 
-        if scene.luxrender_engine.export_type == 'EXT':
+        if scene.pbrtv3_engine.export_type == 'EXT':
             params.add_integer('displayinterval', self.displayinterval)
             params.add_integer('writeinterval', self.writeinterval)
             params.add_integer('flmwriteinterval', self.flmwriteinterval)
@@ -950,33 +950,33 @@ class luxrender_film(declarative_property_group):
             params.add_integer('writeinterval', self.internal_updateinterval)
 
         # Halt conditions
-        if scene.luxrender_halt.haltspp > 0:
-            params.add_integer('haltspp', scene.luxrender_halt.haltspp)
+        if scene.pbrtv3_halt.haltspp > 0:
+            params.add_integer('haltspp', scene.pbrtv3_halt.haltspp)
 
-        if scene.luxrender_halt.halttime > 0:
-            params.add_integer('halttime', scene.luxrender_halt.halttime)
+        if scene.pbrtv3_halt.halttime > 0:
+            params.add_integer('halttime', scene.pbrtv3_halt.halttime)
 
-        if scene.luxrender_halt.haltthreshold > 0:
-            params.add_float('haltthreshold', 1 / 10.0 ** scene.luxrender_halt.haltthreshold)
+        if scene.pbrtv3_halt.haltthreshold > 0:
+            params.add_float('haltthreshold', 1 / 10.0 ** scene.pbrtv3_halt.haltthreshold)
 
         # Convergence Test
-        if scene.luxrender_halt.convergencestep != 32:
-            params.add_float('convergencestep', scene.luxrender_halt.convergencestep)
+        if scene.pbrtv3_halt.convergencestep != 32:
+            params.add_float('convergencestep', scene.pbrtv3_halt.convergencestep)
 
         # Filename for User Sampling Map
-        if scene.luxrender_sampler.usersamplingmap_filename:
-            if scene.luxrender_sampler.usersamplingmap_filename.endswith('.exr'):
-                params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename)
+        if scene.pbrtv3_sampler.usersamplingmap_filename:
+            if scene.pbrtv3_sampler.usersamplingmap_filename.endswith('.exr'):
+                params.add_string('usersamplingmap_filename', scene.pbrtv3_sampler.usersamplingmap_filename)
             else:
-                params.add_string('usersamplingmap_filename', scene.luxrender_sampler.usersamplingmap_filename + '.exr')
+                params.add_string('usersamplingmap_filename', scene.pbrtv3_sampler.usersamplingmap_filename + '.exr')
 
-        if self.outlierrejection_k > 0 and scene.luxrender_rendermode.renderer != 'sppm':
+        if self.outlierrejection_k > 0 and scene.pbrtv3_rendermode.renderer != 'sppm':
             params.add_integer('outlierrejection_k', self.outlierrejection_k)
 
         params.add_integer('tilecount', self.tilecount)
 
         # update the film settings with tonemapper settings
-        params.update(self.luxrender_tonemapping.get_paramset())
+        params.update(self.pbrtv3_tonemapping.get_paramset())
 
         return 'image', params
 
@@ -1034,8 +1034,8 @@ crf_preset_names = [s.strip() for s in
 
 
 @PBRTv3Addon.addon_register_class
-class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
-    bl_idname = 'camera.set_luxrender_crf'
+class CAMERA_OT_set_pbrtv3_crf(bpy.types.Operator):
+    bl_idname = 'camera.set_pbrtv3_crf'
     bl_label = 'Set LuxRender Film Response Function'
 
     preset_name = bpy.props.StringProperty()
@@ -1043,15 +1043,15 @@ class CAMERA_OT_set_luxrender_crf(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return hasattr(context, 'camera') and context.camera and \
-               context.camera.luxrender_camera.luxrender_film.luxrender_colorspace
+               context.camera.pbrtv3_camera.pbrtv3_film.pbrtv3_colorspace
 
     def execute(self, context):
-        context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset = self.properties.preset_name
+        context.camera.pbrtv3_camera.pbrtv3_film.pbrtv3_colorspace.crf_preset = self.properties.preset_name
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class CAMERA_MT_luxrender_crf(bpy.types.Menu):
+class CAMERA_MT_pbrtv3_crf(bpy.types.Menu):
     bl_label = 'CRF Preset'
 
     # Flat-list menu system
@@ -1063,17 +1063,17 @@ class CAMERA_MT_luxrender_crf(bpy.types.Menu):
             if i % 20 == 0:
                 cl = lt.column()
 
-            op = cl.operator('CAMERA_OT_set_luxrender_crf', text=crf_name)
+            op = cl.operator('CAMERA_OT_set_pbrtv3_crf', text=crf_name)
             op.preset_name = crf_name
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_colorspace(declarative_property_group):
+class pbrtv3_colorspace(declarative_property_group):
     """
     Storage class for LuxRender Colour-Space settings.
     """
 
-    ef_attach_to = ['luxrender_film']
+    ef_attach_to = ['pbrtv3_film']
 
     controls = [
         'cs_label',
@@ -1341,12 +1341,12 @@ class colorspace_presets(object):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tonemapping(declarative_property_group):
+class pbrtv3_tonemapping(declarative_property_group):
     """
     Storage class for LuxRender ToneMapping settings.
     """
 
-    ef_attach_to = ['luxrender_film']
+    ef_attach_to = ['pbrtv3_film']
 
     controls = [
         'tm_label',
@@ -1621,10 +1621,10 @@ class luxrender_tonemapping(declarative_property_group):
             params.add_float('reinhard_burn', self.reinhard_burn)
 
         if self.type == 'linear':
-            params.add_float('linear_sensitivity', cam.luxrender_camera.sensitivity)
-            params.add_float('linear_exposure', cam.luxrender_camera.exposure_time())
-            params.add_float('linear_fstop', cam.luxrender_camera.fstop)
-            params.add_float('linear_gamma', cam.luxrender_camera.luxrender_film.get_gamma())
+            params.add_float('linear_sensitivity', cam.pbrtv3_camera.sensitivity)
+            params.add_float('linear_exposure', cam.pbrtv3_camera.exposure_time())
+            params.add_float('linear_fstop', cam.pbrtv3_camera.fstop)
+            params.add_float('linear_gamma', cam.pbrtv3_camera.pbrtv3_film.get_gamma())
 
         if self.type == 'contrast':
             params.add_float('contrast_ywa', self.ywa)

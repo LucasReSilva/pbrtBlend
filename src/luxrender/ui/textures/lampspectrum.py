@@ -25,22 +25,22 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_lampspectrum(luxrender_texture_base):
+class ui_texture_lampspectrum(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Lamp spectrum Texture'
 
     LUX_COMPAT = {'lampspectrum'}
 
     display_property_groups = [
-        ( ('texture', 'luxrender_texture'), 'luxrender_tex_lampspectrum' )
+        ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_lampspectrum' )
     ]
 
     def draw(self, context):
         cl = self.layout.column(align=True)
         cl.menu('TEXTURE_MT_lampspectrum_presets',
-                text=context.texture.luxrender_texture.luxrender_tex_lampspectrum.label)
+                text=context.texture.pbrtv3_texture.pbrtv3_tex_lampspectrum.label)
         super().draw(context)
 

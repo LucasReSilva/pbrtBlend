@@ -85,7 +85,7 @@ class luxcore_material(declarative_property_group):
         {
             'type': 'prop_search',
             'attr': 'materialgroup_chooser',
-            'src': lambda s, c: s.scene.luxrender_materialgroups,
+            'src': lambda s, c: s.scene.pbrtv3_materialgroups,
             'src_attr': 'materialgroups',
             'trg': lambda s, material: material.luxcore_material,
             'trg_attr': 'materialgroup',

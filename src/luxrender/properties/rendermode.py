@@ -34,7 +34,7 @@ from ..export import ParamSet
 from ..extensions_framework.validate import Logic_OR as O
 
 @PBRTv3Addon.addon_register_class
-class luxrender_rendermode(declarative_property_group):
+class pbrtv3_rendermode(declarative_property_group):
     """
     This class holds the renderingmode menu and renderer prefs. Surface integrators settings are
     in a seperate class, due to there being a hell of a lot of them
@@ -74,11 +74,11 @@ class luxrender_rendermode(declarative_property_group):
     # This function sets renderer and surface integrator according to rendermode setting
     def update_rendering_mode(self, context):
         if self.rendermode in ('luxcorepath', 'luxcorepathocl', 'luxcorebiaspath', 'luxcorebiaspathocl', 'hybridpath'):
-            context.scene.luxrender_integrator.surfaceintegrator = 'path'
+            context.scene.pbrtv3_integrator.surfaceintegrator = 'path'
         elif self.rendermode in ('luxcorebidir', 'luxcorebidirvcm', 'hybridbidir'):
-            context.scene.luxrender_integrator.surfaceintegrator = 'bidirectional'
+            context.scene.pbrtv3_integrator.surfaceintegrator = 'bidirectional'
         else:
-            context.scene.luxrender_integrator.surfaceintegrator = self.rendermode
+            context.scene.pbrtv3_integrator.surfaceintegrator = self.rendermode
 
         if self.rendermode in ('hybridpath', 'hybridbidir'):
             self.renderer = 'hybrid'
@@ -307,8 +307,8 @@ class luxrender_rendermode(declarative_property_group):
                 luxcore_params = '" "'.join((luxcore_params, 'tile.multipass.enable = 1'))
 
             # Set native  threadcount when manually set
-            if not bpy.context.scene.luxrender_engine.threads_auto:
-                luxcore_native_threads = "native.threads.count = " +  str(bpy.context.scene.luxrender_engine.threads)
+            if not bpy.context.scene.pbrtv3_engine.threads_auto:
+                luxcore_native_threads = "native.threads.count = " +  str(bpy.context.scene.pbrtv3_engine.threads)
                 luxcore_params = '" "'.join((luxcore_params, luxcore_native_threads))
 
             # Finally add custom properties
@@ -319,7 +319,7 @@ class luxrender_rendermode(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_halt(declarative_property_group):
+class pbrtv3_halt(declarative_property_group):
     """
     Storage class for LuxRender Halt settings.
     """
@@ -337,7 +337,7 @@ class luxrender_halt(declarative_property_group):
             'attr': 'haltspp',
             'name': 'Halt Samples',
             'description': 'Halt the rendering at this number of samples/px or passes (0=disabled)',
-            'default': 0,
+            'default': 16,
             'min': 0,
             'soft_min': 0,
             'max': 65535,

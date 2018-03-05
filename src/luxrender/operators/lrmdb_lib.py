@@ -37,7 +37,7 @@ def make_cookie_filename():
     fc = []
     for p in efutil.config_paths:
         if os.path.exists(p) and os.path.isdir(p) and os.access(p, os.W_OK):
-            fc.append('/'.join([p, 'luxrender_lrmdb_cookies.txt']))
+            fc.append('/'.join([p, 'pbrtv3_lrmdb_cookies.txt']))
 
     if len(fc) < 1:
         return None

@@ -58,7 +58,7 @@ class VolumeExporter(object):
     def __convert_node_volume(self):
         self.__generate_volume_name(self.volume.name)
 
-        output_node = find_node_in_volume(self.volume, 'luxrender_volume_output_node')
+        output_node = find_node_in_volume(self.volume, 'pbrtv3_volume_output_node')
 
         if output_node is None:
             self.__export_fallback_volume()

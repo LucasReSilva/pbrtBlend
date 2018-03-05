@@ -29,7 +29,7 @@ import bpy
 from .. import PBRTv3Addon
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
+class PBRTv3_OT_convert_cycles_scene(bpy.types.Operator):
     bl_idname = 'luxrender.convert_cycles_scene'
     bl_label = 'Convert Cycles Scene'
     bl_description = 'Convert Cycles materials, lamps and world background to LuxRender materials and lamps'
@@ -53,7 +53,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
         for light in lights:
             if light.data.type == 'SUN':
                 print('Converting light %s (%s)' % (light.name, light.data.type))
-                lux_sun = light.data.luxrender_lamp.luxrender_lamp_sun
+                lux_sun = light.data.pbrtv3_lamp.pbrtv3_lamp_sun
                 # Cycles sun lamps are always in "sun only" mode
                 lux_sun.sunsky_type = 'sun'
                 # Sun size
@@ -61,7 +61,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
 
             elif light.data.type == 'AREA':
                 print('Converting light %s (%s)' % (light.name, light.data.type))
-                lux_area = light.data.luxrender_lamp.luxrender_lamp_area
+                lux_area = light.data.pbrtv3_lamp.pbrtv3_lamp_area
                 output = None
 
                 if light.data.node_tree:
@@ -134,7 +134,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
             hemi_object = bpy.data.objects.new(name=hemi_name, object_data=hemi_data)
             context.scene.objects.link(hemi_object)
 
-            lux_hemi = hemi_data.luxrender_lamp.luxrender_lamp_hemi
+            lux_hemi = hemi_data.pbrtv3_lamp.pbrtv3_lamp_hemi
 
             if hemi_color:
                 lux_hemi.L_color = hemi_color
@@ -148,7 +148,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
             sky_object = bpy.data.objects.new(name=sky_name, object_data=sky_data)
             context.scene.objects.link(sky_object)
 
-            lux_sky = sky_data.luxrender_lamp.luxrender_lamp_sun
+            lux_sky = sky_data.pbrtv3_lamp.pbrtv3_lamp_sun
 
             # Set it to be sky only
             lux_sky.sunsky_type = 'sky'
@@ -158,7 +158,7 @@ class LUXRENDER_OT_convert_cycles_scene(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_convert_all_cycles_materials(bpy.types.Operator):
+class PBRTv3_OT_convert_all_cycles_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_cycles_materials'
     bl_label = 'Convert all Cycles materials'
 
@@ -171,7 +171,7 @@ class LUXRENDER_OT_convert_all_cycles_materials(bpy.types.Operator):
             # Don't convert materials from linked-in files
             if blender_mat.library is None and blender_mat.node_tree:
                 # Cycles nodetree available
-                if not (hasattr(blender_mat, 'luxrender_material') and blender_mat.luxrender_material.nodetree):
+                if not (hasattr(blender_mat, 'pbrtv3_material') and blender_mat.pbrtv3_material.nodetree):
                     # No Lux nodetree yet, convert the Cycles material
                     total += 1
 
@@ -187,7 +187,7 @@ class LUXRENDER_OT_convert_all_cycles_materials(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_convert_cycles_material(bpy.types.Operator):
+class PBRTv3_OT_convert_cycles_material(bpy.types.Operator):
     bl_idname = 'luxrender.convert_cycles_material'
     bl_label = 'Convert this Cycles material'
 
@@ -216,9 +216,9 @@ def cycles_material_converter(blender_mat, context):
         print('Converting material %s' % blender_mat.name)
 
         # Create Lux nodetree
-        lux_nodetree = bpy.data.node_groups.new(blender_mat.name, type='luxrender_material_nodes')
+        lux_nodetree = bpy.data.node_groups.new(blender_mat.name, type='pbrtv3_material_nodes')
         lux_nodetree.use_fake_user = True
-        blender_mat.luxrender_material.nodetree = lux_nodetree.name
+        blender_mat.pbrtv3_material.nodetree = lux_nodetree.name
 
         # Find several Cycles nodetypes needed to start the export (or just useful later)
         output = None
@@ -237,14 +237,14 @@ def cycles_material_converter(blender_mat, context):
         first_surface_node, default_value = convert_socket(output.inputs['Surface'], lux_nodetree)
 
         # Create Lux output node
-        lux_output = lux_nodetree.nodes.new('luxrender_material_output_node')
+        lux_output = lux_nodetree.nodes.new('pbrtv3_material_output_node')
         lux_output.location = output.location
         # Connect Lux output to first converted node (if it could be converted)
         if first_surface_node:
             lux_nodetree.links.new(first_surface_node.outputs[0], lux_output.inputs[0])
         else:
             # Backup material in case nothing could be converted
-            backup_matte_node = lux_nodetree.nodes.new('luxrender_material_matte_node')
+            backup_matte_node = lux_nodetree.nodes.new('pbrtv3_material_matte_node')
             backup_matte_node.location = lux_output.location.x - 300, lux_output.location.y
             lux_nodetree.links.new(backup_matte_node.outputs[0], lux_output.inputs[0])
 
@@ -252,7 +252,7 @@ def cycles_material_converter(blender_mat, context):
 
             # If nothing at all could be converted, try at least to find an image texture
             if first_image_node:
-                backup_image_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
+                backup_image_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_image_map_node')
                 backup_image_node.location = backup_matte_node.location.x - 300, backup_matte_node.location.y
                 lux_nodetree.links.new(backup_image_node.outputs[0], backup_matte_node.inputs[0])
 
@@ -260,7 +260,7 @@ def cycles_material_converter(blender_mat, context):
 
         # Use the first emission node if there are any
         if emission:
-            lux_emission = lux_nodetree.nodes.new('luxrender_light_area_node')
+            lux_emission = lux_nodetree.nodes.new('pbrtv3_light_area_node')
             lux_emission.location = lux_output.location.x - 230, lux_output.location.y - 180
 
             # Color
@@ -324,7 +324,7 @@ def convert_socket(socket, lux_nodetree):
 
     elif node.type == 'BSDF_DIFFUSE':
         # "Matte" in Lux
-        lux_node = lux_nodetree.nodes.new('luxrender_material_matte_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_matte_node')
 
         # Color
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
@@ -334,7 +334,7 @@ def convert_socket(socket, lux_nodetree):
 
     elif node.type == 'BSDF_GLOSSY':
         # "Metal2" in Lux
-        lux_node = lux_nodetree.nodes.new('luxrender_material_metal2_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_metal2_node')
 
         # Color
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
@@ -355,7 +355,7 @@ def convert_socket(socket, lux_nodetree):
                 amount_node.type in ('FRESNEL', 'LAYER_WEIGHT') and
                 mat1_node.type == 'BSDF_DIFFUSE' and mat2_node.type == 'BSDF_GLOSSY'):
             # This is the most common way to fake a glossy material in Cycles
-            lux_node = lux_nodetree.nodes.new('luxrender_material_glossy_node')
+            lux_node = lux_nodetree.nodes.new('pbrtv3_material_glossy_node')
 
             # Diffuse color (from BSDF_DIFFUSE)
             linked_node, default_value = convert_socket(mat1_node.inputs['Color'], lux_nodetree)
@@ -374,7 +374,7 @@ def convert_socket(socket, lux_nodetree):
             # This is the most common way to fake an archglass material in Cycles
             glass_node = mat1_node if mat1_node.type == 'BSDF_GLASS' else mat2_node
 
-            lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
+            lux_node = lux_nodetree.nodes.new('pbrtv3_material_glass_node')
             # Set it to architectural mode
             lux_node.architectural = True
 
@@ -391,7 +391,7 @@ def convert_socket(socket, lux_nodetree):
 
             # Only create the mix material if at least one of the sub-shaders could be converted
             if linked_node_1 or linked_node_2:
-                lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
+                lux_node = lux_nodetree.nodes.new('pbrtv3_material_mix_node')
                 # Amount
                 copy_socket_properties(lux_node, 0, lux_nodetree, linked_node_amount, default_value_amount)
                 # Material 1
@@ -405,14 +405,14 @@ def convert_socket(socket, lux_nodetree):
         linked_node_2, default_value_2 = convert_socket(node.inputs[1], lux_nodetree)
 
         if linked_node_1 or linked_node_2:
-            lux_node = lux_nodetree.nodes.new('luxrender_material_mix_node')
+            lux_node = lux_nodetree.nodes.new('pbrtv3_material_mix_node')
             # Material 1
             copy_socket_properties(lux_node, 1, lux_nodetree, linked_node_1, default_value_1)
             # Material 2
             copy_socket_properties(lux_node, 2, lux_nodetree, linked_node_2, default_value_2)
 
     elif node.type == 'BSDF_TRANSPARENT':
-        lux_node = lux_nodetree.nodes.new('luxrender_material_null_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_null_node')
 
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
         default_value = convert_rgba_to_rgb(default_value)
@@ -420,7 +420,7 @@ def convert_socket(socket, lux_nodetree):
         copy_socket_properties(lux_node, 0, lux_nodetree, linked_node, default_value)
 
     elif node.type == 'BSDF_GLASS':
-        lux_node = lux_nodetree.nodes.new('luxrender_material_glass_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_glass_node')
 
         # Color (Transmission)
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
@@ -441,7 +441,7 @@ def convert_socket(socket, lux_nodetree):
         copy_socket_properties(lux_node, 2, lux_nodetree, linked_node, default_value)
 
     elif node.type == 'BSDF_TRANSLUCENT':
-        lux_node = lux_nodetree.nodes.new('luxrender_material_mattetranslucent_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_mattetranslucent_node')
 
         # Color (the cycles node only has one value that is used for both reflection and transmission in the Lux mat)
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
@@ -451,7 +451,7 @@ def convert_socket(socket, lux_nodetree):
         copy_socket_properties(lux_node, 1, lux_nodetree, linked_node, default_value)
 
     elif node.type == 'BSDF_VELVET':
-        lux_node = lux_nodetree.nodes.new('luxrender_material_velvet_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_material_velvet_node')
 
         # Color (the cycles node only has one value that is used for both reflection and transmission in the Lux mat)
         linked_node, default_value = convert_socket(node.inputs['Color'], lux_nodetree)
@@ -462,7 +462,7 @@ def convert_socket(socket, lux_nodetree):
     ### Textures ###
 
     elif node.type == 'TEX_IMAGE':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_image_map_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_image_map_node')
 
         if node.image:
             # Selected Blender image
@@ -476,31 +476,31 @@ def convert_socket(socket, lux_nodetree):
             lux_node.channel = 'alpha'
 
     elif node.type == 'TEX_NOISE':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_clouds_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_clouds_node')
 
     elif node.type == 'TEX_VORONOI':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_voronoi_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_voronoi_node')
 
     elif node.type == 'TEX_GRADIENT':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_blend_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_blend_node')
 
     # No node support for magic texture yet (in LuxBlend)
     #elif node.type == 'TEX_MAGIC':
-    #    lux_node = lux_nodetree.nodes.new('luxrender_texture_blender__node')
+    #    lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender__node')
 
     elif node.type == 'TEX_MUSGRAVE':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_blender_musgrave_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_blender_musgrave_node')
 
     elif node.type == 'TEX_CHECKER':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_checker_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_checker_node')
 
     # Brick is making problems (does not have outputs after creation, probably because of color/float switch which is
     # done in the draw() function... annoying concept
     #elif node.type == 'TEX_BRICK':
-    #    lux_node = lux_nodetree.nodes.new('luxrender_texture_brick_node')
+    #    lux_node = lux_nodetree.nodes.new('pbrtv3_texture_brick_node')
 
     elif node.type == 'BUMP':
-        lux_node = lux_nodetree.nodes.new('luxrender_texture_math_node')
+        lux_node = lux_nodetree.nodes.new('pbrtv3_texture_math_node')
         lux_node.mode = 'scale'
 
         # Strength

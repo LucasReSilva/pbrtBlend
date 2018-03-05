@@ -265,7 +265,7 @@ def get_worldscale(as_scalematrix=True):
     For usability, previev_scale is not an own property but calculated from the object dimensions
     A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
     """
-    preview_scale = bpy.context.scene.luxrender_world.preview_object_size / 2
+    preview_scale = bpy.context.scene.pbrtv3_world.preview_object_size / 2
 
     # This is a safety net to prevent previewscale affecting render
     ws = 1 / preview_scale if LuxManager.CurrentScene.name == "preview" else 1
@@ -387,7 +387,7 @@ def process_filepath_data(scene, obj, file_path, paramset, parameter_name):
     file_relative = efutil.filesystem_path(file_library_path) if (
         hasattr(obj, 'library') and obj.library) else efutil.filesystem_path(file_path)
 
-    if scene.luxrender_engine.allow_file_embed():
+    if scene.pbrtv3_engine.allow_file_embed():
         paramset.add_string(parameter_name, file_basename)
         encoded_data, encoded_size = bencode_file2string_with_size(file_relative)
         paramset.increase_size('%s_data' % parameter_name, encoded_size)

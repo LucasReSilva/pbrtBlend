@@ -51,7 +51,7 @@ from ..export.scene import SceneExporter
 from ..export.volumes import SmokeCache
 from ..outputs import LuxManager, LuxFilmDisplay
 from ..outputs import LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
 from ..export.luxcore import LuxCoreExporter
@@ -94,7 +94,7 @@ from ..operators import lrmdb, export, materials, nodes, cycles_converter
 
 def _register_elm(elm, required=False):
     try:
-        elm.COMPAT_ENGINES.add('LUXRENDER_RENDER')
+        elm.COMPAT_ENGINES.add('PBRTv3_RENDER')
     except:
         if required:
             LuxLog('Failed to add LuxRender to ' + elm.__name__)
@@ -194,11 +194,11 @@ if bpy.app.version > (2, 77, 2):
 # Use this example for such overrides
 # Add output format flags to output panel
 def lux_output_hints(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER' and not UseLuxCore():
+    if context.scene.render.engine == 'PBRTv3_RENDER' and not UseLuxCore():
 
         # In this mode, we don't use use the regular interval write
-        pipe_mode = (context.scene.luxrender_engine.export_type == 'INT' and
-                     not context.scene.luxrender_engine.write_files)
+        pipe_mode = (context.scene.pbrtv3_engine.export_type == 'INT' and
+                     not context.scene.pbrtv3_engine.write_files)
 
         # in this case, none of these buttons do anything, so don't even bother drawing the label
         if not pipe_mode:
@@ -206,48 +206,48 @@ def lux_output_hints(self, context):
             col.label("LuxRender Output Formats")
         row = self.layout.row()
         if not pipe_mode:
-            row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png", text="PNG")
+            row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_png", text="PNG")
 
-            if context.scene.camera.data.luxrender_camera.luxrender_film.write_png:
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_png_16bit",
+            if context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_png:
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_png_16bit",
                          text="Use 16bit PNG")
 
             row = self.layout.row()
-            row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_tga", text="TARGA")
+            row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_tga", text="TARGA")
             row = self.layout.row()
-            row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr", text="OpenEXR")
+            row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_exr", text="OpenEXR")
 
-            if context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_applyimaging",
+            if context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_exr:
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_exr_applyimaging",
                          text="Tonemap EXR")
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_halftype",
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_exr_halftype",
                          text="Use 16bit EXR")
                 row = self.layout.row()
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_exr_compressiontype",
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_exr_compressiontype",
                          text="EXR Compression")
 
-            if context.scene.camera.data.luxrender_camera.luxrender_film.write_tga or \
-                    context.scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+            if context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_tga or \
+                    context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_exr:
                 row = self.layout.row()
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_zbuf",
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_zbuf",
                          text="Enable Z-Buffer")
 
-                if context.scene.camera.data.luxrender_camera.luxrender_film.write_zbuf:
+                if context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_zbuf:
                     row = self.layout.row()
-                    row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "zbuf_normalization",
+                    row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "zbuf_normalization",
                              text="Z-Buffer Normalization")
 
             row = self.layout.row()
-            row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm", text="Write FLM")
+            row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_flm", text="Write FLM")
 
-            if context.scene.camera.data.luxrender_camera.luxrender_film.write_flm:
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "restart_flm", text="Restart FLM")
-                row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "write_flm_direct",
+            if context.scene.camera.data.pbrtv3_camera.pbrtv3_film.write_flm:
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "restart_flm", text="Restart FLM")
+                row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_flm_direct",
                          text="Write FLM Directly")
         row = self.layout.row()
 
         # Integrated imaging always with premul named according to Blender usage
-        row.prop(context.scene.camera.data.luxrender_camera.luxrender_film, "output_alpha",
+        row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "output_alpha",
                  text="Transparent Background")
 
 
@@ -256,33 +256,33 @@ _register_elm(bl_ui.properties_render.RENDER_PT_output.append(lux_output_hints))
 
 # Add view buttons for viewcontrol to preview panels
 def lux_use_alternate_matview(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         row = self.layout.row()
 
         if not UseLuxCore():
-            row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
+            row.prop(context.scene.pbrtv3_world, "preview_object_size", text="Size")
 
-        row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
+        row.prop(context.material.pbrtv3_material, "preview_zoom", text="Zoom")
 
         if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
-            row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
+            row.prop(context.material.pbrtv3_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
 _register_elm(bl_ui.properties_material.MATERIAL_PT_preview.append(lux_use_alternate_matview))
 
 
 def lux_use_alternate_texview(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         row = self.layout.row()
 
         if not UseLuxCore():
-            row.prop(context.scene.luxrender_world, "preview_object_size", text="Size")
+            row.prop(context.scene.pbrtv3_world, "preview_object_size", text="Size")
 
         if context.material:
-            row.prop(context.material.luxrender_material, "preview_zoom", text="Zoom")
+            row.prop(context.material.pbrtv3_material, "preview_zoom", text="Zoom")
 
             if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
-                row.prop(context.material.luxrender_material, "mat_preview_flip_xz", text="Flip XZ")
+                row.prop(context.material.pbrtv3_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
 _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alternate_texview))
@@ -290,10 +290,10 @@ _register_elm(bl_ui.properties_texture.TEXTURE_PT_preview.append(lux_use_alterna
 
 # Add use_clipping button to lens panel
 def lux_use_clipping(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         split = self.layout.split()
         split.label("")
-        split.column().prop(context.camera.luxrender_camera, "use_clipping", text="Export Clipping")
+        split.column().prop(context.camera.pbrtv3_camera, "use_clipping", text="Export Clipping")
 
 
 _register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping))
@@ -301,14 +301,14 @@ _register_elm(bl_ui.properties_data_camera.DATA_PT_lens.append(lux_use_clipping)
 
 # Add options by render image/anim buttons
 def render_start_options(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         col = self.layout.column()
         row = self.layout.row()
 
         if UseLuxCore() and context.scene.render.display_mode == 'WINDOW':
             col.label("Window mode can cause crashes!", icon="ERROR")
 
-        col.prop(context.scene.luxrender_engine, "selected_luxrender_api", text="LuxRender API")
+        col.prop(context.scene.pbrtv3_engine, "selected_pbrtv3_api", text="LuxRender API")
 
         if UseLuxCore():
             col.prop(context.scene.luxcore_translatorsettings, "export_type")
@@ -317,12 +317,12 @@ def render_start_options(self, context):
                 sub.alignment = 'RIGHT'
                 sub.prop(context.scene.luxcore_translatorsettings, "run_luxcoreui")
         else:
-            col.prop(context.scene.luxrender_engine, "export_type", text="Export Type")
-            if context.scene.luxrender_engine.export_type == 'EXT':
-                col.prop(context.scene.luxrender_engine, "binary_name", text="Render Using")
-            if context.scene.luxrender_engine.export_type == 'INT':
-                row.prop(context.scene.luxrender_engine, "write_files", text="Write to Disk")
-                row.prop(context.scene.luxrender_engine, "integratedimaging", text="Integrated Imaging")
+            col.prop(context.scene.pbrtv3_engine, "export_type", text="Export Type")
+            if context.scene.pbrtv3_engine.export_type == 'EXT':
+                col.prop(context.scene.pbrtv3_engine, "binary_name", text="Render Using")
+            if context.scene.pbrtv3_engine.export_type == 'INT':
+                row.prop(context.scene.pbrtv3_engine, "write_files", text="Write to Disk")
+                row.prop(context.scene.pbrtv3_engine, "integratedimaging", text="Integrated Imaging")
 
         col.separator()
         row = col.row()
@@ -342,8 +342,8 @@ def blender_texture_poll(cls, context):
     show = tex and ((tex.type == cls.tex_type and not tex.use_nodes) and
                     (context.scene.render.engine in cls.COMPAT_ENGINES))
 
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
-        show = show and tex.luxrender_texture.type == 'BLENDER'
+    if context.scene.render.engine == 'PBRTv3_RENDER':
+        show = show and tex.pbrtv3_texture.type == 'BLENDER'
 
     return show
 
@@ -371,7 +371,7 @@ def blender_psys_poll(cls, context):
     brush = context.brush
     show = tex and not brush and (context.scene.render.engine in cls.COMPAT_ENGINES)
 
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         show = show and psys
 
     return show
@@ -386,12 +386,12 @@ for blender_psys_ui in blender_psys_ui_list:
 
 
 def lux_texture_chooser(self, context):
-    if context.scene.render.engine == 'LUXRENDER_RENDER':
+    if context.scene.render.engine == 'PBRTv3_RENDER':
         self.layout.separator()
         row = self.layout.row(align=True)
         if context.texture:
             row.label('LuxRender type')
-            row.menu('TEXTURE_MT_luxrender_type', text=context.texture.luxrender_texture.type_label)
+            row.menu('TEXTURE_MT_pbrtv3_type', text=context.texture.pbrtv3_texture.type_label)
 
             if UseLuxCore():
                 self.layout.separator()
@@ -428,7 +428,7 @@ compatible("properties_data_speaker")
 def DrawButtonPause(self, context):
     scene = context.scene
 
-    if scene.render.engine == "LUXRENDER_RENDER" and UseLuxCore():
+    if scene.render.engine == "PBRTv3_RENDER" and UseLuxCore():
         view = context.space_data
 
         if view.viewport_shade == "RENDERED":
@@ -438,7 +438,7 @@ _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
 
 
 def draw_button_show_imagemap_previews(self, context):
-    if context.scene.render.engine == "LUXRENDER_RENDER" and UseLuxCore():
+    if context.scene.render.engine == "PBRTv3_RENDER" and UseLuxCore():
         self.layout.prop(context.scene.luxcore_global, 'nodeeditor_show_imagemap_previews',
                          toggle=True,
                          icon='IMAGE_COL')
@@ -452,7 +452,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     LuxRender Engine Exporter/Integration class
     """
 
-    bl_idname = 'LUXRENDER_RENDER'
+    bl_idname = 'PBRTv3_RENDER'
     bl_label = 'PBRTv3'
     bl_use_preview = True
     bl_use_texture_preview = True
@@ -479,7 +479,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             if UseLuxCore():
                 self.luxcore_render(scene)
             else:
-                self.luxrender_render(scene)
+                self.pbrtv3_render(scene)
 
     def view_update(self, context):
         if UseLuxCore():
@@ -497,7 +497,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     #
     ############################################################################
 
-    def luxrender_render(self, scene):
+    def pbrtv3_render(self, scene):
         prev_cwd = os.getcwd()
         try:
             self.LuxManager = None
@@ -506,7 +506,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.output_file = 'default.png'
 
             if scene.name == 'preview':
-                self.luxrender_render_preview(scene)
+                self.pbrtv3_render_preview(scene)
                 return
 
             if scene.display_settings.display_device != "sRGB":
@@ -517,8 +517,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             os.chdir(efutil.export_path)
 
             is_animation = hasattr(self, 'is_animation') and self.is_animation
-            make_queue = scene.luxrender_engine.export_type == 'EXT' and \
-                         scene.luxrender_engine.binary_name == 'luxrender' and write_files
+            make_queue = scene.pbrtv3_engine.export_type == 'EXT' and \
+                         scene.pbrtv3_engine.binary_name == 'luxrender' and write_files
 
             if is_animation and make_queue:
                 queue_file = efutil.export_path + '%s.%s.lxq' % (
@@ -555,7 +555,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         os.chdir(prev_cwd)
 
-    def luxrender_render_preview(self, scene):
+    def pbrtv3_render_preview(self, scene):
         if sys.platform == 'darwin':
             self.output_dir = efutil.filesystem_path(bpy.app.tempdir)
         else:
@@ -636,7 +636,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             from ..export import preview_scene
 
-            xres, yres = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+            xres, yres = scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene)
 
             # Don't render the tiny images
             if xres <= 96:
@@ -670,7 +670,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 preview_context.addThread()
 
             while not is_finished(preview_context):
-                if self.test_break() or bpy.context.scene.render.engine != 'LUXRENDER_RENDER':
+                if self.test_break() or bpy.context.scene.render.engine != 'PBRTv3_RENDER':
                     raise Exception('Render interrupted')
 
                 # progressively update the preview
@@ -732,8 +732,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if self.output_dir[-1] not in ('/', '\\'):
             self.output_dir += '/'
 
-        if scene.luxrender_engine.export_type == 'INT':
-            write_files = scene.luxrender_engine.write_files
+        if scene.pbrtv3_engine.export_type == 'INT':
+            write_files = scene.pbrtv3_engine.write_files
             if write_files:
                 api_type = 'FILE'
             else:
@@ -760,11 +760,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         )
         LuxManager.SetActive(LM)
 
-        if scene.luxrender_engine.export_type == 'INT':
+        if scene.pbrtv3_engine.export_type == 'INT':
             # Set up networking before export so that we get better server usage
-            if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers:
-                LM.lux_context.setNetworkServerUpdateInterval(scene.luxrender_networking.serverinterval)
-                for server in scene.luxrender_networking.servers.split(','):
+            if scene.pbrtv3_networking.use_network_servers and scene.pbrtv3_networking.servers:
+                LM.lux_context.setNetworkServerUpdateInterval(scene.pbrtv3_networking.serverinterval)
+                for server in scene.pbrtv3_networking.servers.split(','):
                     LM.lux_context.addServer(server.strip())
 
         output_filename = get_output_filename(scene)
@@ -783,15 +783,15 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             return False
 
         # Look for an output image to load
-        if scene.camera.data.luxrender_camera.luxrender_film.write_png:
+        if scene.camera.data.pbrtv3_camera.pbrtv3_film.write_png:
             self.output_file = efutil.path_relative_to_export(
                 '%s/%s.png' % (self.output_dir, output_filename)
             )
-        elif scene.camera.data.luxrender_camera.luxrender_film.write_tga:
+        elif scene.camera.data.pbrtv3_camera.pbrtv3_film.write_tga:
             self.output_file = efutil.path_relative_to_export(
                 '%s/%s.tga' % (self.output_dir, output_filename)
             )
-        elif scene.camera.data.luxrender_camera.luxrender_film.write_exr:
+        elif scene.camera.data.pbrtv3_camera.pbrtv3_film.write_exr:
             self.output_file = efutil.path_relative_to_export(
                 '%s/%s.exr' % (self.output_dir, output_filename)
             )
@@ -799,9 +799,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return "%s.PBRTv3s" % output_filename
 
     def rendering_behaviour(self, scene):
-        internal = (scene.luxrender_engine.export_type in ['INT'])
-        write_files = scene.luxrender_engine.write_files and (scene.luxrender_engine.export_type in ['INT', 'EXT'])
-        render = scene.luxrender_engine.render
+        internal = (scene.pbrtv3_engine.export_type in ['INT'])
+        write_files = scene.pbrtv3_engine.write_files and (scene.pbrtv3_engine.export_type in ['INT', 'EXT'])
+        render = scene.pbrtv3_engine.render
 
         # Handle various option combinations using simplified variable names !
         if internal:
@@ -842,86 +842,86 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             LuxLog('Launching Queue: %s' % cmd_args)
             # LuxLog(' in %s' % self.outout_dir)
-            luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
+            pbrtv3_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
-    def append_lux_binary_name(self, scene, luxrender_path, binary_name):
+    def append_lux_binary_name(self, scene, pbrtv3_path, binary_name):
         if sys.platform == 'darwin':
             # Get binary from OSX bundle
-            luxrender_path += 'LuxRender.app/Contents/MacOS/%s' % binary_name
-            if not os.path.exists(luxrender_path):
-                LuxLog('LuxRender not found at path: %s' % luxrender_path, ', trying default LuxRender location')
-                luxrender_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % \
+            pbrtv3_path += 'LuxRender.app/Contents/MacOS/%s' % binary_name
+            if not os.path.exists(pbrtv3_path):
+                LuxLog('LuxRender not found at path: %s' % pbrtv3_path, ', trying default LuxRender location')
+                pbrtv3_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % \
                                  binary_name  # try fallback to default installation path
         elif sys.platform == 'win32':
-            luxrender_path += '%s.exe' % binary_name
+            pbrtv3_path += '%s.exe' % binary_name
         else:
-            luxrender_path += binary_name
+            pbrtv3_path += binary_name
 
-        return luxrender_path
+        return pbrtv3_path
 
     def get_lux_binary_path(self, scene, binary_name):
-        luxrender_path = efutil.filesystem_path(efutil.find_config_value(
+        pbrtv3_path = efutil.filesystem_path(efutil.find_config_value(
                               'luxrender', 'defaults', 'install_path', ''))
 
-        print('luxrender_path: ', luxrender_path)
+        print('pbrtv3_path: ', pbrtv3_path)
 
-        if not luxrender_path:
+        if not pbrtv3_path:
             return ['']
 
-        if luxrender_path[-1] != '/':
-            luxrender_path += '/'
+        if pbrtv3_path[-1] != '/':
+            pbrtv3_path += '/'
 
-        luxrender_path = self.append_lux_binary_name(scene, luxrender_path, binary_name)
+        pbrtv3_path = self.append_lux_binary_name(scene, pbrtv3_path, binary_name)
 
-        if not os.path.exists(luxrender_path):
-            raise Exception('LuxRender not found at path: %s' % luxrender_path)
+        if not os.path.exists(pbrtv3_path):
+            raise Exception('LuxRender not found at path: %s' % pbrtv3_path)
 
-        return luxrender_path
+        return pbrtv3_path
 
     def get_process_args(self, scene, start_rendering):
         config_updates = {
             'auto_start': start_rendering
         }
 
-        luxrender_path = self.get_lux_binary_path(scene, scene.luxrender_engine.binary_name)
+        pbrtv3_path = self.get_lux_binary_path(scene, scene.pbrtv3_engine.binary_name)
 
-        cmd_args = [luxrender_path]
+        cmd_args = [pbrtv3_path]
 
         # set log verbosity
-        if scene.luxrender_engine.log_verbosity != 'default':
-            cmd_args.append('--' + scene.luxrender_engine.log_verbosity)
+        if scene.pbrtv3_engine.log_verbosity != 'default':
+            cmd_args.append('--' + scene.pbrtv3_engine.log_verbosity)
 
         # Epsilon values if any
-        if scene.luxrender_engine.binary_name != 'luxvr':
-            if scene.luxrender_engine.min_epsilon:
-                cmd_args.append('--minepsilon=%.8f' % scene.luxrender_engine.min_epsilon)
-            if scene.luxrender_engine.max_epsilon:
-                cmd_args.append('--maxepsilon=%.8f' % scene.luxrender_engine.max_epsilon)
+        if scene.pbrtv3_engine.binary_name != 'luxvr':
+            if scene.pbrtv3_engine.min_epsilon:
+                cmd_args.append('--minepsilon=%.8f' % scene.pbrtv3_engine.min_epsilon)
+            if scene.pbrtv3_engine.max_epsilon:
+                cmd_args.append('--maxepsilon=%.8f' % scene.pbrtv3_engine.max_epsilon)
 
-        if scene.luxrender_engine.binary_name == 'luxrender':
+        if scene.pbrtv3_engine.binary_name == 'luxrender':
             # Copy the GUI log to the console
             cmd_args.append('--logconsole')
 
         # Set number of threads for external processes
-        if not scene.luxrender_engine.threads_auto:
-            cmd_args.append('--threads=%i' % scene.luxrender_engine.threads)
+        if not scene.pbrtv3_engine.threads_auto:
+            cmd_args.append('--threads=%i' % scene.pbrtv3_engine.threads)
 
         # Set fixed seeds, if enabled
-        if scene.luxrender_engine.fixed_seed:
+        if scene.pbrtv3_engine.fixed_seed:
             cmd_args.append('--fixedseed')
 
-        if scene.luxrender_networking.use_network_servers and scene.luxrender_networking.servers:
-            for server in scene.luxrender_networking.servers.split(','):
+        if scene.pbrtv3_networking.use_network_servers and scene.pbrtv3_networking.servers:
+            for server in scene.pbrtv3_networking.servers.split(','):
                 cmd_args.append('--useserver')
                 cmd_args.append(server.strip())
 
             cmd_args.append('--serverinterval')
-            cmd_args.append('%i' % scene.luxrender_networking.serverinterval)
+            cmd_args.append('%i' % scene.pbrtv3_networking.serverinterval)
 
-            config_updates['servers'] = scene.luxrender_networking.servers
-            config_updates['serverinterval'] = '%i' % scene.luxrender_networking.serverinterval
+            config_updates['servers'] = scene.pbrtv3_networking.servers
+            config_updates['serverinterval'] = '%i' % scene.pbrtv3_networking.serverinterval
 
-        config_updates['use_network_servers'] = scene.luxrender_networking.use_network_servers
+        config_updates['use_network_servers'] = scene.pbrtv3_networking.use_network_servers
 
         # Save changed config items and then launch Lux
 
@@ -962,27 +962,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             LuxLog('Starting LuxRender')
             if internal:
 
-                self.LuxManager.lux_context.logVerbosity(scene.luxrender_engine.log_verbosity)
+                self.LuxManager.lux_context.logVerbosity(scene.pbrtv3_engine.log_verbosity)
 
-                self.update_stats('', 'LuxRender: Building %s' % scene.luxrender_accelerator.accelerator)
+                self.update_stats('', 'LuxRender: Building %s' % scene.pbrtv3_accelerator.accelerator)
                 self.LuxManager.start()
 
-                self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.luxrender_engine.integratedimaging
+                self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.pbrtv3_engine.integratedimaging
 
                 # Update the image from disk only as often as it is written
                 self.LuxManager.fb_thread.set_kick_period(
-                    scene.camera.data.luxrender_camera.luxrender_film.internal_updateinterval)
+                    scene.camera.data.pbrtv3_camera.pbrtv3_film.internal_updateinterval)
 
                 # Start the stats and framebuffer threads and add additional threads to Lux renderer
                 self.LuxManager.start_worker_threads(self)
 
-                if scene.luxrender_engine.threads_auto:
+                if scene.pbrtv3_engine.threads_auto:
                     try:
                         thread_count = multiprocessing.cpu_count()
                     except:
                         thread_count = 1
                 else:
-                    thread_count = scene.luxrender_engine.threads
+                    thread_count = scene.pbrtv3_engine.threads
 
                 # Run rendering with specified number of threads
                 for i in range(thread_count - 1):
@@ -1000,27 +1000,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 LuxLog('Launching: %s' % cmd_args)
                 # LuxLog(' in %s' % self.outout_dir)
-                luxrender_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
+                pbrtv3_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
                 if not (
-                        scene.luxrender_engine.binary_name == 'luxrender' and not
-                        scene.luxrender_engine.monitor_external):
+                        scene.pbrtv3_engine.binary_name == 'luxrender' and not
+                        scene.pbrtv3_engine.monitor_external):
                     framebuffer_thread = LuxFilmDisplay({
-                        'resolution': scene.camera.data.luxrender_camera.luxrender_film.resolution(scene),
+                        'resolution': scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene),
                         'RE': self,
                     })
-                    framebuffer_thread.set_kick_period(scene.camera.data.luxrender_camera.luxrender_film.writeinterval)
+                    framebuffer_thread.set_kick_period(scene.camera.data.pbrtv3_camera.pbrtv3_film.writeinterval)
                     framebuffer_thread.start()
-                    while luxrender_process.poll() is None and not self.test_break():
+                    while pbrtv3_process.poll() is None and not self.test_break():
                         self.render_update_timer = threading.Timer(1, self.process_wait_timer)
                         self.render_update_timer.start()
                         if self.render_update_timer.isAlive():
                             self.render_update_timer.join()
 
                     # If we exit the wait loop (user cancelled) and luxconsole is still running, then send SIGINT
-                    if luxrender_process.poll() is None and scene.luxrender_engine.binary_name != 'luxrender':
+                    if pbrtv3_process.poll() is None and scene.pbrtv3_engine.binary_name != 'luxrender':
                         # Use SIGTERM because that's the only one supported on Windows
-                        luxrender_process.send_signal(subprocess.signal.SIGTERM)
+                        pbrtv3_process.send_signal(subprocess.signal.SIGTERM)
 
                     # Stop updating the render result and load the final image
                     framebuffer_thread.stop()
@@ -1379,7 +1379,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 lcSession.GetFilm().GetOutputFloat(outputType, channel_buffer)
 
             # Import into Blender passes
-            if pass_type is not None and scene.luxrender_channels.import_compatible:
+            if pass_type is not None and scene.pbrtv3_channels.import_compatible:
                 nested_list = [channel_buffer[i:i+arrayDepth] for i in range(0, len(channel_buffer), arrayDepth)]
 
                 for renderpass in passes:
@@ -1410,7 +1410,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 else:
                     channel_buffer_converted = channel_buffer
 
-        if pass_type is None or not scene.luxrender_channels.import_compatible:
+        if pass_type is None or not scene.pbrtv3_channels.import_compatible:
             # Pass is incompatible with Blender passes or import of compatible passes was disabled
 
             imageName = 'pass_' + str(channelType)
@@ -1429,7 +1429,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if scene.render.use_border and not scene.render.use_crop_to_border:
                 # border rendering without cropping: fit the rendered area into a blank image
-                imageWidth, imageHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+                imageWidth, imageHeight = scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene)
 
                 # construct an empty Blender image
                 blenderImage = bpy.data.images.new(imageName, alpha = True,
@@ -1567,7 +1567,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             self.set_export_path_luxcore(scene)
             # Stay compatible to old pyluxcore versions
-            self.transparent_film = (scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film and
+            self.transparent_film = (scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film and
                                      hasattr(pyluxcore, 'ConvertFilmChannelOutput_4xFloat_To_4xFloatList'))
 
             filmWidth, filmHeight = self.get_film_size(scene)
@@ -1593,27 +1593,27 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 luxcore_session.Stop()
 
                 if scene.luxcore_translatorsettings.run_luxcoreui:
-                    luxrender_path = self.get_lux_binary_path(scene, 'luxcoreui')
+                    pbrtv3_path = self.get_lux_binary_path(scene, 'luxcoreui')
 
-                    if not os.path.exists(luxrender_path):
-                        self.report({'ERROR'}, 'LuxCoreUI executable not found at path "%s"' % luxrender_path)
+                    if not os.path.exists(pbrtv3_path):
+                        self.report({'ERROR'}, 'LuxCoreUI executable not found at path "%s"' % pbrtv3_path)
                         return
 
-                    cmd_args = [luxrender_path, '-o', 'render.cfg']
+                    cmd_args = [pbrtv3_path, '-o', 'render.cfg']
 
                     env = os.environ.copy()
 
                     if 'linux' in sys.platform:
-                        env['LD_LIBRARY_PATH'] = os.path.dirname(luxrender_path)
+                        env['LD_LIBRARY_PATH'] = os.path.dirname(pbrtv3_path)
 
-                    luxrender_process = subprocess.Popen(cmd_args, cwd=efutil.export_path, env=env)
+                    pbrtv3_process = subprocess.Popen(cmd_args, cwd=efutil.export_path, env=env)
 
                 return
 
             bufferdepth = 4 if self.transparent_film else 3
             imageBufferFloat = array.array('f', [0.0] * (filmWidth * filmHeight * bufferdepth))
 
-            imagepipeline_settings = scene.camera.data.luxrender_camera.luxcore_imagepipeline
+            imagepipeline_settings = scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
             start_time = time.time()
             last_image_display = start_time
             done = False
@@ -1700,14 +1700,14 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             stats = luxcore_session.GetStats()
             result = self.create_result(luxcore_session, imageBufferFloat, scene, stats, filmWidth, filmHeight, True)
 
-            if scene.luxrender_channels.enable_aovs:
-                if scene.luxrender_channels.saveToDisk:
+            if scene.pbrtv3_channels.enable_aovs:
+                if scene.pbrtv3_channels.saveToDisk:
                     output_path = efutil.filesystem_path(scene.render.filepath)
                     self.update_stats('Saving AOV passes to disk', 'Output path: ' + str(output_path))
                     LuxLog('Saving AOV passes to disk, output path: ' + str(output_path))
                     luxcore_session.GetFilm().Save()
 
-                if scene.luxrender_channels.import_into_blender:
+                if scene.pbrtv3_channels.import_into_blender:
                     self.import_aov_channels(scene, luxcore_session, filmWidth, filmHeight, result.layers[0].passes)
 
             self.end_result(result)
@@ -1754,7 +1754,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return result
 
     def get_film_size(self, scene):
-        width, height = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+        width, height = scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene)
 
         if scene.render.use_border:
             x_min, x_max, y_min, y_max = [
@@ -1773,7 +1773,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     def import_aov_channels(self, scene, lcSession, filmWidth, filmHeight, passes):
         channelCalcStartTime = time.time()
-        channels = scene.luxrender_channels
+        channels = scene.pbrtv3_channels
 
         if channels.RGB:
             self.convertChannelToImage(lcSession, scene, passes, filmWidth, filmHeight,
@@ -1948,7 +1948,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                                                                    imageBufferFloat)
                 self.end_result(result)
 
-            filmWidth, filmHeight = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+            filmWidth, filmHeight = scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene)
             is_thumbnail = filmWidth <= 96
 
             # don't render thumbnails
@@ -2062,7 +2062,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         elapsed = view_draw_startTime - self.last_update_time
 
         if context.scene.camera:
-            interval = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.viewport_interval / 1000
+            interval = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.viewport_interval / 1000
         else:
             interval = 0.05
 
@@ -2211,7 +2211,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             if bpy.data.materials.is_updated:
                 for mat in bpy.data.materials:
-                    nodetree_name = mat.luxrender_material.nodetree
+                    nodetree_name = mat.pbrtv3_material.nodetree
 
                     mat_updated = False
 
@@ -2245,7 +2245,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                             update_changes.set_cause(materials = True)
 
             # check for changes in volume configuration
-            for volume in context.scene.luxrender_volumes.volumes:
+            for volume in context.scene.pbrtv3_volumes.volumes:
                 self.luxcore_exporter.convert_volume(volume)
 
             # Exclude all densitygrid data properties from the update check
@@ -2358,7 +2358,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxCoreSessionManager.stop_luxcore_session(self.space)
 
                 if context.scene.camera:
-                    self.transparent_film = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+                    self.transparent_film = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film
                 else:
                     self.transparent_film = False
 
@@ -2404,7 +2404,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxLog('Configuration update')
 
                 if context.scene.camera:
-                    self.transparent_film = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+                    self.transparent_film = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film
                 else:
                     self.transparent_film = False
 
@@ -2475,7 +2475,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                                     luxcore_scene.DeleteObject(luxcore_name)
 
                 if update_changes.cause_volumes:
-                    for volume in context.scene.luxrender_volumes.volumes:
+                    for volume in context.scene.pbrtv3_volumes.volumes:
                         self.luxcore_exporter.convert_volume(volume)
 
                 updated_properties = self.luxcore_exporter.pop_updated_scene_properties()

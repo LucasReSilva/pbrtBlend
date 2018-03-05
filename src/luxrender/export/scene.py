@@ -42,7 +42,7 @@ from ..export import fix_matrix_order
 from ..export import is_obj_visible
 from ..outputs import LuxManager, LuxLog
 from ..outputs.file_api import Files
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
 
 
@@ -85,18 +85,18 @@ class SceneExporter(object):
             lamp_enabled &= obj.data.energy > 0.0
 
             if obj.data.type == 'POINT':
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_point.L_color.v > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_point.L_color.v > 0.0
 
             if obj.data.type == 'SPOT':
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_spot.L_color.v > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_spot.L_color.v > 0.0
 
             if obj.data.type == 'HEMI':
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_hemi.L_color.v > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_hemi.L_color.v > 0.0
 
             if obj.data.type == 'AREA':
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.L_color.v > 0.0
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.power > 0.0
-                lamp_enabled &= obj.data.luxrender_lamp.luxrender_lamp_area.efficacy > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_area.L_color.v > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_area.power > 0.0
+                lamp_enabled &= obj.data.pbrtv3_lamp.pbrtv3_lamp_area.efficacy > 0.0
 
             have_lamp |= lamp_enabled
 
@@ -104,16 +104,16 @@ class SceneExporter(object):
             for ms in obj.material_slots:
                 mat = ms.material
 
-                if mat and mat.luxrender_emission.use_emission:
-                    emit_enabled = self.scene.luxrender_lightgroups.is_enabled(mat.luxrender_emission.lightgroup)
-                    emit_enabled &= (mat.luxrender_emission.L_color.v * mat.luxrender_emission.gain) > 0.0
+                if mat and mat.pbrtv3_emission.use_emission:
+                    emit_enabled = self.scene.pbrtv3_lightgroups.is_enabled(mat.pbrtv3_emission.lightgroup)
+                    emit_enabled &= (mat.pbrtv3_emission.L_color.v * mat.pbrtv3_emission.gain) > 0.0
                     have_emitter |= emit_enabled
 
                     if have_emitter:
                         break
 
-                if mat.luxrender_material.nodetree:
-                    output_node = find_node(mat, 'luxrender_material_output_node')
+                if mat.pbrtv3_material.nodetree:
+                    output_node = find_node(mat, 'pbrtv3_material_output_node')
 
                     if output_node is not None:
                         light_socket = output_node.inputs['Emission']
@@ -215,19 +215,19 @@ class SceneExporter(object):
                 lux_context.set_output_file(Files.MAIN)
 
             # Set up render engine parameters
-            lux_context.renderer(*scene.luxrender_rendermode.api_output())
-            lux_context.sampler(*scene.luxrender_sampler.api_output())
-            lux_context.accelerator(*scene.luxrender_accelerator.api_output())
-            lux_context.surfaceIntegrator(*scene.luxrender_integrator.api_output(scene))
-            lux_context.volumeIntegrator(*scene.luxrender_volumeintegrator.api_output())
-            lux_context.pixelFilter(*scene.luxrender_filter.api_output())
+            lux_context.renderer(*scene.pbrtv3_rendermode.api_output())
+            lux_context.sampler(*scene.pbrtv3_sampler.api_output())
+            lux_context.accelerator(*scene.pbrtv3_accelerator.api_output())
+            lux_context.surfaceIntegrator(*scene.pbrtv3_integrator.api_output(scene))
+            lux_context.volumeIntegrator(*scene.pbrtv3_volumeintegrator.api_output())
+            lux_context.pixelFilter(*scene.pbrtv3_filter.api_output())
 
             # Set up camera, view and film
             is_cam_animated = False
 
-            if scene.camera.data.luxrender_camera.usemblur and scene.camera.data.luxrender_camera.cammblur:
+            if scene.camera.data.pbrtv3_camera.usemblur and scene.camera.data.pbrtv3_camera.cammblur:
 
-                STEPS = scene.camera.data.luxrender_camera.motion_blur_samples
+                STEPS = scene.camera.data.pbrtv3_camera.motion_blur_samples
                 anim_matrices = object_anim_matrices(scene, scene.camera, steps=STEPS)
 
                 if anim_matrices:
@@ -237,16 +237,16 @@ class SceneExporter(object):
                     lux_context.motionBegin(step_times)
 
                     for m in anim_matrices:
-                        lux_context.lookAt(*scene.camera.data.luxrender_camera.lookAt(scene.camera, m))
+                        lux_context.lookAt(*scene.camera.data.pbrtv3_camera.lookAt(scene.camera, m))
 
                     lux_context.motionEnd()
                     is_cam_animated = True
 
             if not is_cam_animated:
-                lux_context.lookAt(*scene.camera.data.luxrender_camera.lookAt(scene.camera))
+                lux_context.lookAt(*scene.camera.data.pbrtv3_camera.lookAt(scene.camera))
 
-            lux_context.camera(*scene.camera.data.luxrender_camera.api_output(scene, is_cam_animated))
-            lux_context.film(*scene.camera.data.luxrender_camera.luxrender_film.api_output())
+            lux_context.camera(*scene.camera.data.pbrtv3_camera.api_output(scene, is_cam_animated))
+            lux_context.film(*scene.camera.data.pbrtv3_camera.pbrtv3_film.api_output())
 
             lux_context.worldBegin()
             lights_in_export = False
@@ -265,12 +265,12 @@ class SceneExporter(object):
 
             # Export all data in linked 'background_set' scenes
             for geom_scene in geom_scenes:
-                if len(geom_scene.luxrender_volumes.volumes) > 0:
+                if len(geom_scene.pbrtv3_volumes.volumes) > 0:
                     self.report({'INFO'}, 'Exporting volume data')
                     if self.properties.api_type == 'FILE':
                         lux_context.set_output_file(Files.MATS)
 
-                    for volume in geom_scene.luxrender_volumes.volumes:
+                    for volume in geom_scene.pbrtv3_volumes.volumes:
                         lux_context.makeNamedVolume(volume.name, *volume.api_output(lux_context))
 
                 self.report({'INFO'}, 'Exporting geometry')
@@ -291,10 +291,10 @@ class SceneExporter(object):
                 raise Exception('No lights in exported data!')
 
             # Default 'Camera' Exterior
-            if scene.camera.data.luxrender_camera.Exterior_volume:
-                lux_context.exterior(scene.camera.data.luxrender_camera.Exterior_volume)
-            elif scene.luxrender_world.default_exterior_volume:
-                lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+            if scene.camera.data.pbrtv3_camera.Exterior_volume:
+                lux_context.exterior(scene.camera.data.pbrtv3_camera.Exterior_volume)
+            elif scene.pbrtv3_world.default_exterior_volume:
+                lux_context.exterior(scene.pbrtv3_world.default_exterior_volume)
 
             if self.properties.write_all_files:
                 lux_context.worldEnd()
@@ -311,7 +311,7 @@ class SceneExporter(object):
 
             traceback.print_exc()
 
-            if scene.luxrender_testing.re_raise:
+            if scene.pbrtv3_testing.re_raise:
                 raise err
 
             return {'CANCELLED'}

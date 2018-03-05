@@ -37,7 +37,7 @@ from .cycles_converter import cycles_material_converter
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_load_material(bpy.types.Operator):
+class PBRTv3_OT_load_material(bpy.types.Operator):
     bl_idname = 'luxrender.load_material'
     bl_label = 'Load material'
     bl_description = 'Load material from LBM2 file'
@@ -57,7 +57,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
                 raise Exception('No filename or directory given.')
 
             blender_mat = context.material
-            luxrender_mat = context.material.luxrender_material
+            pbrtv3_mat = context.material.pbrtv3_material
 
             fullpath = os.path.join(
                 self.properties.directory,
@@ -66,7 +66,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
             with open(fullpath, 'r') as lbm2_file:
                 lbm2_data = json.load(lbm2_file)
 
-            luxrender_mat.load_lbm2(context, lbm2_data, blender_mat, context.object)
+            pbrtv3_mat.load_lbm2(context, lbm2_data, blender_mat, context.object)
 
             return {'FINISHED'}
 
@@ -76,7 +76,7 @@ class LUXRENDER_OT_load_material(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_save_material(bpy.types.Operator):
+class PBRTv3_OT_save_material(bpy.types.Operator):
     bl_idname = 'luxrender.save_material'
     bl_label = 'Save material'
     bl_description = 'Save material as LXM or LBM2 file'
@@ -99,7 +99,7 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
                 raise Exception('No filename or directory given.')
 
             blender_mat = context.material
-            luxrender_mat = context.material.luxrender_material
+            pbrtv3_mat = context.material.pbrtv3_material
 
             LM = LuxManager("material_save", self.properties.material_file_type)
             LuxManager.SetActive(LM)
@@ -120,28 +120,28 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
             export_materials.ExportedTextures.clear()
 
             # This causes lb25 to embed all external data ...
-            context.scene.luxrender_engine.is_saving_lbm2 = True
+            context.scene.pbrtv3_engine.is_saving_lbm2 = True
 
             # Include interior/exterior for this material
-            for volume in context.scene.luxrender_volumes.volumes:
-                if volume.name in [luxrender_mat.Interior_volume, luxrender_mat.Exterior_volume]:
+            for volume in context.scene.pbrtv3_volumes.volumes:
+                if volume.name in [pbrtv3_mat.Interior_volume, pbrtv3_mat.Exterior_volume]:
                     material_context.makeNamedVolume(volume.name, *volume.api_output(material_context))
 
-            cr = context.scene.luxrender_testing.clay_render
-            context.scene.luxrender_testing.clay_render = False
-            luxrender_mat.export(context.scene, material_context, blender_mat)
-            context.scene.luxrender_testing.clay_render = cr
+            cr = context.scene.pbrtv3_testing.clay_render
+            context.scene.pbrtv3_testing.clay_render = False
+            pbrtv3_mat.export(context.scene, material_context, blender_mat)
+            context.scene.pbrtv3_testing.clay_render = cr
 
             material_context.set_material_name(blender_mat.name)
             material_context.update_material_metadata(
-                interior=luxrender_mat.Interior_volume,
-                exterior=luxrender_mat.Exterior_volume
+                interior=pbrtv3_mat.Interior_volume,
+                exterior=pbrtv3_mat.Exterior_volume
             )
 
             material_context.write(fullpath)
 
             # .. and must be reset!
-            context.scene.luxrender_engine.is_saving_lbm2 = False
+            context.scene.pbrtv3_engine.is_saving_lbm2 = False
 
             LM.reset()
             LuxManager.SetActive(None)
@@ -156,31 +156,31 @@ class LUXRENDER_OT_save_material(bpy.types.Operator):
 
 def material_converter(report, scene, blender_mat):
     try:
-        luxrender_mat = blender_mat.luxrender_material
+        pbrtv3_mat = blender_mat.pbrtv3_material
 
         # TODO - check values marked #ASV - Arbitrary Scale Value
 
-        luxrender_mat.Interior_volume = ''
-        luxrender_mat.Exterior_volume = ''
+        pbrtv3_mat.Interior_volume = ''
+        pbrtv3_mat.Exterior_volume = ''
 
-        luxrender_mat.reset(prnt=blender_mat)
+        pbrtv3_mat.reset(prnt=blender_mat)
 
         if blender_mat.raytrace_mirror.use and blender_mat.raytrace_mirror.reflect_factor >= 0.9:
             # for high mirror reflection values switch to mirror material
-            luxrender_mat.set_type('mirror')
-            lmm = luxrender_mat.luxrender_mat_mirror
+            pbrtv3_mat.set_type('mirror')
+            lmm = pbrtv3_mat.pbrtv3_mat_mirror
             lmm.Kr_color = [i for i in blender_mat.mirror_color]
             luxmat = lmm
         elif blender_mat.specular_intensity < 0.01:
             # use matte as glossy mat with very low specular is not equal matte
-            luxrender_mat.set_type('matte')
-            lms = luxrender_mat.luxrender_mat_matte
+            pbrtv3_mat.set_type('matte')
+            lms = pbrtv3_mat.pbrtv3_mat_matte
             lms.Kd_color = [blender_mat.diffuse_intensity * i for i in blender_mat.diffuse_color]
             lms.sigma_floatvalue = 0.0
             luxmat = lms
         else:
-            luxrender_mat.set_type('glossy')
-            lmg = luxrender_mat.luxrender_mat_glossy
+            pbrtv3_mat.set_type('glossy')
+            lmg = pbrtv3_mat.pbrtv3_mat_glossy
             lmg.multibounce = False
             lmg.useior = False
             lmg.Kd_color = [blender_mat.diffuse_intensity * i for i in blender_mat.diffuse_color]
@@ -204,7 +204,7 @@ def material_converter(report, scene, blender_mat):
 
 
         # Emission
-        lme = blender_mat.luxrender_emission
+        lme = blender_mat.pbrtv3_emission
         if blender_mat.emit > 0:
             lme.use_emission = True
             lme.L_color = [1.0, 1.0, 1.0]
@@ -213,7 +213,7 @@ def material_converter(report, scene, blender_mat):
             lme.use_emission = False
 
         # Transparency
-        lmt = blender_mat.luxrender_transparency
+        lmt = blender_mat.pbrtv3_transparency
         if blender_mat.use_transparency:
             lmt.transparent = True
             lmt.alpha_source = 'constant'
@@ -229,8 +229,8 @@ def material_converter(report, scene, blender_mat):
         for tex_slot in blender_mat.texture_slots:
             if tex_slot is not None:
                 if tex_slot.use and tex_slot.texture.type != 'NONE' and \
-                                tex_slot.texture.luxrender_texture.type != 'BLENDER':
-                    tex_slot.texture.luxrender_texture.type = 'BLENDER'
+                                tex_slot.texture.pbrtv3_texture.type != 'BLENDER':
+                    tex_slot.texture.pbrtv3_texture.type = 'BLENDER'
 
                     if tex_slot.use_map_color_diffuse:
                         dcf = tex_slot.diffuse_color_factor
@@ -249,12 +249,12 @@ def material_converter(report, scene, blender_mat):
                     if tex_slot.use_map_normal:
                         bump_tex = (tex_slot.texture, tex_slot.normal_factor)
 
-        if luxrender_mat.type in ('matte', 'glossy'):
+        if pbrtv3_mat.type in ('matte', 'glossy'):
             if len(Kd_stack) == 1:
                 tex = Kd_stack[0][0]
                 dcf = Kd_stack[0][1]
                 color = Kd_stack[0][2]
-                variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
+                variant = tex.pbrtv3_texture.get_paramset(scene, tex)[0]
 
                 if variant == 'color':
                     # assign the texture directly
@@ -280,17 +280,17 @@ def material_converter(report, scene, blender_mat):
                                                                                        'NONE')
                             alpha_tex = alpha_tex_slot.texture = bpy.data.textures.new('Lux::alpha:%s' % tex.name,
                                                                                        'NONE')
-                            mix_lux_tex = mix_tex.luxrender_texture
-                            lux_tex = color_tex.luxrender_texture
-                            alpha_lux_tex = alpha_tex.luxrender_texture
+                            mix_lux_tex = mix_tex.pbrtv3_texture
+                            lux_tex = color_tex.pbrtv3_texture
+                            alpha_lux_tex = alpha_tex.pbrtv3_texture
 
                             col_ramp = tex.color_ramp.elements
                             mix_lux_tex.type = 'mix'
                             lux_tex.type = 'band'
                             alpha_lux_tex.type = 'band'
-                            mix_params = mix_lux_tex.luxrender_tex_mix
-                            color_params = lux_tex.luxrender_tex_band
-                            alpha_params = alpha_lux_tex.luxrender_tex_band
+                            mix_params = mix_lux_tex.pbrtv3_tex_mix
+                            color_params = lux_tex.pbrtv3_tex_band
+                            alpha_params = alpha_lux_tex.pbrtv3_tex_band
 
                             color_params.variant = 'color'
                             color_params.noffsets = len(col_ramp)
@@ -344,11 +344,11 @@ def material_converter(report, scene, blender_mat):
 
                             Lux_TexName.append(mix_tex.name)
 
-                            mix_lux_tex = mix_tex.luxrender_texture
-                            color_lux_tex = color_tex.luxrender_texture
-                            alpha_lux_tex = alpha_tex.luxrender_texture
+                            mix_lux_tex = mix_tex.pbrtv3_texture
+                            color_lux_tex = color_tex.pbrtv3_texture
+                            alpha_lux_tex = alpha_tex.pbrtv3_texture
 
-                            mix_params = mix_lux_tex.luxrender_tex_mix
+                            mix_params = mix_lux_tex.pbrtv3_tex_mix
                             mix_params.variant = 'color'
                             mix_params.amount_floatvalue = dcf
                             mix_params.amount_usefloattexture = True
@@ -358,8 +358,8 @@ def material_converter(report, scene, blender_mat):
                             color_lux_tex.type = 'band'
                             alpha_lux_tex.type = 'band'
 
-                            color_params = color_lux_tex.luxrender_tex_band
-                            alpha_params = alpha_lux_tex.luxrender_tex_band
+                            color_params = color_lux_tex.pbrtv3_tex_band
+                            alpha_params = alpha_lux_tex.pbrtv3_tex_band
 
                             color_params.variant = 'color'
                             color_params.noffsets = len(col_ramp)
@@ -396,9 +396,9 @@ def material_converter(report, scene, blender_mat):
                             mix_tex_slot.use = True
                             mix_tex = mix_tex_slot.texture = bpy.data.textures.new('Lux::%s' % tex.name, 'NONE')
                             Lux_TexName.append(mix_tex.name)
-                            mix_lux_tex = mix_tex.luxrender_texture
+                            mix_lux_tex = mix_tex.pbrtv3_texture
                             mix_lux_tex.type = 'mix'
-                            mix_params = mix_lux_tex.luxrender_tex_mix
+                            mix_params = mix_lux_tex.pbrtv3_tex_mix
                             mix_params.variant = 'color'
                             mix_params.amount_floatvalue = dcf
                             mix_params.amount_usefloattexture = True
@@ -418,10 +418,10 @@ def material_converter(report, scene, blender_mat):
                 # else:
                 #luxmat.Kd_usecolortexture = False
 
-        if luxrender_mat.type in ('glossy'):
+        if pbrtv3_mat.type in ('glossy'):
             if len(Ks_stack) == 1:
                 tex = Ks_stack[0][0]
-                variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
+                variant = tex.pbrtv3_texture.get_paramset(scene, tex)[0]
                 if variant == 'color':
                     # assign the texture directly
                     luxmat.Ks_usecolortexture = True
@@ -441,19 +441,19 @@ def material_converter(report, scene, blender_mat):
 
         if bump_tex is not None:
             tex = bump_tex[0]
-            variant = tex.luxrender_texture.get_paramset(scene, tex)[0]
+            variant = tex.pbrtv3_texture.get_paramset(scene, tex)[0]
             if variant == 'float':
-                luxrender_mat.bumpmap_usefloattexture = True
-                luxrender_mat.bumpmap_floattexturename = tex.name
-                luxrender_mat.bumpmap_floatvalue = bump_tex[1] / 50.0  # ASV
-                luxrender_mat.bumpmap_multiplyfloat = True
+                pbrtv3_mat.bumpmap_usefloattexture = True
+                pbrtv3_mat.bumpmap_floattexturename = tex.name
+                pbrtv3_mat.bumpmap_floatvalue = bump_tex[1] / 50.0  # ASV
+                pbrtv3_mat.bumpmap_multiplyfloat = True
             else:
                 # TODO - insert mix texture
                 # check there are enough free empty texture slots !
                 pass
         else:
-            luxrender_mat.bumpmap_floatvalue = 0.0
-            luxrender_mat.bumpmap_usefloattexture = False
+            pbrtv3_mat.bumpmap_floatvalue = 0.0
+            pbrtv3_mat.bumpmap_usefloattexture = False
 
         report({'INFO'}, 'Converted blender material "%s"' % blender_mat.name)
         return {'FINISHED'}
@@ -464,18 +464,18 @@ def material_converter(report, scene, blender_mat):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_material_reset(bpy.types.Operator):
+class PBRTv3_OT_material_reset(bpy.types.Operator):
     bl_idname = 'luxrender.material_reset'
     bl_label = 'Reset material to defaults'
 
     def execute(self, context):
-        if context.material and hasattr(context.material, 'luxrender_material'):
-            context.material.luxrender_material.reset(prnt=context.material)
+        if context.material and hasattr(context.material, 'pbrtv3_material'):
+            context.material.pbrtv3_material.reset(prnt=context.material)
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
+class PBRTv3_OT_convert_all_materials(bpy.types.Operator):
     bl_idname = 'luxrender.convert_all_materials'
     bl_label = 'Convert all Blender Internal materials'
 
@@ -492,7 +492,7 @@ class LUXRENDER_OT_convert_all_materials(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_convert_material(bpy.types.Operator):
+class PBRTv3_OT_convert_material(bpy.types.Operator):
     bl_idname = 'luxrender.convert_material'
     bl_label = 'Convert this Blender Internal material'
 
@@ -510,7 +510,7 @@ class LUXRENDER_OT_convert_material(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_material_copy(bpy.types.Operator):
+class PBRTv3_OT_material_copy(bpy.types.Operator):
     bl_idname = 'luxrender.material_copy'
     bl_label = 'Copy'
     bl_description = 'Create a copy of the material (also copying the nodetree)'
@@ -521,7 +521,7 @@ class LUXRENDER_OT_material_copy(bpy.types.Operator):
         # Create a copy of the material
         new_mat = current_mat.copy()
 
-        current_nodetree_name = current_mat.luxrender_material.nodetree
+        current_nodetree_name = current_mat.pbrtv3_material.nodetree
 
         if current_nodetree_name in bpy.data.node_groups:
             current_nodetree = bpy.data.node_groups[current_nodetree_name]
@@ -529,7 +529,7 @@ class LUXRENDER_OT_material_copy(bpy.types.Operator):
             new_nodetree = current_nodetree.copy()
             new_nodetree.use_fake_user = True
             # Assign new nodetree to the new material
-            new_mat.luxrender_material.nodetree = new_nodetree.name
+            new_mat.pbrtv3_material.nodetree = new_nodetree.name
 
         context.active_object.active_material = new_mat
 

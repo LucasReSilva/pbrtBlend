@@ -38,7 +38,7 @@ class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_rende
     """
 
     bl_label = 'PBRTv3 Object Settings'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     @classmethod
     def poll(cls, context):
@@ -47,6 +47,6 @@ class ui_object(bl_ui.properties_object.ObjectButtonsPanel, property_group_rende
             engine in cls.COMPAT_ENGINES)
 
     display_property_groups = [
-        ( ('object',), 'luxrender_object' )
+        ( ('object',), 'pbrtv3_object' )
     ]
 

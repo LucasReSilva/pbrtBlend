@@ -175,10 +175,10 @@ class LightgroupCache(object):
         if lightgroup_name in self.cache:
             exported_lightgroup = self.cache[lightgroup_name]
             id = exported_lightgroup.id
-        elif lightgroup_name in blender_scene.luxrender_lightgroups.lightgroups:
+        elif lightgroup_name in blender_scene.pbrtv3_lightgroups.lightgroups:
             assert user is not None # We need to create a new ExportedLightgroup, so the user must not be None
 
-            lightgroup = blender_scene.luxrender_lightgroups.lightgroups[lightgroup_name]
+            lightgroup = blender_scene.pbrtv3_lightgroups.lightgroups[lightgroup_name]
             self.cache[lightgroup_name] = ExportedLightgroup(lightgroup, self.id_counter, user)
             id = self.id_counter
             self.id_counter += 1

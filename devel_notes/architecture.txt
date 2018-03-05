@@ -206,7 +206,7 @@ Material/Texture export
 =======================
 
 The entry point for exporting a material is in
-properties/material/luxrender_material.export()
+properties/material/pbrtv3_material.export()
 
 This method takes a lux_context and the parent Blender material as arguments
 and exports the material, and its constituent textures and sub-materials to the

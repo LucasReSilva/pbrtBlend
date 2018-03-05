@@ -35,7 +35,7 @@ from ..export import get_worldscale
 
 
 class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_group_renderer):
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
@@ -43,13 +43,13 @@ class camera(camera_panel):
     bl_label = 'LuxRender Camera'
 
     display_property_groups = [
-        ( ('camera',), 'luxrender_camera' ),
+        ( ('camera',), 'pbrtv3_camera' ),
     ]
 
     def draw(self, context):
         layout = self.layout
         blender_cam = context.camera
-        lux_cam = context.camera.luxrender_camera
+        lux_cam = context.camera.pbrtv3_camera
 
         # Draw property groups
         super().draw(context)
@@ -106,41 +106,41 @@ class film(camera_panel):
     bl_label = 'LuxRender Film'
 
     display_property_groups = [
-        ( ('camera', 'luxrender_camera'), 'luxrender_film', lambda: not UseLuxCore() ),
-        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_colorspace', lambda: not UseLuxCore() ),
-        ( ('camera', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping', lambda: not UseLuxCore() ),
-        ( ('camera', 'luxrender_camera'), 'luxcore_imagepipeline', lambda: UseLuxCore() ),
+        ( ('camera', 'pbrtv3_camera'), 'pbrtv3_film', lambda: not UseLuxCore() ),
+        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_colorspace', lambda: not UseLuxCore() ),
+        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_tonemapping', lambda: not UseLuxCore() ),
+        ( ('camera', 'pbrtv3_camera'), 'luxcore_imagepipeline', lambda: UseLuxCore() ),
     ]
 
     def draw_crf_preset_menu(self, context):
         if UseLuxCore():
-            self.layout.menu('IMAGEPIPELINE_MT_luxrender_crf',
-                         text=context.camera.luxrender_camera.luxcore_imagepipeline.crf_preset)
+            self.layout.menu('IMAGEPIPELINE_MT_pbrtv3_crf',
+                         text=context.camera.pbrtv3_camera.luxcore_imagepipeline.crf_preset)
         else:
-            self.layout.menu('CAMERA_MT_luxrender_crf',
-                         text=context.camera.luxrender_camera.luxrender_film.luxrender_colorspace.crf_preset)
+            self.layout.menu('CAMERA_MT_pbrtv3_crf',
+                         text=context.camera.pbrtv3_camera.pbrtv3_film.pbrtv3_colorspace.crf_preset)
 
     def draw(self, context):
         layout = self.layout
 
         if UseLuxCore():
-            imagepipeline_settings = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline
+            imagepipeline_settings = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
 
             # Show warning in case of missing passes
             if imagepipeline_settings.use_background_image:
-                if not context.scene.luxrender_channels.enable_aovs:
+                if not context.scene.pbrtv3_channels.enable_aovs:
                     layout.label('Background image not available (passes disabled)', icon='ERROR')
-                elif not context.scene.luxrender_channels.ALPHA:
+                elif not context.scene.pbrtv3_channels.ALPHA:
                     layout.label('Background image not available (Alpha pass disabled)', icon='ERROR')
 
             if imagepipeline_settings.use_mist:
-                if not context.scene.luxrender_channels.enable_aovs:
+                if not context.scene.pbrtv3_channels.enable_aovs:
                     layout.label('Mist not available (passes disabled)', icon='ERROR')
-                elif not context.scene.luxrender_channels.DEPTH:
+                elif not context.scene.pbrtv3_channels.DEPTH:
                     layout.label('Mist not available (Depth pass disabled)', icon='ERROR')
 
         super().draw(context)
 
         if UseLuxCore():
-            imagepipeline_settings = context.scene.camera.data.luxrender_camera.luxcore_imagepipeline
+            imagepipeline_settings = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
             layout.label('Framerate: %d fps' % (1 / (imagepipeline_settings.viewport_interval / 1000)))

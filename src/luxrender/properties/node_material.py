@@ -34,11 +34,11 @@ from ..export import get_expanded_file_name
 
 from ..outputs.luxcore_api import set_prop_mat, set_prop_vol, set_prop_tex
 
-from ..properties import (luxrender_node, luxrender_material_node, check_node_export_material)
+from ..properties import (pbrtv3_node, pbrtv3_material_node, check_node_export_material)
 from ..properties.node_sockets import *
 
 
-class luxrender_texture_maker:
+class pbrtv3_texture_maker:
     def __init__(self, lux_context, root_name):
         def _impl(tex_variant, tex_type, tex_name, tex_params):
             nonlocal lux_context
@@ -76,9 +76,9 @@ def add_common_sockets(node):
     """
     Add sockets shared by all material nodes
     """
-    node.inputs.new('luxrender_TF_bump_socket', 'Bump')
+    node.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
     # LuxCore only transparency property
-    node.inputs.new('luxrender_transparency_socket', 'Opacity')
+    node.inputs.new('pbrtv3_transparency_socket', 'Opacity')
 
     node.outputs.new('NodeSocketShader', 'Surface')
 
@@ -108,11 +108,11 @@ def set_common_properties(properties, luxcore_name, bump, transparency):
 
 # Material nodes alphabetical
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_carpaint(luxrender_material_node):
+class pbrtv3_material_type_node_carpaint(pbrtv3_material_node):
     # Description string
     """Car paint material node"""
     # Optional identifier string. If not explicitly defined, the python class name is used.
-    bl_idname = 'luxrender_material_carpaint_node'
+    bl_idname = 'pbrtv3_material_carpaint_node'
     # Label for nice name display
     bl_label = 'Car Paint Material'
     # Icon identifier
@@ -120,7 +120,7 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
     bl_width_min = 200
 
     # Get menu items from old material editor properties
-    for prop in luxrender_mat_carpaint.properties:
+    for prop in pbrtv3_mat_carpaint.properties:
         if prop['attr'].startswith('name'):
             carpaint_items = prop['items']
 
@@ -143,18 +143,18 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
     # Definitions for sockets
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_TC_Ks1_socket', 'Specular Color 1')
-        self.inputs.new('luxrender_TF_R1_socket', 'R1')
-        self.inputs.new('luxrender_TF_M1_socket', 'M1')
-        self.inputs.new('luxrender_TC_Ks2_socket', 'Specular Color 2')
-        self.inputs.new('luxrender_TF_R2_socket', 'R2')
-        self.inputs.new('luxrender_TF_M2_socket', 'M2')
-        self.inputs.new('luxrender_TC_Ks3_socket', 'Specular Color 3')
-        self.inputs.new('luxrender_TF_R3_socket', 'R3')
-        self.inputs.new('luxrender_TF_M3_socket', 'M3')
-        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
-        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_TC_Ks1_socket', 'Specular Color 1')
+        self.inputs.new('pbrtv3_TF_R1_socket', 'R1')
+        self.inputs.new('pbrtv3_TF_M1_socket', 'M1')
+        self.inputs.new('pbrtv3_TC_Ks2_socket', 'Specular Color 2')
+        self.inputs.new('pbrtv3_TF_R2_socket', 'R2')
+        self.inputs.new('pbrtv3_TF_M2_socket', 'M2')
+        self.inputs.new('pbrtv3_TC_Ks3_socket', 'Specular Color 3')
+        self.inputs.new('pbrtv3_TF_R3_socket', 'R3')
+        self.inputs.new('pbrtv3_TF_M3_socket', 'M3')
+        self.inputs.new('pbrtv3_TC_Ka_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_TF_d_socket', 'Absorption Depth')
 
         add_common_sockets(self)
 
@@ -220,14 +220,14 @@ class luxrender_material_type_node_carpaint(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_cloth(luxrender_material_node):
+class pbrtv3_material_type_node_cloth(pbrtv3_material_node):
     """Cloth material node"""
-    bl_idname = 'luxrender_material_cloth_node'
+    bl_idname = 'pbrtv3_material_cloth_node'
     bl_label = 'Cloth Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
-    for prop in luxrender_mat_cloth.properties:
+    for prop in pbrtv3_mat_cloth.properties:
         if prop['attr'].startswith('presetname'):
             cloth_items = prop['items']
 
@@ -238,10 +238,10 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_warp_Kd_socket', 'Warp Diffuse Color')
-        self.inputs.new('luxrender_TC_warp_Ks_socket', 'Warp Specular Color')
-        self.inputs.new('luxrender_TC_weft_Kd_socket', 'Weft Diffuse Color')
-        self.inputs.new('luxrender_TC_weft_Ks_socket', 'Weft Specular Color')
+        self.inputs.new('pbrtv3_TC_warp_Kd_socket', 'Warp Diffuse Color')
+        self.inputs.new('pbrtv3_TC_warp_Ks_socket', 'Warp Specular Color')
+        self.inputs.new('pbrtv3_TC_weft_Kd_socket', 'Weft Diffuse Color')
+        self.inputs.new('pbrtv3_TC_weft_Ks_socket', 'Weft Specular Color')
 
         add_common_sockets(self)
 
@@ -286,9 +286,9 @@ class luxrender_material_type_node_cloth(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_doubleside(luxrender_material_node):
+class pbrtv3_material_type_node_doubleside(pbrtv3_material_node):
     """Doubel-sided material node"""
-    bl_idname = 'luxrender_material_doubleside_node'
+    bl_idname = 'pbrtv3_material_doubleside_node'
     bl_label = 'Double-Sided Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
@@ -345,9 +345,9 @@ class luxrender_material_type_node_doubleside(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_glass(luxrender_material_node):
+class pbrtv3_material_type_node_glass(pbrtv3_material_node):
     """Glass material node"""
-    bl_idname = 'luxrender_material_glass_node'
+    bl_idname = 'pbrtv3_material_glass_node'
     bl_label = 'Glass Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -400,23 +400,23 @@ class luxrender_material_type_node_glass(luxrender_material_node):
                                         default=False, update=change_use_volume_ior)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
 
         # advanced options
-        self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
+        self.inputs.new('pbrtv3_TF_cauchyb_socket', 'Cauchy B')
         self.inputs['Cauchy B'].enabled = False
-        self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
+        self.inputs.new('pbrtv3_TF_film_ior_socket', 'Film IOR')
         self.inputs['Film IOR'].enabled = False
-        self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
+        self.inputs.new('pbrtv3_TF_film_thick_socket', 'Film Thickness (nm)')
         self.inputs['Film Thickness (nm)'].enabled = False
 
         # Rough options
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
         self.inputs['U-Roughness'].name = 'Roughness'
         self.inputs['Roughness'].enabled = False
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False
 
         add_common_sockets(self)
@@ -517,9 +517,9 @@ class luxrender_material_type_node_glass(luxrender_material_node):
 
 # Deprecated, replaced by unified glass node
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_glass2(luxrender_material_node):
+class pbrtv3_material_type_node_glass2(pbrtv3_material_node):
     """Glass2 material node"""
-    bl_idname = 'luxrender_material_glass2_node'
+    bl_idname = 'pbrtv3_material_glass2_node'
     bl_label = 'Glass2 Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
@@ -532,7 +532,7 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
                                         data for this', default=False)
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -554,9 +554,9 @@ class luxrender_material_type_node_glass2(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_glossy(luxrender_material_node):
+class pbrtv3_material_type_node_glossy(pbrtv3_material_node):
     """Glossy material node"""
-    bl_idname = 'luxrender_material_glossy_node'
+    bl_idname = 'pbrtv3_material_glossy_node'
     bl_label = 'Glossy Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -591,19 +591,19 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
                                             default=False, update=change_use_anisotropy)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_TF_sigma_socket', 'Sigma')
         if UseLuxCore():
             self.inputs['Sigma'].enabled = False # not supported by LuxCore
-        self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
-        self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+        self.inputs.new('pbrtv3_TC_Ks_socket', 'Specular Color')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_TC_Ka_socket', 'Absorption Color')
         self.inputs['Absorption Color'].enabled = False
-        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+        self.inputs.new('pbrtv3_TF_d_socket', 'Absorption Depth (nm)')
         self.inputs['Absorption Depth (nm)'].enabled = False
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
         self.inputs['U-Roughness'].name = 'Roughness'
 
@@ -657,9 +657,9 @@ class luxrender_material_type_node_glossy(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_glossycoating(luxrender_material_node):
+class pbrtv3_material_type_node_glossycoating(pbrtv3_material_node):
     """Glossy Coating material node"""
-    bl_idname = 'luxrender_material_glossycoating_node'
+    bl_idname = 'pbrtv3_material_glossycoating_node'
     bl_label = 'Glossy Coating Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -695,18 +695,18 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Base Material')
-        self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
-        self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+        self.inputs.new('pbrtv3_TC_Ks_socket', 'Specular Color')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_TC_Ka_socket', 'Absorption Color')
         self.inputs['Absorption Color'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+        self.inputs.new('pbrtv3_TF_d_socket', 'Absorption Depth (nm)')
         self.inputs['Absorption Depth (nm)'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
         self.inputs['U-Roughness'].name = 'Roughness'
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
         # Note: glossycoating does not support the .transparency attribute, thus no add_common_properties() call
 
         self.outputs.new('NodeSocketShader', 'Surface')
@@ -776,9 +776,9 @@ class luxrender_material_type_node_glossycoating(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
+class pbrtv3_material_type_node_glossytranslucent(pbrtv3_material_node):
     """Glossytranslucent material node"""
-    bl_idname = 'luxrender_material_glossytranslucent_node'
+    bl_idname = 'pbrtv3_material_glossytranslucent_node'
     bl_label = 'Glossy Translucent Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -858,35 +858,35 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
 
         # Front
-        self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
-        self.inputs.new('luxrender_TF_ior_socket', 'IOR')
+        self.inputs.new('pbrtv3_TC_Ks_socket', 'Specular Color')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TC_Ka_socket', 'Absorption Color')
+        self.inputs.new('pbrtv3_TC_Ka_socket', 'Absorption Color')
         self.inputs['Absorption Color'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_d_socket', 'Absorption Depth (nm)')
+        self.inputs.new('pbrtv3_TF_d_socket', 'Absorption Depth (nm)')
         self.inputs['Absorption Depth (nm)'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
         self.inputs['U-Roughness'].name = 'Roughness'
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
 
         # Back (not Classic API compatible due to wrong sockets), initially disabled
-        self.inputs.new('luxrender_TC_Ks_socket', 'BF Specular Color')
+        self.inputs.new('pbrtv3_TC_Ks_socket', 'BF Specular Color')
         self.inputs['BF Specular Color'].enabled = False
-        self.inputs.new('luxrender_TF_ior_socket', 'BF IOR')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'BF IOR')
         self.inputs['BF IOR'].enabled = False
-        self.inputs.new('luxrender_TC_Ka_socket', 'BF Absorption Color')
+        self.inputs.new('pbrtv3_TC_Ka_socket', 'BF Absorption Color')
         self.inputs['BF Absorption Color'].enabled = False
-        self.inputs.new('luxrender_TF_d_socket', 'BF Absorption Depth (nm)')
+        self.inputs.new('pbrtv3_TF_d_socket', 'BF Absorption Depth (nm)')
         self.inputs['BF Absorption Depth (nm)'].enabled = False
-        self.inputs.new('luxrender_TF_uroughness_socket', 'BF U-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'BF U-Roughness')
         self.inputs['BF U-Roughness'].enabled = False
         self.inputs['BF U-Roughness'].name = 'BF Roughness'
-        self.inputs.new('luxrender_TF_vroughness_socket', 'BF V-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'BF V-Roughness')
         self.inputs['BF V-Roughness'].enabled = False
 
         add_common_sockets(self)
@@ -977,22 +977,22 @@ class luxrender_material_type_node_glossytranslucent(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_layered(luxrender_material_node):
+class pbrtv3_material_type_node_layered(pbrtv3_material_node):
     """Layered material node"""
-    bl_idname = 'luxrender_material_layered_node'
+    bl_idname = 'pbrtv3_material_layered_node'
     bl_label = 'Layered Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
     def init(self, context):
         self.inputs.new('NodeSocketShader', 'Material 1')
-        self.inputs.new('luxrender_TF_OP1_socket', 'Opacity 1')
+        self.inputs.new('pbrtv3_TF_OP1_socket', 'Opacity 1')
         self.inputs.new('NodeSocketShader', 'Material 2')
-        self.inputs.new('luxrender_TF_OP2_socket', 'Opacity 2')
+        self.inputs.new('pbrtv3_TF_OP2_socket', 'Opacity 2')
         self.inputs.new('NodeSocketShader', 'Material 3')
-        self.inputs.new('luxrender_TF_OP3_socket', 'Opacity 3')
+        self.inputs.new('pbrtv3_TF_OP3_socket', 'Opacity 3')
         self.inputs.new('NodeSocketShader', 'Material 4')
-        self.inputs.new('luxrender_TF_OP4_socket', 'Opacity 4')
+        self.inputs.new('pbrtv3_TF_OP4_socket', 'Opacity 4')
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -1038,16 +1038,16 @@ class luxrender_material_type_node_layered(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_matte(luxrender_material_node):
+class pbrtv3_material_type_node_matte(pbrtv3_material_node):
     """Matte material node"""
-    bl_idname = 'luxrender_material_matte_node'
+    bl_idname = 'pbrtv3_material_matte_node'
     bl_label = 'Matte Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_TF_sigma_socket', 'Sigma')
 
         add_common_sockets(self)
 
@@ -1080,9 +1080,9 @@ class luxrender_material_type_node_matte(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
+class pbrtv3_material_type_node_mattetranslucent(pbrtv3_material_node):
     """Mattetranslucent material node"""
-    bl_idname = 'luxrender_material_mattetranslucent_node'
+    bl_idname = 'pbrtv3_material_mattetranslucent_node'
     bl_label = 'Matte Translucent Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -1090,9 +1090,9 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
     energyconsrv = bpy.props.BoolProperty(name='Energy Conserving', default=True)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.inputs.new('luxrender_TF_sigma_socket', 'Sigma')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TF_sigma_socket', 'Sigma')
 
         add_common_sockets(self)
 
@@ -1129,14 +1129,14 @@ class luxrender_material_type_node_mattetranslucent(luxrender_material_node):
 
 # Deprecated, replaced with metal2 node
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_metal(luxrender_material_node):
+class pbrtv3_material_type_node_metal(pbrtv3_material_node):
     """Metal material node"""
-    bl_idname = 'luxrender_material_metal_node'
+    bl_idname = 'pbrtv3_material_metal_node'
     bl_label = 'Metal Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
-    for prop in luxrender_mat_metal.properties:
+    for prop in pbrtv3_mat_metal.properties:
         if prop['attr'].startswith('name'):
             metal_presets = prop['items']
 
@@ -1158,10 +1158,10 @@ class luxrender_material_type_node_metal(luxrender_material_node):
     metal_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
 
         self.inputs['U-Roughness'].name = 'Roughness'
         self.outputs.new('NodeSocketShader', 'Surface')
@@ -1196,9 +1196,9 @@ class luxrender_material_type_node_metal(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_metal2(luxrender_material_node):
+class pbrtv3_material_type_node_metal2(pbrtv3_material_node):
     """Metal2 material node"""
-    bl_idname = 'luxrender_material_metal2_node'
+    bl_idname = 'pbrtv3_material_metal2_node'
     bl_label = 'Metal Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -1228,12 +1228,12 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
                                             default=False, update=change_use_anisotropy)
 
     def init(self, context):
-        self.inputs.new('luxrender_color_socket', 'Color')
-        self.inputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.inputs.new('pbrtv3_color_socket', 'Color')
+        self.inputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.inputs['Fresnel'].needs_link = True  # suppress inappropiate chooser
         self.inputs['Fresnel'].enabled = False
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
         self.inputs['U-Roughness'].name = 'Roughness'
 
@@ -1290,17 +1290,17 @@ class luxrender_material_type_node_metal2(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_mirror(luxrender_material_node):
+class pbrtv3_material_type_node_mirror(pbrtv3_material_node):
     """Mirror material node"""
-    bl_idname = 'luxrender_material_mirror_node'
+    bl_idname = 'pbrtv3_material_mirror_node'
     bl_label = 'Mirror Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
-        self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.inputs.new('pbrtv3_TF_film_ior_socket', 'Film IOR')
+        self.inputs.new('pbrtv3_TF_film_thick_socket', 'Film Thickness (nm)')
 
         add_common_sockets(self)
 
@@ -1327,15 +1327,15 @@ class luxrender_material_type_node_mirror(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_mix(luxrender_material_node):
+class pbrtv3_material_type_node_mix(pbrtv3_material_node):
     """Mix material node"""
-    bl_idname = 'luxrender_material_mix_node'
+    bl_idname = 'pbrtv3_material_mix_node'
     bl_label = 'Mix Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
+        self.inputs.new('pbrtv3_TF_amount_socket', 'Mix Amount')
         self.inputs.new('NodeSocketShader', 'Material 1')
         self.inputs.new('NodeSocketShader', 'Material 2')
 
@@ -1400,15 +1400,15 @@ class luxrender_material_type_node_mix(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_null(luxrender_material_node):
+class pbrtv3_material_type_node_null(pbrtv3_material_node):
     """Null material node"""
-    bl_idname = 'luxrender_material_null_node'
+    bl_idname = 'pbrtv3_material_null_node'
     bl_label = 'Transparent Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
@@ -1440,9 +1440,9 @@ class luxrender_material_type_node_null(luxrender_material_node):
 
 # Deprecated, replaced by unified glass node
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_roughglass(luxrender_material_node):
+class pbrtv3_material_type_node_roughglass(pbrtv3_material_node):
     """Rough Glass material node"""
-    bl_idname = 'luxrender_material_roughglass_node'
+    bl_idname = 'pbrtv3_material_roughglass_node'
     bl_label = 'Rough Glass Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -1464,14 +1464,14 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
                                         default=False)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.inputs.new('luxrender_TF_ior_socket', 'IOR')
-        self.inputs.new('luxrender_TF_cauchyb_socket', 'Cauchy B')
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
+        self.inputs.new('pbrtv3_TF_cauchyb_socket', 'Cauchy B')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
 
         self.inputs['U-Roughness'].name = 'Roughness'
         self.outputs.new('NodeSocketShader', 'Surface')
@@ -1494,16 +1494,16 @@ class luxrender_material_type_node_roughglass(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_scatter(luxrender_material_node):
+class pbrtv3_material_type_node_scatter(pbrtv3_material_node):
     """Scatter material node"""
-    bl_idname = 'luxrender_material_scatter_node'
+    bl_idname = 'pbrtv3_material_scatter_node'
     bl_label = 'Scatter Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_SC_asymmetry_socket', 'Asymmetry')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_SC_asymmetry_socket', 'Asymmetry')
 
         self.outputs.new('NodeSocketShader', 'Surface')
 
@@ -1521,9 +1521,9 @@ class luxrender_material_type_node_scatter(luxrender_material_node):
 
 # Deprecated
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_shinymetal(luxrender_material_node):
+class pbrtv3_material_type_node_shinymetal(pbrtv3_material_node):
     """Shiny metal material node"""
-    bl_idname = 'luxrender_material_shinymetal_node'
+    bl_idname = 'pbrtv3_material_shinymetal_node'
     bl_label = 'Shiny Metal Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -1542,14 +1542,14 @@ class luxrender_material_type_node_shinymetal(luxrender_material_node):
                                             default=False, update=change_use_anisotropy)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.inputs.new('luxrender_TC_Ks_socket', 'Specular Color')
-        self.inputs.new('luxrender_TF_film_ior_socket', 'Film IOR')
-        self.inputs.new('luxrender_TF_film_thick_socket', 'Film Thickness (nm)')
-        self.inputs.new('luxrender_TF_uroughness_socket', 'U-Roughness')
-        self.inputs.new('luxrender_TF_vroughness_socket', 'V-Roughness')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.inputs.new('pbrtv3_TC_Ks_socket', 'Specular Color')
+        self.inputs.new('pbrtv3_TF_film_ior_socket', 'Film IOR')
+        self.inputs.new('pbrtv3_TF_film_thick_socket', 'Film Thickness (nm)')
+        self.inputs.new('pbrtv3_TF_uroughness_socket', 'U-Roughness')
+        self.inputs.new('pbrtv3_TF_vroughness_socket', 'V-Roughness')
         self.inputs['V-Roughness'].enabled = False  # initial state is disabled
-        self.inputs.new('luxrender_TF_bump_socket', 'Bump')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
 
         self.inputs['U-Roughness'].name = 'Roughness'
         self.outputs.new('NodeSocketShader', 'Surface')
@@ -1569,9 +1569,9 @@ class luxrender_material_type_node_shinymetal(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_velvet(luxrender_material_node):
+class pbrtv3_material_type_node_velvet(pbrtv3_material_node):
     """Velvet material node"""
-    bl_idname = 'luxrender_material_velvet_node'
+    bl_idname = 'pbrtv3_material_velvet_node'
     bl_label = 'Velvet Material'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
@@ -1585,16 +1585,16 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
                                       update=update_advanced)
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kd_socket', 'Diffuse Color')
-        self.inputs.new('luxrender_float_socket', 'Thickness')
+        self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
+        self.inputs.new('pbrtv3_float_socket', 'Thickness')
         self.inputs['Thickness'].default_value = 0.1
-        self.inputs.new('luxrender_float_socket', 'p1')
+        self.inputs.new('pbrtv3_float_socket', 'p1')
         self.inputs['p1'].enabled = False
         self.inputs['p1'].default_value = 2
-        self.inputs.new('luxrender_float_socket', 'p2')
+        self.inputs.new('pbrtv3_float_socket', 'p2')
         self.inputs['p2'].enabled = False
         self.inputs['p2'].default_value = 10
-        self.inputs.new('luxrender_float_socket', 'p3')
+        self.inputs.new('pbrtv3_float_socket', 'p3')
         self.inputs['p3'].enabled = False
         self.inputs['p3'].default_value = 2
 
@@ -1642,9 +1642,9 @@ class luxrender_material_type_node_velvet(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_light_area_node(luxrender_material_node):
+class pbrtv3_light_area_node(pbrtv3_material_node):
     """Area Light node"""
-    bl_idname = 'luxrender_light_area_node'
+    bl_idname = 'pbrtv3_light_area_node'
     bl_label = 'Light Emission'
     bl_icon = 'LAMP'
     bl_width_min = 160
@@ -1671,7 +1671,7 @@ class luxrender_light_area_node(luxrender_material_node):
     lightgroup = bpy.props.StringProperty(description='Lightgroup; leave blank to use default')
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_L_socket', 'Light Color')
+        self.inputs.new('pbrtv3_TC_L_socket', 'Light Color')
 
         self.outputs.new('NodeSocketShader', 'Emission')
 
@@ -1679,7 +1679,7 @@ class luxrender_light_area_node(luxrender_material_node):
         layout.prop(self, 'gain')
 
         if UseLuxCore():
-            layout.prop_search(self, 'lightgroup', context.scene.luxrender_lightgroups, 'lightgroups',
+            layout.prop_search(self, 'lightgroup', context.scene.pbrtv3_lightgroups, 'lightgroups',
                                'Lightgroup', icon='OUTLINER_OB_LAMP')
 
         layout.prop(self, 'advanced', toggle=True)
@@ -1737,14 +1737,14 @@ class luxrender_light_area_node(luxrender_material_node):
         lightgroup_id = luxcore_exporter.lightgroup_cache.get_id(self.lightgroup, blender_scene, self)
         is_opencl_compatible = is_lightgroup_opencl_compatible(luxcore_exporter, lightgroup_id)
 
-        if not blender_scene.luxrender_lightgroups.ignore and is_opencl_compatible:
+        if not blender_scene.pbrtv3_lightgroups.ignore and is_opencl_compatible:
             set_prop_mat(properties, parent_luxcore_name, 'emission.id', lightgroup_id)
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_type_node_datablock(luxrender_material_node):
+class pbrtv3_material_type_node_datablock(pbrtv3_material_node):
     """Datablock material node"""
-    bl_idname = 'luxrender_material_type_node_datablock'
+    bl_idname = 'pbrtv3_material_type_node_datablock'
     bl_label = 'Material Datablock'
     bl_icon = 'MATERIAL'
     bl_width_min = 160
@@ -1774,9 +1774,9 @@ class luxrender_material_type_node_datablock(luxrender_material_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material_output_node(luxrender_node):
+class pbrtv3_material_output_node(pbrtv3_node):
     """Material output node"""
-    bl_idname = 'luxrender_material_output_node'
+    bl_idname = 'pbrtv3_material_output_node'
     bl_label = 'Material Output'
     bl_icon = 'MATERIAL'
     bl_width_min = 180
@@ -1806,17 +1806,17 @@ class luxrender_material_output_node(luxrender_node):
     def draw_buttons(self, context, layout):
         layout.label('Volumes:')
 
-        layout.prop_search(self, 'interior_volume', context.scene.luxrender_volumes, 'volumes', 'Interior',
+        layout.prop_search(self, 'interior_volume', context.scene.pbrtv3_volumes, 'volumes', 'Interior',
                            icon='MOD_FLUIDSIM')
 
-        default_interior = context.scene.luxrender_world.default_interior_volume
+        default_interior = context.scene.pbrtv3_world.default_interior_volume
         if not self.interior_volume and default_interior:
             layout.label('Using default: "%s"' % default_interior, icon='INFO')
 
-        layout.prop_search(self, 'exterior_volume', context.scene.luxrender_volumes, 'volumes', 'Exterior',
+        layout.prop_search(self, 'exterior_volume', context.scene.pbrtv3_volumes, 'volumes', 'Exterior',
                            icon='MOD_FLUIDSIM')
 
-        default_exterior = context.scene.luxrender_world.default_exterior_volume
+        default_exterior = context.scene.pbrtv3_world.default_exterior_volume
         if not self.exterior_volume and default_exterior:
             layout.label('Using default: "%s"' % default_exterior, icon='INFO')
 
@@ -1824,7 +1824,7 @@ class luxrender_material_output_node(luxrender_node):
             layout.prop(self, 'is_shadow_catcher')
             if self.is_shadow_catcher:
                 layout.prop(self, 'sc_onlyinfinitelights')
-            layout.prop_search(self, 'materialgroup', context.scene.luxrender_materialgroups, 'materialgroups',
+            layout.prop_search(self, 'materialgroup', context.scene.pbrtv3_materialgroups, 'materialgroups',
                                'MGroup', icon='IMASEL')
 
             layout.prop(self, 'advanced', toggle=True)
@@ -1844,7 +1844,7 @@ class luxrender_material_output_node(luxrender_node):
     def export_luxcore(self, material, properties, blender_scene, luxcore_exporter, luxcore_name):
         # Note: volumes are exported in export/luxcore/materials.py (in "parent" function that calls this function)
 
-        tree_name = material.luxrender_material.nodetree
+        tree_name = material.pbrtv3_material.nodetree
         print('Converting material: %s (Nodetree: %s)' % (material.name, tree_name))
 
         # Export the material tree
@@ -1855,14 +1855,14 @@ class luxrender_material_output_node(luxrender_node):
 
         # Material group
         materialgroup_name = self.materialgroup
-        if materialgroup_name in blender_scene.luxrender_materialgroups.materialgroups:
-            group = blender_scene.luxrender_materialgroups.materialgroups[materialgroup_name]
+        if materialgroup_name in blender_scene.pbrtv3_materialgroups.materialgroups:
+            group = blender_scene.pbrtv3_materialgroups.materialgroups[materialgroup_name]
 
             set_prop_mat(properties, luxcore_name, 'id', group.id)
 
-            if group.create_MATERIAL_ID_MASK and blender_scene.luxrender_channels.enable_aovs:
+            if group.create_MATERIAL_ID_MASK and blender_scene.pbrtv3_channels.enable_aovs:
                 luxcore_exporter.config_exporter.convert_channel('MATERIAL_ID_MASK', group.id)
-            if group.create_BY_MATERIAL_ID and blender_scene.luxrender_channels.enable_aovs:
+            if group.create_BY_MATERIAL_ID and blender_scene.pbrtv3_channels.enable_aovs:
                 luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', group.id)
 
         # Export advanced LuxCore material settings
@@ -1890,7 +1890,7 @@ class luxrender_material_output_node(luxrender_node):
 
         surface_node = surface_socket.links[0].from_node
 
-        tree_name = material.luxrender_material.nodetree
+        tree_name = material.pbrtv3_material.nodetree
 
         make_material = None
         if mode == 'indirect':
@@ -1910,8 +1910,8 @@ class luxrender_material_output_node(luxrender_node):
                 mat_params.add_string('type', mat_type)
 
                 # DistributedPath compositing. Don't forget these!
-                if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-                    mat_params.update(material.luxrender_material.luxrender_mat_compositing.get_paramset())
+                if scene.pbrtv3_integrator.surfaceintegrator == 'distributedpath':
+                    mat_params.update(material.pbrtv3_material.pbrtv3_mat_compositing.get_paramset())
 
                 ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
                 ExportedMaterials.export_new_named(lux_context)
@@ -1935,8 +1935,8 @@ class luxrender_material_output_node(luxrender_node):
                 mat_params.add_string('type', mat_type)
 
                 # DistributedPath compositing. Don't forget these!
-                if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-                    mat_params.update(material.luxrender_material.luxrender_mat_compositing.get_paramset())
+                if scene.pbrtv3_integrator.surfaceintegrator == 'distributedpath':
+                    mat_params.update(material.pbrtv3_material.pbrtv3_mat_compositing.get_paramset())
 
                 ExportedMaterials.makeNamedMaterial(lux_context, material_name, mat_params)
                 ExportedMaterials.export_new_named(lux_context)
@@ -1947,7 +1947,7 @@ class luxrender_material_output_node(luxrender_node):
 
 
         # texture exporting, only one way
-        make_texture = luxrender_texture_maker(lux_context, tree_name).make_texture
+        make_texture = pbrtv3_texture_maker(lux_context, tree_name).make_texture
 
         # start exporting that material...
         with MaterialCounter(material.name):

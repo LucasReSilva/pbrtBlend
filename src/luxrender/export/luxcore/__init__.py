@@ -77,7 +77,7 @@ class LuxCoreExporter(object):
         self.volume_cache = {}
 
         # Namecache to map an ascending number to each lightgroup name
-        self.lightgroup_cache = LightgroupCache(self.blender_scene.luxrender_lightgroups)
+        self.lightgroup_cache = LightgroupCache(self.blender_scene.pbrtv3_lightgroups)
         # Cache defined passes to avoid multiple definitions
         self.passes_cache = set()
 
@@ -218,7 +218,7 @@ class LuxCoreExporter(object):
         if self.blender_scene.camera is None:
             return temp_properties
 
-        imagepipeline_settings = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline
+        imagepipeline_settings = self.blender_scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
         export_to_luxcoreui = self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui'
         index = 0
         prefix = 'film.imagepipeline.'
@@ -258,7 +258,7 @@ class LuxCoreExporter(object):
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.postscale', postscale))
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.burn', burn))
         elif tonemapper == 'TONEMAP_LUXLINEAR':
-            lux_camera = self.blender_scene.camera.data.luxrender_camera
+            lux_camera = self.blender_scene.camera.data.pbrtv3_camera
             sensitivity = lux_camera.sensitivity
             #exposure = lux_camera.exposure_time() if not self.is_viewport_render else lux_camera.exposure_time() * 2.25
             fstop = lux_camera.fstop
@@ -381,7 +381,7 @@ class LuxCoreExporter(object):
         temp_properties = pyluxcore.Properties()
         prefix = 'film.radiancescales.'
 
-        if not self.blender_scene.luxrender_lightgroups.ignore:
+        if not self.blender_scene.pbrtv3_lightgroups.ignore:
             for lg, id in self.lightgroup_cache.get_lightgroup_id_pairs():
                 if is_lightgroup_opencl_compatible(self, id):
                     if verbose:
@@ -479,7 +479,7 @@ class LuxCoreExporter(object):
 
         # Convert volumes from all scenes (necessary for material preview rendering)
         for scn in bpy.data.scenes:
-            for volume in scn.luxrender_volumes.volumes:
+            for volume in scn.pbrtv3_volumes.volumes:
                 self.convert_volume(volume)
 
 
@@ -506,10 +506,10 @@ class LuxCoreExporter(object):
     def __convert_world_volume(self):
         # Camera exterior is the preferred volume for world default, fallback is the world exterior
         properties = pyluxcore.Properties()
-        volumes = self.blender_scene.luxrender_volumes.volumes
+        volumes = self.blender_scene.pbrtv3_volumes.volumes
 
         if self.blender_scene.camera is not None:
-            cam_exterior_name = self.blender_scene.camera.data.luxrender_camera.Exterior_volume
+            cam_exterior_name = self.blender_scene.camera.data.pbrtv3_camera.Exterior_volume
 
             if cam_exterior_name in volumes:
                 cam_exterior = volumes[cam_exterior_name]
@@ -521,7 +521,7 @@ class LuxCoreExporter(object):
                 return
 
         # No valid camera volume found, try world exterior
-        world_exterior_name = self.blender_scene.luxrender_world.default_exterior_volume
+        world_exterior_name = self.blender_scene.pbrtv3_world.default_exterior_volume
 
         if world_exterior_name in volumes:
             world_exterior = volumes[world_exterior_name]

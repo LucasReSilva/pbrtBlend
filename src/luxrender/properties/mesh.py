@@ -40,7 +40,7 @@ from ..outputs.luxcore_api import UseLuxCore
 class MeshFloatTextureParameter(FloatTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other FloatTextureParameters
-        return lambda s, c: c.luxrender_mesh
+        return lambda s, c: c.pbrtv3_mesh
 
 
 TF_displacementmap = MeshFloatTextureParameter(
@@ -52,7 +52,7 @@ TF_displacementmap = MeshFloatTextureParameter(
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mesh(declarative_property_group):
+class pbrtv3_mesh(declarative_property_group):
     """
     Storage class for LuxRender Mesh settings.
     """
@@ -229,7 +229,7 @@ class luxrender_mesh(declarative_property_group):
             texture_name = getattr(self, 'dm_floattexturename')
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 
-            if texture.type in ('IMAGE', 'OCEAN') and texture.luxrender_texture.type == 'BLENDER':
+            if texture.type in ('IMAGE', 'OCEAN') and texture.pbrtv3_texture.type == 'BLENDER':
                 params.add_texture('displacementmap', '%s_float' % self.dm_floattexturename)
             else:
                 params.add_texture('displacementmap', self.dm_floattexturename)

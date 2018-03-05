@@ -25,26 +25,26 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.materials import luxrender_material_sub
+from ...ui.materials import pbrtv3_material_sub
 
 
 @PBRTv3Addon.addon_register_class
-class ui_material_roughglass(luxrender_material_sub):
+class ui_material_roughglass(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Rough Glass Material'
 
     LUX_COMPAT = {'roughglass'}
 
     display_property_groups = [
-        ( ('material', 'luxrender_material'), 'luxrender_mat_roughglass' )
+        ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_roughglass' )
     ]
 
     def draw_ior_menu(self, context):
         """
         This is a draw callback from property_group_renderer, due
-        to ef_callback item in luxrender_mat_<mat>.properties
+        to ef_callback item in pbrtv3_mat_<mat>.properties
         """
 
-        lmg = context.material.luxrender_material.luxrender_mat_roughglass
+        lmg = context.material.pbrtv3_material.pbrtv3_mat_roughglass
 
         if lmg.index_floatvalue == lmg.index_presetvalue:
             menu_text = lmg.index_presetstring
@@ -52,4 +52,4 @@ class ui_material_roughglass(luxrender_material_sub):
             menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
-        cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+        cl.menu('PBRTv3_MT_ior_presets', text=menu_text)

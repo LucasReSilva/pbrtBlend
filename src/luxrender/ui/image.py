@@ -32,11 +32,11 @@ from ..outputs.pure_api import PYLUX_AVAILABLE
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_ui_rendering_controls(property_group_renderer):
+class pbrtv3_ui_rendering_controls(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
     bl_label = "LuxRender Rendering Controls"
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     ctx = None
 
@@ -57,7 +57,7 @@ class luxrender_ui_rendering_controls(property_group_renderer):
         return False
 
     display_property_groups = [
-        ( ('scene', 'camera', 'data', 'luxrender_camera', 'luxrender_film'), 'luxrender_tonemapping' )
+        ( ('scene', 'camera', 'data', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_tonemapping' )
     ]
 
     def draw(self, context):
@@ -74,7 +74,7 @@ class luxrender_ui_rendering_controls(property_group_renderer):
 
         if self.ctx is not None and self.ctx.API_TYPE == 'PURE':
             pylux = self.ctx.PYLUX
-            tm_data = context.scene.camera.data.luxrender_camera.luxrender_film.luxrender_tonemapping
+            tm_data = context.scene.camera.data.pbrtv3_camera.pbrtv3_film.pbrtv3_tonemapping
             tm_map = {
                 'reinhard': pylux.ImageFilm.TonemapKernels.Reinhard,
                 'linear': pylux.ImageFilm.TonemapKernels.Linear,

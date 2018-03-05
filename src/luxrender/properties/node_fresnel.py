@@ -34,22 +34,22 @@ from ..export import ParamSet, process_filepath_data,  get_expanded_file_name
 from ..outputs import LuxManager
 from ..outputs.luxcore_api import set_prop_tex
 
-from ..properties import luxrender_texture_node
+from ..properties import pbrtv3_texture_node
 from ..properties.node_material import get_socket_paramsets
-from ..properties.texture import luxrender_tex_fresnelname
+from ..properties.texture import pbrtv3_tex_fresnelname
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
+class pbrtv3_texture_type_node_fresnelcolor(pbrtv3_texture_node):
     """Fresnel Color Node"""
-    bl_idname = 'luxrender_texture_fresnelcolor_node'
+    bl_idname = 'pbrtv3_texture_fresnelcolor_node'
     bl_label = 'Fresnel Color'
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kr_socket', 'Reflection Color')
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.inputs.new('pbrtv3_TC_Kr_socket', 'Reflection Color')
+        self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.outputs['Fresnel'].needs_link = True
 
     def export_texture(self, make_texture):
@@ -70,14 +70,14 @@ class luxrender_texture_type_node_fresnelcolor(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
+class pbrtv3_texture_type_node_fresnelname(pbrtv3_texture_node):
     """Fresnel Name Node"""
-    bl_idname = 'luxrender_texture_fresnelname_node'
+    bl_idname = 'pbrtv3_texture_fresnelname_node'
     bl_label = 'Fresnel Preset'
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
-    for prop in luxrender_tex_fresnelname.properties:
+    for prop in pbrtv3_tex_fresnelname.properties:
         if prop['attr'].startswith('name'):
             frname_presets = prop['items']
 
@@ -86,7 +86,7 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
     frname_nkfile = bpy.props.StringProperty(name='Nk File', description='Nk file path', subtype='FILE_PATH')
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
@@ -125,9 +125,9 @@ class luxrender_texture_type_node_fresnelname(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
+class pbrtv3_texture_type_node_fresnelfile(pbrtv3_texture_node):
     """Fresnel Sopra/Luxpop Node"""
-    bl_idname = 'luxrender_texture_fresnelfile_node'
+    bl_idname = 'pbrtv3_texture_fresnelfile_node'
     bl_label = 'Fresnel NK File'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -141,7 +141,7 @@ class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
     type = bpy.props.EnumProperty(name='Type', items=type_items)
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
@@ -161,9 +161,9 @@ class luxrender_texture_type_node_fresnelfile(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_cauchy(luxrender_texture_node):
+class pbrtv3_texture_type_node_cauchy(pbrtv3_texture_node):
     """Cauchy Node"""
-    bl_idname = 'luxrender_texture_cauchy_node'
+    bl_idname = 'pbrtv3_texture_cauchy_node'
     bl_label = 'Cauchy'
     bl_icon = 'TEXTURE'
     bl_width_min = 160
@@ -180,7 +180,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
     cauchy_b = bpy.props.FloatProperty(name='B', default=0.0035, min=0.0, max=10.0, precision=6)
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):
@@ -194,7 +194,7 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
             else:
                 menu_text = '-- Choose IOR preset --'
 
-            layout.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+            layout.menu('PBRTv3_MT_ior_presets', text=menu_text)
             layout.prop(self, 'cauchy_n')
         else:
             layout.prop(self, 'cauchy_a')
@@ -214,9 +214,9 @@ class luxrender_texture_type_node_cauchy(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
+class pbrtv3_texture_type_node_sellmeier(pbrtv3_texture_node):
     """Sellmeier Node"""
-    bl_idname = 'luxrender_texture_sellmeier_node'
+    bl_idname = 'pbrtv3_texture_sellmeier_node'
     bl_label = 'Sellmeier'
     bl_icon = 'TEXTURE'
     bl_width_min = 200
@@ -227,7 +227,7 @@ class luxrender_texture_type_node_sellmeier(luxrender_texture_node):
     c = bpy.props.FloatVectorProperty(name='C', default=(0.0047, 0.0135, 97.93), min=0.0, max=100.0, precision=6)
 
     def init(self, context):
-        self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+        self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
         self.outputs['Fresnel'].needs_link = True
 
     def draw_buttons(self, context, layout):

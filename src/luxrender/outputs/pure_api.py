@@ -29,11 +29,11 @@ from .. import import_bindings_module
 
 if not 'PYLUX_AVAILABLE' in locals():
     # If pylux is not available, revert to 0.8 feature set
-    LUXRENDER_VERSION = '0.8'
+    PBRTv3_VERSION = '0.8'
 
     try:
         pylux = import_bindings_module('pylux')
-        LUXRENDER_VERSION = pylux.version()
+        PBRTv3_VERSION = pylux.version()
 
         class Custom_Context(pylux.Context):
             """
@@ -85,7 +85,7 @@ if not 'PYLUX_AVAILABLE' in locals():
                     pass
 
         # Backwards-compatibility Context method substitution
-        if LUXRENDER_VERSION < '0.8':
+        if PBRTv3_VERSION < '0.8':
             from ..extensions_framework.util import format_elapsed_time
 
             def printableStatistics(self, add_total):
@@ -145,7 +145,7 @@ if not 'PYLUX_AVAILABLE' in locals():
             Custom_Context.portalInstace = portalInstance
 
         PYLUX_AVAILABLE = True
-        LuxLog('Using pylux version %s' % LUXRENDER_VERSION)
+        LuxLog('Using pylux version %s' % PBRTv3_VERSION)
 
     except ImportError as err:
         LuxLog('WARNING: Binary pylux module not available! Visit '

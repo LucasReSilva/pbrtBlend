@@ -44,11 +44,11 @@ bl_info = {
     "description": "PBRTv3 integration for Blender"
 }
 
-def find_luxrender_path():
+def find_pbrtv3_path():
     path = efutil.find_config_value('luxrender', 'defaults', 'install_path', '')
 
     if not path:
-        path = getenv('LUXRENDER_ROOT', '')
+        path = getenv('PBRTv3_ROOT', '')
 
     return path
 
@@ -76,7 +76,7 @@ def import_bindings_module(name):
         LuxLog('{} module imported successfully'.format(name.title()))
         return module
 
-    lux_path = find_luxrender_path()
+    lux_path = find_pbrtv3_path()
     luxblend_path = os.path.dirname(os.path.abspath(__file__))
     if sys.platform == 'darwin':
         return _import_bindings_module(luxblend_path, name, True)
@@ -99,14 +99,14 @@ else:
     from .extensions_framework import Addon
     import nodeitems_utils
 
-    def set_luxrender_path(self, path):
+    def set_pbrtv3_path(self, path):
         """Save Lux install path to persistent disk storage."""
         if not path:
             return
         efutil.write_config_value('luxrender', 'defaults', 'install_path',
                                   efutil.filesystem_path(path))
 
-    def get_luxrender_path(self):
+    def get_pbrtv3_path(self):
         """Load Lux install path from persistent disk storage."""
         return efutil.find_config_value('luxrender', 'defaults',
                                         'install_path', '')
@@ -119,9 +119,9 @@ else:
             name="Path to LuxRender Installation",
             description='Path to LuxRender install directory',
             subtype='DIR_PATH',
-            default=find_luxrender_path(),
-            get=get_luxrender_path,
-            set=set_luxrender_path
+            default=find_pbrtv3_path(),
+            get=get_pbrtv3_path,
+            set=set_pbrtv3_path
         )
 
         def draw(self, context):
@@ -145,8 +145,8 @@ else:
 
     def register():
         bpy.utils.register_class(PBRTv3AddonPreferences)
-        nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.luxrender_node_categories_material)
-        nodeitems_utils.register_node_categories("LUX_VOLUME", ui.node_editor.luxrender_node_categories_volume)
+        nodeitems_utils.register_node_categories("LUX_SHADER", ui.node_editor.pbrtv3_node_categories_material)
+        nodeitems_utils.register_node_categories("LUX_VOLUME", ui.node_editor.pbrtv3_node_categories_volume)
         addon_register()
 
     def unregister():

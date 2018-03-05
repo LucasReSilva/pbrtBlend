@@ -32,7 +32,7 @@ from ..export import ParamSet
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_sampler(declarative_property_group):
+class pbrtv3_sampler(declarative_property_group):
     """
     Storage class for LuxRender Sampler settings.
     """
@@ -77,7 +77,7 @@ class luxrender_sampler(declarative_property_group):
             'attr': 'sampler',
             'name': 'Sampler',
             'description': 'Pixel sampling algorithm to use',
-            'default': 'metropolis',
+            'default': 'sobol',
             'items': [
                 ('metropolis', 'Metropolis', 'Keleman-style metropolis light transport'),
                 ('sobol', 'Sobol', 'Use a Sobol sequence'),

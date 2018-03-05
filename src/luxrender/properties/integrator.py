@@ -30,11 +30,11 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..outputs import LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 # from .engine import check_renderer_settings
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volumeintegrator(declarative_property_group):
+class pbrtv3_volumeintegrator(declarative_property_group):
     """
     Storage class for LuxRender Volume Integrator settings.
     """
@@ -63,7 +63,7 @@ class luxrender_volumeintegrator(declarative_property_group):
             'attr': 'volumeintegrator',
             'name': 'Volume Integrator',
             'description': 'Integrator used to calculate volumetric effects',
-            'default': 'multi',
+            'default': 'none',
             'items': [
                 ('emission', 'Emission', 'Calculate volumetric absorption'),
                 ('single', 'Single', 'Calculate single scattering and absorption'),
@@ -95,7 +95,7 @@ class luxrender_volumeintegrator(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_integrator(declarative_property_group):
+class pbrtv3_integrator(declarative_property_group):
     """
     Storage class for LuxRender Integrator settings.
     """
@@ -103,10 +103,10 @@ class luxrender_integrator(declarative_property_group):
     ef_attach_to = ['Scene']
 
     def advanced_switch(self, context):
-        context.scene.luxrender_sampler.advanced = self.advanced
-        context.scene.luxrender_volumeintegrator.advanced = self.advanced
-        context.scene.luxrender_filter.advanced = self.advanced
-        context.scene.luxrender_accelerator.advanced = self.advanced
+        context.scene.pbrtv3_sampler.advanced = self.advanced
+        context.scene.pbrtv3_volumeintegrator.advanced = self.advanced
+        context.scene.pbrtv3_filter.advanced = self.advanced
+        context.scene.pbrtv3_accelerator.advanced = self.advanced
 
     controls = [
         'advanced',
@@ -293,7 +293,7 @@ class luxrender_integrator(declarative_property_group):
             'attr': 'surfaceintegrator',
             'name': 'Surface Integrator',
             'description': 'Surface Integrator',
-            'default': 'bidirectional',
+            'default': 'path',
             'items': [
                 ('bidirectional', 'Bidirectional', 'bidirectional'),
                 ('path', 'Path', 'path'),
@@ -1035,27 +1035,27 @@ class luxrender_integrator(declarative_property_group):
         # Check to make sure all settings are correct when hybrid is selected. Keep this up to date as hybrid gets \
         # new options in later versions
 
-        if scene.luxrender_rendermode.renderer == 'hybrid':
+        if scene.pbrtv3_rendermode.renderer == 'hybrid':
             #Check each integrator seperately so they don't mess with each other!
             if self.surfaceintegrator == 'bidirectional':
                 if self.lightstrategy != ('one'):
                     LuxLog('Incompatible light strategy for Hybrid Bidir (switching to "one uniform").')
                     #					raise Exception('Incompatible render settings')
 
-        hybrid_compat = scene.luxrender_rendermode.renderer == 'hybrid' and self.surfaceintegrator == 'bidirectional'
+        hybrid_compat = scene.pbrtv3_rendermode.renderer == 'hybrid' and self.surfaceintegrator == 'bidirectional'
 
         # Exphotonmap is not compatible with light groups, warn here instead of light export code so
         # this warning only shows once instead of per lamp
-        if not scene.luxrender_lightgroups.ignore and self.surfaceintegrator == 'exphotonmap':
+        if not scene.pbrtv3_lightgroups.ignore and self.surfaceintegrator == 'exphotonmap':
             LuxLog('WARNING: Ex. Photon Map does not support light groups, exporting all lights in the default group.')
 
         # Warn about multi volume integrator and homogeneous exterior
-        if scene.luxrender_world.default_exterior_volume:
-            ext_v = scene.luxrender_world.default_exterior_volume
+        if scene.pbrtv3_world.default_exterior_volume:
+            ext_v = scene.pbrtv3_world.default_exterior_volume
 
-            for volume in scene.luxrender_volumes.volumes:
+            for volume in scene.pbrtv3_volumes.volumes:
                 if volume.name == ext_v and volume.type == 'homogeneous' and \
-                                scene.luxrender_volumeintegrator.volumeintegrator == 'multi':
+                                scene.pbrtv3_volumeintegrator.volumeintegrator == 'multi':
                     LuxLog('Warning: Default exterior volume is homogeneous, and the "multi" volume integrator is \
                     selected! Performance may be poor, consider using the "single" volume integrator instead')
 

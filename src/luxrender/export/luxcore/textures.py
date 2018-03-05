@@ -59,7 +59,7 @@ class TextureExporter(object):
     def __convert_mapping(self, prefix, texture):
         # Note 2DMapping is used for: bilerp, checkerboard(dimension == 2), dots, imagemap, normalmap, uv, uvmask
         # Blender - image
-        luxMapping = getattr(texture.luxrender_texture, 'luxrender_tex_mapping')
+        luxMapping = getattr(texture.pbrtv3_texture, 'pbrtv3_tex_mapping')
 
         if luxMapping.type == 'uv':
             self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'uvmapping2d'))
@@ -81,7 +81,7 @@ class TextureExporter(object):
         # Note 3DMapping is used for: brick, checkerboard(dimension == 3), cloud', densitygrid,
         # exponential, fbm', marble', windy, wrinkled
         # BLENDER - CLOUDS,DISTORTED_NOISE,MAGIC,MARBLE, MUSGRAVE,STUCCI,VORONOI, WOOD
-        luxTransform = getattr(texture.luxrender_texture, 'luxrender_tex_transform')
+        luxTransform = getattr(texture.pbrtv3_texture, 'pbrtv3_tex_transform')
 
         if luxTransform.coordinates == 'uv':
             self.properties.Set(pyluxcore.Property(prefix + '.mapping.type', 'uvmapping3d'))
@@ -96,16 +96,16 @@ class TextureExporter(object):
 
         if luxTransform.coordinates == 'smoke_domain':
             #For correct densitygrid texture transformation use smoke domain bounding box
-            tex = texture.luxrender_texture.luxrender_tex_densitygrid
+            tex = texture.pbrtv3_texture.pbrtv3_tex_densitygrid
             obj = bpy.context.scene.objects[tex.domain_object]
             
             luxScale = obj.dimensions
             luxTranslate = obj.matrix_world * mathutils.Vector([v for v in obj.bound_box[0]])
             luxRotate = obj.rotation_euler
         else:
-            luxTranslate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'translate')
-            luxScale = getattr(texture.luxrender_texture.luxrender_tex_transform, 'scale')
-            luxRotate = getattr(texture.luxrender_texture.luxrender_tex_transform, 'rotate')
+            luxTranslate = getattr(texture.pbrtv3_texture.pbrtv3_tex_transform, 'translate')
+            luxScale = getattr(texture.pbrtv3_texture.pbrtv3_tex_transform, 'scale')
+            luxRotate = getattr(texture.pbrtv3_texture.pbrtv3_tex_transform, 'rotate')
 
         # create a location matrix
         tex_loc = mathutils.Matrix.Translation((luxTranslate))
@@ -166,7 +166,7 @@ class TextureExporter(object):
     def __convert_texture(self, name=''):
         texture = self.texture
 
-        texType = texture.luxrender_texture.type
+        texType = texture.pbrtv3_texture.type
 
         if name == '':
             self.__generate_texture_name(texture.name)
@@ -293,9 +293,9 @@ class TextureExporter(object):
                         tex_image = efutil.filesystem_path(f_path)
 
 
-                gamma = texture.luxrender_texture.luxrender_tex_imagesampling.gamma
-                gain = texture.luxrender_texture.luxrender_tex_imagesampling.gain
-                channel = texture.luxrender_texture.luxrender_tex_imagesampling.channel_luxcore
+                gamma = texture.pbrtv3_texture.pbrtv3_tex_imagesampling.gamma
+                gain = texture.pbrtv3_texture.pbrtv3_tex_imagesampling.gain
+                channel = texture.pbrtv3_texture.pbrtv3_tex_imagesampling.channel_luxcore
 
                 self.properties.Set(pyluxcore.Property(prefix + '.type', ['imagemap']))
                 self.properties.Set(pyluxcore.Property(prefix + '.file', [tex_image]))
@@ -407,7 +407,7 @@ class TextureExporter(object):
             return
 
         elif texType != 'BLENDER':
-            luxTex = getattr(texture.luxrender_texture, 'luxrender_tex_' + texType)
+            luxTex = getattr(texture.pbrtv3_texture, 'pbrtv3_tex_' + texType)
 
             ####################################################################
             # ADD/SUBTRACT
@@ -465,7 +465,7 @@ class TextureExporter(object):
 
                 self.properties.Set(pyluxcore.Property(prefix + '.brickbond', [(luxTex.brickbond)]))
 
-                if texture.luxrender_texture.luxrender_tex_brick.brickbond in ('running', 'flemish'):
+                if texture.pbrtv3_texture.pbrtv3_tex_brick.brickbond in ('running', 'flemish'):
                     self.properties.Set(pyluxcore.Property(prefix + '.brickrun', [float(luxTex.brickrun)]))
 
                 self.properties.Set(pyluxcore.Property(prefix + '.mortarsize', [float(luxTex.mortarsize)]))
@@ -485,7 +485,7 @@ class TextureExporter(object):
                 tex2 = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name, luxTex, 'tex2', 'float')
                 self.properties.Set(pyluxcore.Property(prefix + '.texture1', tex1))
                 self.properties.Set(pyluxcore.Property(prefix + '.texture2', tex2))
-                if texture.luxrender_texture.luxrender_tex_checkerboard.dimension == 2:
+                if texture.pbrtv3_texture.pbrtv3_tex_checkerboard.dimension == 2:
                     self.properties.Set(pyluxcore.Property(prefix + '.type', ['checkerboard2d']))
                     self.__convert_mapping(prefix, texture)
                 else:

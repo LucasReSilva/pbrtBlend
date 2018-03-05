@@ -77,7 +77,7 @@ class CameraExporter(object):
         view_camera_offset = list(self.context.region_data.view_camera_offset)
         view_ortho_zoom = self.context.space_data.region_3d.view_distance
 
-        luxCamera = self.context.scene.camera.data.luxrender_camera if self.context.scene.camera is not None else None
+        luxCamera = self.context.scene.camera.data.pbrtv3_camera if self.context.scene.camera is not None else None
 
         if self.context.region.width > self.context.region.height:
             xaspect = 1.0
@@ -172,7 +172,7 @@ class CameraExporter(object):
     def __convert_final_camera(self):
         blCamera = self.blender_scene.camera
         blCameraData = blCamera.data
-        luxCamera = blCameraData.luxrender_camera
+        luxCamera = blCameraData.pbrtv3_camera
 
         if blCameraData.type == 'ORTHO':
             set_prop_cam(self.properties, 'type', 'orthographic')
@@ -189,7 +189,7 @@ class CameraExporter(object):
 
         # Field of view
         # Correction for vertical fit sensor, must truncate the float to .1f precision and round down !
-        width, height = luxCamera.luxrender_film.resolution(self.blender_scene)
+        width, height = luxCamera.pbrtv3_film.resolution(self.blender_scene)
 
         if blCameraData.sensor_fit == 'VERTICAL' and not self.is_viewport_render and width > height:
             aspect_fix = round(width / height - 0.05, 1) # make sure it rounds down
@@ -259,7 +259,7 @@ class CameraExporter(object):
 
 
     def __convert_camera_motion_blur(self, blCamera):
-        luxCamera = blCamera.data.luxrender_camera
+        luxCamera = blCamera.data.pbrtv3_camera
 
         # Note: enabling this in viewport leads to constant refresing of the render, even when cam is not animated
         if luxCamera.usemblur and luxCamera.cammblur and not self.is_viewport_render:

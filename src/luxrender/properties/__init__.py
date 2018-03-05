@@ -29,18 +29,18 @@ import bpy
 from ..outputs.luxcore_api import ToValidLuxCoreName, UseLuxCore, set_prop_mat, set_prop_vol
 
 
-class luxrender_node(bpy.types.Node):
+class pbrtv3_node(bpy.types.Node):
     # This node is only for the Lux node-tree
     @classmethod
     def poll(cls, tree):
-        return tree.bl_idname in ['luxrender_material_nodes', 'luxrender_volume_nodes_a']
+        return tree.bl_idname in ['pbrtv3_material_nodes', 'pbrtv3_volume_nodes_a']
 
 
-class luxrender_texture_node(luxrender_node):
+class pbrtv3_texture_node(pbrtv3_node):
     pass
 
 
-class luxrender_material_node(luxrender_node):
+class pbrtv3_material_node(pbrtv3_node):
     pass
 
 
@@ -59,10 +59,10 @@ class ExportedVolumes(object):
 
 
 def find_node(material, nodetype):
-    if not (material and material.luxrender_material and material.luxrender_material.nodetree):
+    if not (material and material.pbrtv3_material and material.pbrtv3_material.nodetree):
         return None
 
-    nodetree_name = material.luxrender_material.nodetree
+    nodetree_name = material.pbrtv3_material.nodetree
 
     if not nodetree_name or nodetree_name not in bpy.data.node_groups:
         return None
@@ -112,7 +112,7 @@ def get_linked_node(socket):
 
 
 def has_interior_volume(node):
-    mat_output_node = find_node_in_nodetree(node.id_data, 'luxrender_material_output_node')
+    mat_output_node = find_node_in_nodetree(node.id_data, 'pbrtv3_material_output_node')
     if mat_output_node and mat_output_node.interior_volume:
         return True
     else:

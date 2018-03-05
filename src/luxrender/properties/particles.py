@@ -35,12 +35,12 @@ from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, LuxManager
 from ..export import fix_matrix_order
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import UseLuxCore
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_hair(declarative_property_group):
+class pbrtv3_hair(declarative_property_group):
     """
     Storage class for LuxRender Hair Rendering settings.
     """

@@ -84,10 +84,10 @@ class UnexportableObjectException(Exception):
     pass
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
+class PBRTv3_OT_export_pbrtv3_proxy(bpy.types.Operator):
     """Export an object as ply file, replace the original mesh with a preview version and set path to the exported ply file."""
 
-    bl_idname = 'export.export_luxrender_proxy'
+    bl_idname = 'export.export_pbrtv3_proxy'
     bl_label = 'Export as LuxRender Proxy'
     bl_description = 'Converts selected objects to LuxRender proxies (simple preview geometry, original mesh is loaded at rendertime)'
 
@@ -241,8 +241,8 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
                     #################################################################
                     # Set exported PLY as proxy file
                     #################################################################
-                    ob.luxrender_object.append_proxy = True
-                    ob.luxrender_object.external_mesh = ply_path
+                    ob.pbrtv3_object.append_proxy = True
+                    ob.pbrtv3_object.external_mesh = ply_path
 
                     print("[Object: %s] Created proxy object" % ob.name)
                     print("-----------------")
@@ -309,7 +309,7 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
 
                     mesh_name, ply_path = make_plyfilename()
 
-                    if (not os.path.exists(ply_path) or self.overwrite) and not obj.luxrender_object.append_proxy:
+                    if (not os.path.exists(ply_path) or self.overwrite) and not obj.pbrtv3_object.append_proxy:
                         uv_textures = mesh.tessface_uv_textures
                         vertex_color = mesh.tessface_vertex_colors.active
 
@@ -500,5 +500,5 @@ class LUXRENDER_OT_export_luxrender_proxy(bpy.types.Operator):
             return None, None
 
 # Register operator in Blender File -> Export menu
-#proxy_menu_func = lambda self, context: self.layout.operator("export.export_luxrender_proxy", text="Export LuxRender Proxy")
+#proxy_menu_func = lambda self, context: self.layout.operator("export.export_pbrtv3_proxy", text="Export LuxRender Proxy")
 #bpy.types.INFO_MT_file_export.append(proxy_menu_func)

@@ -25,11 +25,11 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_blender(luxrender_texture_base):
+class ui_texture_blender(pbrtv3_texture_base):
     bl_label = 'Blender Texture Settings'
 
     LUX_COMPAT = {'BLENDER'}

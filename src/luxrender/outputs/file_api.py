@@ -31,7 +31,7 @@ import bpy
 from ..extensions_framework import util as efutil
 
 from ..outputs import LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import ExportedVolumes
 
 

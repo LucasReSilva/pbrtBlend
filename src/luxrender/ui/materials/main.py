@@ -28,7 +28,7 @@ import bpy
 
 from ... import PBRTv3Addon
 from ...properties import (find_node, find_node_input)
-from ...ui.materials import luxrender_material_base
+from ...ui.materials import pbrtv3_material_base
 from ...operators.lrmdb import lrmdb_state
 from ...outputs.luxcore_api import UseLuxCore
 
@@ -59,14 +59,14 @@ def node_tree_selector_draw(layout, id_data, output_type):
 
     node = find_node(id_data, output_type)
     if not node:
-        if not id_data.luxrender_material.nodetree:
+        if not id_data.pbrtv3_material.nodetree:
             sub_layout = layout.split(percentage=0.665)
             sub_layout.operator('luxrender.add_material_nodetree', icon='NODETREE')
             prop_search_text = ''
 
-    sub_layout.prop_search(id_data.luxrender_material, "nodetree", bpy.data, "node_groups", text=prop_search_text)
+    sub_layout.prop_search(id_data.pbrtv3_material, "nodetree", bpy.data, "node_groups", text=prop_search_text)
 
-    if id_data.luxrender_material.nodetree and id_data.luxrender_material.nodetree not in bpy.data.node_groups:
+    if id_data.pbrtv3_material.nodetree and id_data.pbrtv3_material.nodetree not in bpy.data.node_groups:
         layout.label('Invalid nodetree name, select a nodetree.', icon='ERROR')
 
     layout.separator()
@@ -77,8 +77,8 @@ def panel_node_draw(layout, id_data, output_type, input_name):
     if not node:
         return False
     else:
-        if id_data.luxrender_material.nodetree:
-            ntree = bpy.data.node_groups[id_data.luxrender_material.nodetree]
+        if id_data.pbrtv3_material.nodetree:
+            ntree = bpy.data.node_groups[id_data.pbrtv3_material.nodetree]
             input = find_node_input(node, input_name)
             layout.template_node_view(ntree, node, input)
 
@@ -86,7 +86,7 @@ def panel_node_draw(layout, id_data, output_type, input_name):
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_header(luxrender_material_base):
+class ui_pbrtv3_material_header(pbrtv3_material_base):
     """
     Material Editor UI Panel
     """
@@ -100,7 +100,7 @@ class ui_luxrender_material_header(luxrender_material_base):
         return (context.material or context.object) and (engine in cls.COMPAT_ENGINES)
 
     display_property_groups = [
-        ( ('material',), 'luxrender_material' ),
+        ( ('material',), 'pbrtv3_material' ),
     ]
 
     def draw(self, context):
@@ -146,25 +146,25 @@ class ui_luxrender_material_header(luxrender_material_base):
             split.template_ID(space, "pin_id")
             split.separator()
 
-        node_tree_selector_draw(layout, mat, 'luxrender_material_output_node')
-        if not panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Surface'):
+        node_tree_selector_draw(layout, mat, 'pbrtv3_material_output_node')
+        if not panel_node_draw(layout, mat, 'pbrtv3_material_output_node', 'Surface'):
             row = self.layout.row(align=True)
             if slot is not None and slot.name:
                 row.label("Material type")
-                row.menu('MATERIAL_MT_luxrender_type', text=context.material.luxrender_material.type_label)
+                row.menu('MATERIAL_MT_pbrtv3_type', text=context.material.pbrtv3_material.type_label)
                 super().draw(context)
         else:
             # Draw volume dropdowns for material output node
-            output_node = find_node(mat, 'luxrender_material_output_node')
+            output_node = find_node(mat, 'pbrtv3_material_output_node')
             if output_node:
-                layout.prop_search(output_node, 'interior_volume', context.scene.luxrender_volumes, 'volumes',
+                layout.prop_search(output_node, 'interior_volume', context.scene.pbrtv3_volumes, 'volumes',
                                    'Interior', icon='MOD_FLUIDSIM')
-                layout.prop_search(output_node, 'exterior_volume', context.scene.luxrender_volumes, 'volumes',
+                layout.prop_search(output_node, 'exterior_volume', context.scene.pbrtv3_volumes, 'volumes',
                                    'Exterior', icon='MOD_FLUIDSIM')
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_transparency(luxrender_material_base):
+class ui_pbrtv3_material_transparency(pbrtv3_material_base):
     """
     Material Transparency Settings
     """
@@ -173,27 +173,27 @@ class ui_luxrender_material_transparency(luxrender_material_base):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('material',), 'luxrender_transparency' )
+        ( ('material',), 'pbrtv3_transparency' )
     ]
 
     def draw_header(self, context):
-        self.layout.prop(context.material.luxrender_transparency, "transparent", text="")
+        self.layout.prop(context.material.pbrtv3_transparency, "transparent", text="")
 
     @classmethod
     def poll(cls, context):
-        if not hasattr(context.material, 'luxrender_transparency'):
+        if not hasattr(context.material, 'pbrtv3_transparency'):
             return False
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
             return super().poll(
-                context) and context.material.luxrender_material.type != 'null' and not context.material.luxrender_material.nodetree
+                context) and context.material.pbrtv3_material.type != 'null' and not context.material.pbrtv3_material.nodetree
         except:
             return super().poll(context)
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_emission(luxrender_material_base):
+class ui_pbrtv3_material_emission(pbrtv3_material_base):
     """
     Material Emission Settings
     """
@@ -202,24 +202,24 @@ class ui_luxrender_material_emission(luxrender_material_base):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('material',), 'luxrender_emission' )
+        ( ('material',), 'pbrtv3_emission' )
     ]
 
     def draw_header(self, context):
-        self.layout.prop(context.material.luxrender_emission, "use_emission", text="")
+        self.layout.prop(context.material.pbrtv3_emission, "use_emission", text="")
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
-            return not context.material.luxrender_material.nodetree
+            return not context.material.pbrtv3_material.nodetree
         except:
             return False
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_coating(luxrender_material_base):
+class ui_pbrtv3_material_coating(pbrtv3_material_base):
     """
     Material Glossy Coating Settings
     """
@@ -228,18 +228,18 @@ class ui_luxrender_material_coating(luxrender_material_base):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('material',), 'luxrender_coating')
+        ( ('material',), 'pbrtv3_coating')
     ]
 
     def draw_header(self, context):
-        self.layout.prop(context.material.luxrender_coating, "use_coating", text="")
+        self.layout.prop(context.material.pbrtv3_coating, "use_coating", text="")
 
     def draw_coating_ior_menu(self, context):
         """
         This is a draw callback from property_group_renderer, due
-        to ef_callback item in luxrender_coating.properties
+        to ef_callback item in pbrtv3_coating.properties
         """
-        lmc = context.material.luxrender_coating
+        lmc = context.material.pbrtv3_coating
 
         if lmc.index_floatvalue == lmc.index_presetvalue:
             menu_text = lmc.index_presetstring
@@ -248,64 +248,64 @@ class ui_luxrender_material_coating(luxrender_material_base):
 
         cl = self.layout.column(align=True)
 
-        cl.menu('LUXRENDER_MT_coating_ior_presets', text=menu_text)
+        cl.menu('PBRTv3_MT_coating_ior_presets', text=menu_text)
 
     @classmethod
     def poll(cls, context):
-        if not hasattr(context.material, 'luxrender_coating'):
+        if not hasattr(context.material, 'pbrtv3_coating'):
             return False
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
-            return super().poll(context) and not context.material.luxrender_material.nodetree
+            return super().poll(context) and not context.material.pbrtv3_material.nodetree
         except:
             return super().poll(context)
 
 '''
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_node_volume(luxrender_material_base):
+class ui_pbrtv3_material_node_volume(pbrtv3_material_base):
     bl_label = 'Volumes'
 
     def draw(self, context):
         layout = self.layout
         mat = context.material
-        panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Interior Volume')
-        panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Exterior Volume')
+        panel_node_draw(layout, mat, 'pbrtv3_material_output_node', 'Interior Volume')
+        panel_node_draw(layout, mat, 'pbrtv3_material_output_node', 'Exterior Volume')
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
-            return context.material.luxrender_material.nodetree
+            return context.material.pbrtv3_material.nodetree
         except:
             return False
 '''
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_node_emit(luxrender_material_base):
+class ui_pbrtv3_material_node_emit(pbrtv3_material_base):
     bl_label = 'Light Emission'
 
     def draw(self, context):
         layout = self.layout
         mat = context.material
 
-        if mat.luxrender_material.nodetree in bpy.data.node_groups:
-            panel_node_draw(layout, mat, 'luxrender_material_output_node', 'Emission')
+        if mat.pbrtv3_material.nodetree in bpy.data.node_groups:
+            panel_node_draw(layout, mat, 'pbrtv3_material_output_node', 'Emission')
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
-            return context.material.luxrender_material.nodetree
+            return context.material.pbrtv3_material.nodetree
         except:
             return False
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxcore_material(luxrender_material_base):
+class ui_luxcore_material(pbrtv3_material_base):
     """
     LuxCore only settings
     """
@@ -319,16 +319,16 @@ class ui_luxcore_material(luxrender_material_base):
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER' or not UseLuxCore():
+        if context.scene.render.engine != 'PBRTv3_RENDER' or not UseLuxCore():
             return False
         try:
-            return not context.material.luxrender_material.nodetree
+            return not context.material.pbrtv3_material.nodetree
         except:
             return False
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_material_utils(luxrender_material_base):
+class ui_pbrtv3_material_utils(pbrtv3_material_base):
     bl_label = 'PBRTv3 Materials Utils'
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -354,16 +354,16 @@ class ui_luxrender_material_utils(luxrender_material_base):
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'LUXRENDER_RENDER':
+        if context.scene.render.engine != 'PBRTv3_RENDER':
             return False
         try:
-            return not context.material.luxrender_material.nodetree
+            return not context.material.pbrtv3_material.nodetree
         except:
             return False
 
 
 # @PBRTv3Addon.addon_register_class
-# class ui_luxrender_material_db(luxrender_material_base):
+# class ui_pbrtv3_material_db(pbrtv3_material_base):
 #     bl_label = 'LuxRender Materials Database'
 #     bl_options = {'DEFAULT_CLOSED'}
 #
@@ -381,9 +381,9 @@ class ui_luxrender_material_utils(luxrender_material_base):
 #
 #     @classmethod
 #     def poll(cls, context):
-#         if context.scene.render.engine != 'LUXRENDER_RENDER':
+#         if context.scene.render.engine != 'PBRTv3_RENDER':
 #             return False
 #         try:
-#             return not context.material.luxrender_material.nodetree
+#             return not context.material.pbrtv3_material.nodetree
 #         except:
 #             return False

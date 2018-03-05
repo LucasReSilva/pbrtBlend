@@ -105,7 +105,7 @@ class LightExporter(object):
         luxcore_name = self.luxcore_name
         light = obj.data
         energy = light.energy
-        lux_lamp = getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower())
+        lux_lamp = getattr(light.pbrtv3_lamp, 'pbrtv3_lamp_%s' % light.type.lower())
 
         if not is_obj_visible(self.blender_scene, obj, self.is_dupli, self.luxcore_exporter.is_viewport_render):
             return
@@ -114,37 +114,37 @@ class LightExporter(object):
             matrix = obj.matrix_world
 
         # Get lightgroup ID
-        lightgroup = light.luxrender_lamp.lightgroup
+        lightgroup = light.pbrtv3_lamp.lightgroup
         lightgroup_id =  self.luxcore_exporter.lightgroup_cache.get_id(lightgroup, self.blender_scene, self)
 
         # Don't set lightgroup for sun because it might be split into sun + sky (and not for AREA because it needs a helper mat)
         if lightgroup_id != -1 and light.type != 'SUN' and not (
-                        light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser) and not (
-                        self.blender_scene.luxrender_lightgroups.ignore) and (
+                        light.type == 'AREA' and not light.pbrtv3_lamp.pbrtv3_lamp_laser.is_laser) and not (
+                        self.blender_scene.pbrtv3_lightgroups.ignore) and (
                         is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id)):
             self.properties.Set(pyluxcore.Property('scene.lights.' + self.luxcore_name + '.id', [lightgroup_id]))
 
         # Visibility settings for indirect rays (not for sun because it might be split into sun + sky,
         # and not for area light because it needs a different prefix (scene.materials.)
-        if light.type != 'SUN' and not (light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
+        if light.type != 'SUN' and not (light.type == 'AREA' and not light.pbrtv3_lamp.pbrtv3_lamp_laser.is_laser):
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
-                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                                                 light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.glossy.enable',
-                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                                                 light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
-                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                                                 light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
-        gain_r = light.luxrender_lamp.luxcore_lamp.gain_r
-        gain_g = light.luxrender_lamp.luxcore_lamp.gain_g
-        gain_b = light.luxrender_lamp.luxcore_lamp.gain_b
+        gain_r = light.pbrtv3_lamp.luxcore_lamp.gain_r
+        gain_g = light.pbrtv3_lamp.luxcore_lamp.gain_g
+        gain_b = light.pbrtv3_lamp.luxcore_lamp.gain_b
         gain_spectrum = self.__multiply_gain(energy, gain_r, gain_g, gain_b)  # luxcore gain is rgb
 
         # not for distant light,
         # not for area lamps (because these are meshlights and gain is controlled by material settings)
         if lux_lamp.L_color and not (
                         light.type == 'SUN' and lux_lamp.sunsky_type != 'distant') and not (
-                        light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
-            iesfile = light.luxrender_lamp.iesname
+                        light.type == 'AREA' and not light.pbrtv3_lamp.pbrtv3_lamp_laser.is_laser):
+            iesfile = light.pbrtv3_lamp.iesname
             iesfile, basename = get_expanded_file_name(light, iesfile)
             if os.path.exists(iesfile):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.iesfile', iesfile))
@@ -160,8 +160,8 @@ class LightExporter(object):
 
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.gain', gain_spectrum))
 
-        samples = light.luxrender_lamp.luxcore_lamp.samples
-        if light.type != 'SUN' and not (light.type == 'AREA' and not light.luxrender_lamp.luxrender_lamp_laser.is_laser):
+        samples = light.pbrtv3_lamp.luxcore_lamp.samples
+        if light.type != 'SUN' and not (light.type == 'AREA' and not light.pbrtv3_lamp.pbrtv3_lamp_laser.is_laser):
             self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
 
         ####################################################################
@@ -171,14 +171,14 @@ class LightExporter(object):
             invmatrix = matrix.inverted()
             sundir = [invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]]
 
-            sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
-            legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
+            sunsky_type = light.pbrtv3_lamp.pbrtv3_lamp_sun.sunsky_type
+            legacy_sky = light.pbrtv3_lamp.pbrtv3_lamp_sun.legacy_sky
 
             if 'sun' in sunsky_type:
                 name = luxcore_name + '_sun'
                 self.exported_lights.add(ExportedLight(name, 'SUN'))
 
-                if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
+                if not self.blender_scene.pbrtv3_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = lux_lamp.turbidity
@@ -194,17 +194,17 @@ class LightExporter(object):
 
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.glossy.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
             if 'sky' in sunsky_type:
                 name = luxcore_name + '_sky'
                 self.exported_lights.add(ExportedLight(name, 'SKY'))
 
-                if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
+                if not self.blender_scene.pbrtv3_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.id', [lightgroup_id]))
 
                 turbidity = lux_lamp.turbidity
@@ -223,16 +223,16 @@ class LightExporter(object):
 
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.diffuse.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.glossy.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + name + '.visibility.indirect.specular.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
             if sunsky_type == 'distant':
                 self.exported_lights.add(ExportedLight(luxcore_name, 'DISTANT'))
 
-                if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
+                if not self.blender_scene.pbrtv3_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.id', [lightgroup_id]))
 
                 distant_dir = [-sundir[0], -sundir[1], -sundir[2]]
@@ -245,12 +245,12 @@ class LightExporter(object):
 
                 # Settings for indirect light visibility
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.diffuse.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.glossy.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(
                     pyluxcore.Property('scene.lights.' + luxcore_name + '.visibility.indirect.specular.enable',
-                                       light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                                       light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_specular_enable))
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
 
         ####################################################################
@@ -349,7 +349,7 @@ class LightExporter(object):
         # Area (includes laser)
         ####################################################################
         elif light.type == 'AREA':
-            if light.luxrender_lamp.luxrender_lamp_laser.is_laser:
+            if light.pbrtv3_lamp.pbrtv3_lamp_laser.is_laser:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'LASER'))
                 # Laser lamp
                 transform = matrix_to_list(matrix, apply_worldscale=True)
@@ -361,7 +361,7 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.lights.' + luxcore_name + '.samples', [samples]))
             else:
                 self.exported_lights.add(ExportedLight(luxcore_name, 'AREA'))
-                area = light.luxrender_lamp.luxrender_lamp_area
+                area = light.pbrtv3_lamp.pbrtv3_lamp_area
     
                 # Area lamp workaround: create plane and add emitting material
                 mat_name = luxcore_name + '_helper_mat'
@@ -369,11 +369,11 @@ class LightExporter(object):
 
                 # Visibility for indirect rays
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.diffuse.enable',
-                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
+                                                 light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_diffuse_enable))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.glossy.enable',
-                                                     light.luxrender_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
+                                                     light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_glossy_enable))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.visibility.indirect.specular.enable',
-                                                 light.luxrender_lamp.luxcore_lamp.visibility_indirect_specular_enable))
+                                                 light.pbrtv3_lamp.luxcore_lamp.visibility_indirect_specular_enable))
 
                 emission_color = list(area.L_color)
                 # overwrite gain with a gain scaled by ws^2 to account for change in lamp area
@@ -390,12 +390,12 @@ class LightExporter(object):
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.samples', samples))
                 self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.theta', math.degrees(area.theta)))
 
-                if not self.blender_scene.luxrender_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
+                if not self.blender_scene.pbrtv3_lightgroups.ignore and is_lightgroup_opencl_compatible(self.luxcore_exporter, lightgroup_id):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.id', [lightgroup_id]))
 
                 # Ies
-                iesfile = light.luxrender_lamp.iesname
-                iesfile, basename = get_expanded_file_name(light.luxrender_lamp, iesfile)
+                iesfile = light.pbrtv3_lamp.iesname
+                iesfile, basename = get_expanded_file_name(light.pbrtv3_lamp, iesfile)
                 if os.path.exists(iesfile):
                     self.properties.Set(pyluxcore.Property('scene.materials.' + mat_name + '.emission.iesfile', iesfile))
 

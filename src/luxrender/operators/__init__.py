@@ -33,7 +33,7 @@ from .. import PBRTv3Addon
 
 # Per-IDPropertyGroup preset handling
 
-class LUXRENDER_MT_base(bpy.types.Menu):
+class PBRTv3_MT_base(bpy.types.Menu):
     preset_operator = "script.execute_preset"
 
     def draw(self, context):
@@ -41,62 +41,62 @@ class LUXRENDER_MT_base(bpy.types.Menu):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_presets_engine(LUXRENDER_MT_base):
+class PBRTv3_MT_presets_engine(PBRTv3_MT_base):
     bl_label = "LuxRender Engine Presets"
     preset_subdir = "luxrender/engine"
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
+class PBRTv3_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_engine_add'
     bl_label = 'Add LuxRender Engine settings preset'
-    preset_menu = 'LUXRENDER_MT_presets_engine'
+    preset_menu = 'PBRTv3_MT_presets_engine'
     preset_values = []
     preset_subdir = 'luxrender/engine'
 
     def execute(self, context):
         self.preset_values = [
-                                 'bpy.context.scene.luxrender_engine.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_engine.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_engine.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_engine.get_exportable_properties()
                              ] + [
-                                 'bpy.context.scene.luxrender_sampler.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_sampler.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_sampler.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_sampler.get_exportable_properties()
                              ] + [
-                                 'bpy.context.scene.luxrender_integrator.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_integrator.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_integrator.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_integrator.get_exportable_properties()
                              ] + [
-                                 'bpy.context.scene.luxrender_volumeintegrator.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_volumeintegrator.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_volumeintegrator.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_volumeintegrator.get_exportable_properties()
                              ] + [
-                                 'bpy.context.scene.luxrender_filter.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_filter.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_filter.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_filter.get_exportable_properties()
                              ] + [
-                                 'bpy.context.scene.luxrender_accelerator.%s' % v['attr'] for v in
-                                 bpy.types.luxrender_accelerator.get_exportable_properties()
+                                 'bpy.context.scene.pbrtv3_accelerator.%s' % v['attr'] for v in
+                                 bpy.types.pbrtv3_accelerator.get_exportable_properties()
                              ]
         return super().execute(context)
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_presets_networking(LUXRENDER_MT_base):
+class PBRTv3_MT_presets_networking(PBRTv3_MT_base):
     bl_label = "LuxRender Networking Presets"
     preset_subdir = "luxrender/networking"
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
+class PBRTv3_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     '''Save the current settings as a preset'''
     bl_idname = 'luxrender.preset_networking_add'
     bl_label = 'Add LuxRender Networking settings preset'
-    preset_menu = 'LUXRENDER_MT_presets_networking'
+    preset_menu = 'PBRTv3_MT_presets_networking'
     preset_values = []
     preset_subdir = 'luxrender/networking'
 
     def execute(self, context):
         self.preset_values = [
-            'bpy.context.scene.luxrender_networking.%s' % v['attr'] for v in
-            bpy.types.luxrender_networking.get_exportable_properties()
+            'bpy.context.scene.pbrtv3_networking.%s' % v['attr'] for v in
+            bpy.types.pbrtv3_networking.get_exportable_properties()
         ]
         return super().execute(context)
 
@@ -104,24 +104,24 @@ class LUXRENDER_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy
 # Volume data handling
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_presets_volume(LUXRENDER_MT_base):
+class PBRTv3_MT_presets_volume(PBRTv3_MT_base):
     bl_label = "LuxRender Volume Presets"
     preset_subdir = "luxrender/volume"
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
+class PBRTv3_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_volume_add'
     bl_label = 'Add LuxRender Volume settings preset'
-    preset_menu = 'LUXRENDER_MT_presets_volume'
+    preset_menu = 'PBRTv3_MT_presets_volume'
     preset_values = []
     preset_subdir = 'luxrender/volume'
 
     def execute(self, context):
-        ks = 'bpy.context.scene.luxrender_volumes.volumes[bpy.context.scene.luxrender_volumes.volumes_index].%s'
+        ks = 'bpy.context.scene.pbrtv3_volumes.volumes[bpy.context.scene.pbrtv3_volumes.volumes_index].%s'
         pv = [
-            ks % v['attr'] for v in bpy.types.luxrender_volume_data.get_exportable_properties()
+            ks % v['attr'] for v in bpy.types.pbrtv3_volume_data.get_exportable_properties()
         ]
 
         self.preset_values = pv
@@ -129,7 +129,7 @@ class LUXRENDER_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.typ
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_volume_add(bpy.types.Operator):
+class PBRTv3_OT_volume_add(bpy.types.Operator):
     """Add a new material volume definition to the scene"""
 
     bl_idname = "luxrender.volume_add"
@@ -138,7 +138,7 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
     new_volume_name = bpy.props.StringProperty(default='New Volume 1')
 
     def create_unique_name(self, context):
-        volumes = context.scene.luxrender_volumes.volumes
+        volumes = context.scene.pbrtv3_volumes.volumes
         volume_names = [v.name for v in volumes]
         name = self.new_volume_name
 
@@ -158,7 +158,7 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
 
     def invoke(self, context, event):
         self.new_volume_name = 'New Volume 1'
-        volumes = context.scene.luxrender_volumes.volumes
+        volumes = context.scene.pbrtv3_volumes.volumes
 
         # Create unique volume name
         self.create_unique_name(context)
@@ -168,20 +168,20 @@ class LUXRENDER_OT_volume_add(bpy.types.Operator):
         new_vol.name = self.properties.new_volume_name
 
         # Switch to the added volume
-        context.scene.luxrender_volumes.volumes_index = len(volumes) - 1
+        context.scene.pbrtv3_volumes.volumes_index = len(volumes) - 1
 
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_volume_remove(bpy.types.Operator):
+class PBRTv3_OT_volume_remove(bpy.types.Operator):
     """Remove the selected material volume definition"""
 
     bl_idname = "luxrender.volume_remove"
     bl_label = "Remove LuxRender Volume"
 
     def invoke(self, context, event):
-        w = context.scene.luxrender_volumes
+        w = context.scene.pbrtv3_volumes
         old_index = w.volumes_index
         w.volumes.remove(w.volumes_index)
         # Switch to the volume above the deleted volume
@@ -190,7 +190,7 @@ class LUXRENDER_OT_volume_remove(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
+class PBRTv3_OT_lightgroup_add(bpy.types.Operator):
     """Add a new light group definition to the scene"""
 
     bl_idname = "luxrender.lightgroup_add"
@@ -200,16 +200,16 @@ class LUXRENDER_OT_lightgroup_add(bpy.types.Operator):
     new_lightgroup_name = bpy.props.StringProperty(default='New Light Group ')
 
     def invoke(self, context, event):
-        lg = context.scene.luxrender_lightgroups.lightgroups
+        lg = context.scene.pbrtv3_lightgroups.lightgroups
         lg.add()
         new_lg = lg[len(lg) - 1]
-        new_lg.name = self.properties.new_lightgroup_name + str(LUXRENDER_OT_lightgroup_add.lg_count)
-        LUXRENDER_OT_lightgroup_add.lg_count += 1
+        new_lg.name = self.properties.new_lightgroup_name + str(PBRTv3_OT_lightgroup_add.lg_count)
+        PBRTv3_OT_lightgroup_add.lg_count += 1
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
+class PBRTv3_OT_lightgroup_remove(bpy.types.Operator):
     """Remove the selected lightgroup definition"""
 
     bl_idname = "luxrender.lightgroup_remove"
@@ -218,7 +218,7 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
     lg_index = bpy.props.IntProperty(default=-1)
 
     def invoke(self, context, event):
-        w = context.scene.luxrender_lightgroups
+        w = context.scene.pbrtv3_lightgroups
         if self.properties.lg_index == -1:
             w.lightgroups.remove(w.lightgroups_index)
         else:
@@ -228,7 +228,7 @@ class LUXRENDER_OT_lightgroup_remove(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_materialgroup_add(bpy.types.Operator):
+class PBRTv3_OT_materialgroup_add(bpy.types.Operator):
     """Add a new material group definition to the scene"""
 
     bl_idname = "luxrender.materialgroup_add"
@@ -238,16 +238,16 @@ class LUXRENDER_OT_materialgroup_add(bpy.types.Operator):
     new_materialgroup_name = bpy.props.StringProperty(default='New Material Group ')
 
     def invoke(self, context, event):
-        mg = context.scene.luxrender_materialgroups.materialgroups
+        mg = context.scene.pbrtv3_materialgroups.materialgroups
         mg.add()
         new_mg = mg[len(mg) - 1]
-        new_mg.name = self.properties.new_materialgroup_name + str(LUXRENDER_OT_materialgroup_add.mg_count)
-        LUXRENDER_OT_materialgroup_add.mg_count += 1
+        new_mg.name = self.properties.new_materialgroup_name + str(PBRTv3_OT_materialgroup_add.mg_count)
+        PBRTv3_OT_materialgroup_add.mg_count += 1
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_materialgroup_remove(bpy.types.Operator):
+class PBRTv3_OT_materialgroup_remove(bpy.types.Operator):
     """Remove the selected materialgroup definition"""
 
     bl_idname = "luxrender.materialgroup_remove"
@@ -256,7 +256,7 @@ class LUXRENDER_OT_materialgroup_remove(bpy.types.Operator):
     mg_index = bpy.props.IntProperty(default=-1)
 
     def invoke(self, context, event):
-        w = context.scene.luxrender_materialgroups
+        w = context.scene.pbrtv3_materialgroups
         if self.properties.mg_index == -1:
             w.materialgroups.remove(w.materialgroups_index)
         else:
@@ -266,7 +266,7 @@ class LUXRENDER_OT_materialgroup_remove(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
+class PBRTv3_OT_opencl_device_list_update(bpy.types.Operator):
     """Update the OpenCL device list"""
 
     bl_idname = "luxrender.opencl_device_list_update"
@@ -292,7 +292,7 @@ class LUXRENDER_OT_opencl_device_list_update(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
+class PBRTv3_OT_update_luxblend(bpy.types.Operator):
     """Update LuxBlend to the latest version"""
     bl_idname = "luxrender.update_luxblend"
     bl_label = "Update LuxBlend"
@@ -395,7 +395,7 @@ class LUXRENDER_OT_update_luxblend(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
+class PBRTv3_OT_open_daily_builds_webpage(bpy.types.Operator):
     """Open the "daily builds" webpage"""
     bl_idname = 'luxrender.open_daily_builds_webpage'
     bl_label = 'Update LuxRender'
@@ -407,7 +407,7 @@ class LUXRENDER_OT_open_daily_builds_webpage(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_fix_color_management(bpy.types.Operator):
+class PBRTv3_OT_fix_color_management(bpy.types.Operator):
     """Reset "view", "exposure", "gamma", "look" and "use curves" values. Rendered images might look wrong when these settings are not not the defaults."""
 
     bl_idname = "luxrender.fix_color_management"

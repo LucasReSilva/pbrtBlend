@@ -25,15 +25,15 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.materials import luxrender_material_sub
+from ...ui.materials import pbrtv3_material_sub
 
 
 @PBRTv3Addon.addon_register_class
-class ui_material_mattetranslucent(luxrender_material_sub):
+class ui_material_mattetranslucent(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Matte Translucent Material'
 
     LUX_COMPAT = {'mattetranslucent'}
 
     display_property_groups = [
-        ( ('material', 'luxrender_material'), 'luxrender_mat_mattetranslucent' )
+        ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_mattetranslucent' )
     ]

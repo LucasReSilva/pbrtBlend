@@ -85,8 +85,8 @@ crf_preset_names = [s.strip() for s in
                     Portra_800CD""".splitlines()]
 
 @PBRTv3Addon.addon_register_class
-class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
-    bl_idname = 'imagepipeline.set_luxrender_crf'
+class IMAGEPIPELINE_OT_set_pbrtv3_crf(bpy.types.Operator):
+    bl_idname = 'imagepipeline.set_pbrtv3_crf'
     bl_label = 'Set LuxRender Film Response Function'
 
     preset_name = bpy.props.StringProperty()
@@ -94,18 +94,18 @@ class IMAGEPIPELINE_OT_set_luxrender_crf(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         camera_data = context.camera if hasattr(context, 'camera') else context.scene.camera.data
-        return camera_data.luxrender_camera and camera_data.luxrender_camera.luxcore_imagepipeline
+        return camera_data.pbrtv3_camera and camera_data.pbrtv3_camera.luxcore_imagepipeline
 
     def execute(self, context):
         camera_data = context.camera if hasattr(context, 'camera') else context.scene.camera.data
-        camera_data.luxrender_camera.luxcore_imagepipeline.crf_preset = self.properties.preset_name
+        camera_data.pbrtv3_camera.luxcore_imagepipeline.crf_preset = self.properties.preset_name
 
         camera_data.update_tag()
 
         return {'FINISHED'}
 
 @PBRTv3Addon.addon_register_class
-class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
+class IMAGEPIPELINE_MT_pbrtv3_crf(bpy.types.Menu):
     bl_label = 'CRF Preset'
     bl_description = 'Simulate analog film'
 
@@ -118,7 +118,7 @@ class IMAGEPIPELINE_MT_luxrender_crf(bpy.types.Menu):
             if i % 20 == 0:
                 cl = lt.column()
 
-            op = cl.operator('IMAGEPIPELINE_OT_set_luxrender_crf', text=crf_name)
+            op = cl.operator('IMAGEPIPELINE_OT_set_pbrtv3_crf', text=crf_name)
             op.preset_name = crf_name
 
 @PBRTv3Addon.addon_register_class
@@ -127,7 +127,7 @@ class luxcore_imagepipeline(declarative_property_group):
     Storage class for LuxCore imagepipeline settings.
     """
     
-    ef_attach_to = ['luxrender_camera']
+    ef_attach_to = ['pbrtv3_camera']
     
     alert = {}
 
@@ -203,13 +203,13 @@ class luxcore_imagepipeline(declarative_property_group):
 
     def update_background_image(self, context):
         # Enable alpha AOV so the background image plugin works
-        if not context.scene.luxrender_channels.ALPHA and self.use_background_image:
-            context.scene.luxrender_channels.ALPHA = True
+        if not context.scene.pbrtv3_channels.ALPHA and self.use_background_image:
+            context.scene.pbrtv3_channels.ALPHA = True
 
     def update_mist(self, context):
         # Enable depth AOV so the mist plugin works
-        if not context.scene.luxrender_channels.DEPTH and self.use_mist:
-            context.scene.luxrender_channels.DEPTH = True
+        if not context.scene.pbrtv3_channels.DEPTH and self.use_mist:
+            context.scene.pbrtv3_channels.DEPTH = True
 
     properties = [
         # Output switcher

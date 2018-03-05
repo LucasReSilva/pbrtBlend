@@ -32,7 +32,7 @@ from ..export import ParamSet
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_accelerator(declarative_property_group):
+class pbrtv3_accelerator(declarative_property_group):
     """
     Storage class for LuxRender Accelerator settings.
     """

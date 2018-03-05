@@ -31,7 +31,7 @@ from .. import PBRTv3Addon
 
 
 class hair_panel(bl_ui.properties_particle.ParticleButtonsPanel, property_group_renderer):
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     @classmethod
     def poll(cls, context):
@@ -39,12 +39,12 @@ class hair_panel(bl_ui.properties_particle.ParticleButtonsPanel, property_group_
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_ui_controls(hair_panel):
+class pbrtv3_ui_controls(hair_panel):
     """
     Hair settings
     """
     bl_label = "PBRTv3 Hair Rendering"
     display_property_groups = [
-        ( ('particle_system', 'settings',), 'luxrender_hair' )
+        ( ('particle_system', 'settings',), 'pbrtv3_hair' )
     ]
 

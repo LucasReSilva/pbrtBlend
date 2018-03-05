@@ -25,12 +25,12 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 from ...outputs.luxcore_api import UseLuxCore
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_main(luxrender_texture_base):
+class ui_texture_main(pbrtv3_texture_base):
     '''
     Texture Editor UI Panel
     '''
@@ -39,7 +39,7 @@ class ui_texture_main(luxrender_texture_base):
     bl_options = {'HIDE_HEADER'}
 
     display_property_groups = [
-        ( ('texture',), 'luxrender_texture' )
+        ( ('texture',), 'pbrtv3_texture' )
     ]
 
     @classmethod
@@ -51,7 +51,7 @@ class ui_texture_main(luxrender_texture_base):
         tex = context.texture
         return tex and \
                (context.scene.render.engine in cls.COMPAT_ENGINES) \
-               and context.texture.luxrender_texture.type is not 'BLENDER'
+               and context.texture.pbrtv3_texture.type is not 'BLENDER'
 
     # drawing directly attached to blender panel
 

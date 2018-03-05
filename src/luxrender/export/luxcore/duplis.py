@@ -222,7 +222,7 @@ class DupliExporter(object):
 
         # Export code copied from export/geometry (line 947)
 
-        settings = psys.settings.luxrender_hair
+        settings = psys.settings.pbrtv3_hair
 
         hair_size = settings.hair_size
         root_width = settings.root_width

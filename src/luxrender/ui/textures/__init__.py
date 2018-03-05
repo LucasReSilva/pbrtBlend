@@ -31,7 +31,7 @@ from ...extensions_framework.ui import property_group_renderer
 from ... import PBRTv3Addon
 
 
-class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property_group_renderer):
+class pbrtv3_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property_group_renderer):
     """
     This is the base class for all LuxRender texture sub-panels.
     All subpanels should have their own property_groups, and define
@@ -42,26 +42,26 @@ class luxrender_texture_base(bl_ui.properties_texture.TextureButtonsPanel, prope
     """
 
     # bl_options		= {'HIDE_HEADER'}
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
     LUX_COMPAT = set()
     BL_COMPAT = set()
 
     @classmethod
     def poll(cls, context):
         """
-        Only show LuxRender panel if luxrender_texture.type in LUX_COMPAT
+        Only show LuxRender panel if pbrtv3_texture.type in LUX_COMPAT
         """
 
         tex = context.texture
         if not tex:
             return False
 
-        if context.texture.luxrender_texture.type == 'BLENDER':
+        if context.texture.pbrtv3_texture.type == 'BLENDER':
             return tex and \
                    (context.scene.render.engine in cls.COMPAT_ENGINES) and \
                    context.texture.type in cls.BL_COMPAT
         else:
             return tex and \
                    (context.scene.render.engine in cls.COMPAT_ENGINES) and \
-                   context.texture.luxrender_texture.type in cls.LUX_COMPAT
+                   context.texture.pbrtv3_texture.type in cls.LUX_COMPAT
 

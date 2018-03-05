@@ -172,9 +172,9 @@ def get_instance_materials(ob):
 
 
 def get_material_volume_defs(m):
-    if m.luxrender_material.nodetree:
-        outputNode = find_node(m, 'luxrender_material_output_node')
-        tree_name = m.luxrender_material.nodetree
+    if m.pbrtv3_material.nodetree:
+        outputNode = find_node(m, 'pbrtv3_material_output_node')
+        tree_name = m.pbrtv3_material.nodetree
 
         if outputNode is None:
             print('Node tree is assigned, but does not contain an output node')
@@ -185,15 +185,15 @@ def get_material_volume_defs(m):
 
         return int_vol_name, ext_vol_name
     else:
-        return m.luxrender_material.Interior_volume, m.luxrender_material.Exterior_volume
+        return m.pbrtv3_material.Interior_volume, m.pbrtv3_material.Exterior_volume
 
 
 def get_preview_flip(m):
-    return m.luxrender_material.mat_preview_flip_xz
+    return m.pbrtv3_material.mat_preview_flip_xz
 
 
 def get_preview_zoom(m):
-    return m.luxrender_material.preview_zoom
+    return m.pbrtv3_material.preview_zoom
 
 
 def convert_texture(scene, texture, variant_hint=None):
@@ -408,7 +408,7 @@ def convert_texture(scene, texture, variant_hint=None):
             scene.render.image_settings.file_format = orig_render_format
 
         lux_tex_name = 'imagemap'
-        sampling = texture.luxrender_texture.luxrender_tex_imagesampling
+        sampling = texture.pbrtv3_texture.pbrtv3_tex_imagesampling
 
         if variant_hint:
             variant = variant_hint
@@ -458,9 +458,9 @@ def convert_texture(scene, texture, variant_hint=None):
             lux_tex_name = 'constant'
 
     if mapping_type == '3D':
-        paramset.update(texture.luxrender_texture.luxrender_tex_transform.get_paramset(scene))
+        paramset.update(texture.pbrtv3_texture.pbrtv3_tex_transform.get_paramset(scene))
     else:
-        paramset.update(texture.luxrender_texture.luxrender_tex_mapping.get_paramset(scene))
+        paramset.update(texture.pbrtv3_texture.pbrtv3_tex_mapping.get_paramset(scene))
 
     return variant, lux_tex_name, paramset
 
@@ -500,7 +500,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
     lux_context				pylux.Context - like object
     lux_prop_name			LuxRender material/texture parameter name
     variant					Required variant: 'float' or 'color' or 'fresnel'
-    property_group			luxrender_material or luxrender_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
+    property_group			pbrtv3_material or pbrtv3_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
 
     Either insert a float parameter or a float texture reference, depending on setup
 
@@ -521,12 +521,12 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                     texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
 
                     if texture != False:
-                        if texture.luxrender_texture.type != 'BLENDER':
-                            tex_luxrender_texture = texture.luxrender_texture
-                            lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene,
+                        if texture.pbrtv3_texture.type != 'BLENDER':
+                            tex_pbrtv3_texture = texture.pbrtv3_texture
+                            lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(LuxManager.CurrentScene,
                                                                                            texture)
                             if lux_tex_variant == variant:
-                                ExportedTextures.texture(lux_context, texture_name, variant, tex_luxrender_texture.type,
+                                ExportedTextures.texture(lux_context, texture_name, variant, tex_pbrtv3_texture.type,
                                                          paramset)
                             else:
                                 LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (

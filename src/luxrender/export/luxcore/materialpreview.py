@@ -53,7 +53,7 @@ class MaterialPreviewExporter(object):
 
     def convert(self, film_width, film_height):
         # Make the strands in strand preview mode thicker so they are visible
-        strands_settings = self.blender_scene.objects['previewhair'].particle_systems[0].settings.luxrender_hair
+        strands_settings = self.blender_scene.objects['previewhair'].particle_systems[0].settings.pbrtv3_hair
         strands_settings.hair_size = 0.05
         strands_settings.tesseltype = 'solid'
 
@@ -90,7 +90,7 @@ class MaterialPreviewExporter(object):
 
             # Camera zoom
             field_of_view = scn_props.Get('scene.camera.fieldofview').GetFloat()
-            zoom = self.preview_material.luxrender_material.preview_zoom
+            zoom = self.preview_material.pbrtv3_material.preview_zoom
             scn_props.Set(pyluxcore.Property('scene.camera.fieldofview', field_of_view / zoom))
 
             if self.is_world_sphere_type and not self.is_thumbnail:

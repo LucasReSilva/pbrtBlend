@@ -78,9 +78,9 @@ def VolumeParameter(attr, name):
         {
             'type': 'prop_search',
             'attr': attr,
-            'src': lambda s, c: s.scene.luxrender_volumes,
+            'src': lambda s, c: s.scene.pbrtv3_volumes,
             'src_attr': 'volumes',
-            'trg': lambda s, c: c.luxrender_material,
+            'trg': lambda s, c: c.pbrtv3_material,
             'trg_attr': '%s_volume' % attr,
             'name': name,
             'icon': 'MOD_FLUIDSIM'
@@ -91,7 +91,7 @@ def VolumeParameter(attr, name):
 class SubGroupFloatTextureParameter(FloatTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other FloatTextureParameters
-        return lambda s, c: c.luxrender_material
+        return lambda s, c: c.pbrtv3_material
 
 
 def texture_append_visibility(vis_main, textureparam_object, vis_append):
@@ -211,49 +211,49 @@ mat_names = {
 
 
 @PBRTv3Addon.addon_register_class
-class MATERIAL_OT_set_luxrender_type(bpy.types.Operator):
-    bl_idname = 'material.set_luxrender_type'
+class MATERIAL_OT_set_pbrtv3_type(bpy.types.Operator):
+    bl_idname = 'material.set_pbrtv3_type'
     bl_label = 'Set PBRTv3 material type'
 
     mat_name = bpy.props.StringProperty()
 
     @classmethod
     def poll(cls, context):
-        return hasattr(context, 'material') and context.material and context.material.luxrender_material
+        return hasattr(context, 'material') and context.material and context.material.pbrtv3_material
 
     def execute(self, context):
-        context.material.luxrender_material.set_type(self.properties.mat_name)
+        context.material.pbrtv3_material.set_type(self.properties.mat_name)
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class MATERIAL_MT_luxrender_type(bpy.types.Menu):
+class MATERIAL_MT_pbrtv3_type(bpy.types.Menu):
     bl_label = 'Material Type'
 
     def draw(self, context):
         sl = self.layout
 
         for m_name in sorted(mat_names.keys()):
-            op = sl.operator('MATERIAL_OT_set_luxrender_type', text=mat_names[m_name])
+            op = sl.operator('MATERIAL_OT_set_pbrtv3_type', text=mat_names[m_name])
             op.mat_name = m_name
 
 
-def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF_bumpmap, TF_normalmap):
+def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF_bumpmap, TF_normalmap):
     bump_params = ParamSet()
     if self.normalmap_usefloattexture:  # We have a normal map
         # Get the normal map
-        texture_name = getattr(material.luxrender_material, 'normalmap_floattexturename')
+        texture_name = getattr(material.pbrtv3_material, 'normalmap_floattexturename')
 
         if texture_name and self.normalmap_usefloattexture:
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-            lux_texture = texture.luxrender_texture
+            lux_texture = texture.pbrtv3_texture
             params = ParamSet()
 
             if lux_texture.type in ('normalmap', 'imagemap'):
                 if lux_texture.type == 'normalmap':
-                    src_texture = lux_texture.luxrender_tex_normalmap
+                    src_texture = lux_texture.pbrtv3_tex_normalmap
                 else:
-                    src_texture = lux_texture.luxrender_tex_imagemap
+                    src_texture = lux_texture.pbrtv3_tex_imagemap
 
                 process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
                 params.add_integer('discardmipmaps', src_texture.discardmipmaps)
@@ -261,7 +261,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
                 params.add_float('maxanisotropy', src_texture.maxanisotropy)
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
                 params.add_string('wrap', src_texture.wrap)
-                params.update(lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
             elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                 src_texture = texture.image
 
@@ -269,7 +269,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
                 process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
                 params.add_string('filtertype', 'bilinear')
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
-                params.update(lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
             else:
                 LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to \
                  the bump channel.' % texture_name)
@@ -311,10 +311,10 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
         normalmap_floattexturename = self.normalmap_floattexturename if self.normalmap_usefloattexture else ''
 
         # Get the bump map
-        texture_name = getattr(material.luxrender_material, 'bumpmap_floattexturename')
+        texture_name = getattr(material.pbrtv3_material, 'bumpmap_floattexturename')
         if texture_name:
             texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-            lux_texture = texture.luxrender_texture
+            lux_texture = texture.pbrtv3_texture
 
             if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                 bumpmap_texturename = '%s_float' % bumpmap_texturename
@@ -358,7 +358,7 @@ def luxrender_bumpmap_export(self, lux_context, material, bumpmap_material_name,
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_material(declarative_property_group):
+class pbrtv3_material(declarative_property_group):
     """
     Storage class for LuxRender Material settings.
     """
@@ -489,12 +489,12 @@ class luxrender_material(declarative_property_group):
 
         # Also reset sub-property groups
         for a in mat_names.keys():
-            getattr(self, 'luxrender_mat_%s' % a).reset()
+            getattr(self, 'pbrtv3_mat_%s' % a).reset()
 
         if prnt:
-            prnt.luxrender_emission.reset()
-            prnt.luxrender_transparency.reset()
-            prnt.luxrender_coating.reset()
+            prnt.pbrtv3_emission.reset()
+            prnt.pbrtv3_transparency.reset()
+            prnt.pbrtv3_coating.reset()
 
     def set_master_color(self, blender_material):
         """
@@ -506,7 +506,7 @@ class luxrender_material(declarative_property_group):
         if blender_material is None:
             return
 
-        submat = getattr(self, 'luxrender_mat_%s' % self.type)
+        submat = getattr(self, 'pbrtv3_mat_%s' % self.type)
 
         if self.type == 'metal' or (self.type == 'metal2' and submat.metaltype == 'preset'):
             preset = submat.name if self.type == 'metal' else submat.preset
@@ -525,7 +525,7 @@ class luxrender_material(declarative_property_group):
                     blender_material.diffuse_color = submat_col
 
     def exportNodetree(self, scene, lux_context, material, mode):
-        outputNode = find_node(material, 'luxrender_material_output_node')
+        outputNode = find_node(material, 'pbrtv3_material_output_node')
 
         print('outputNode: ', outputNode)
 
@@ -540,7 +540,7 @@ class luxrender_material(declarative_property_group):
         if self.type in ['glass', 'glass2', 'null']:
             mat_is_transparent = True
 
-        if scene.luxrender_testing.clay_render and not mat_is_transparent:
+        if scene.pbrtv3_testing.clay_render and not mat_is_transparent:
             return {'CLAY'}
 
         if self.nodetree:
@@ -550,73 +550,73 @@ class luxrender_material(declarative_property_group):
             if not (mode == 'indirect' and material.name in ExportedMaterials.exported_material_names):
                 if self.type == 'mix':
                     # First export the other mix mats
-                    m1_name = self.luxrender_mat_mix.namedmaterial1_material
+                    m1_name = self.pbrtv3_mat_mix.namedmaterial1_material
                     if not m1_name:
                         raise Exception('Unassigned mix material slot 1 on material %s' % material.name)
 
                     m1 = bpy.data.materials[m1_name]
-                    m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
-                    m2_name = self.luxrender_mat_mix.namedmaterial2_material
+                    m1.pbrtv3_material.export(scene, lux_context, m1, 'indirect')
+                    m2_name = self.pbrtv3_mat_mix.namedmaterial2_material
 
                     if not m2_name:
                         raise Exception('Unassigned mix material slot 2 on material %s' % material.name)
 
                     m2 = bpy.data.materials[m2_name]
-                    m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+                    m2.pbrtv3_material.export(scene, lux_context, m2, 'indirect')
 
                 if self.type == 'glossycoating':
-                    bm_name = self.luxrender_mat_glossycoating.basematerial_material
+                    bm_name = self.pbrtv3_mat_glossycoating.basematerial_material
 
                     if not bm_name:
                         raise Exception('No base material assigned!')
 
                     bm = bpy.data.materials[bm_name]
-                    bm.luxrender_material.export(scene, lux_context, bm, 'indirect')
+                    bm.pbrtv3_material.export(scene, lux_context, bm, 'indirect')
 
                 if self.type == 'layered':
-                    m1_name = self.luxrender_mat_layered.namedmaterial1_material
+                    m1_name = self.pbrtv3_mat_layered.namedmaterial1_material
 
                     if not m1_name:
                         raise Exception('Unassigned layered material slot 1 on material %s' % material.name)
 
                     m1 = bpy.data.materials[m1_name]
-                    m1.luxrender_material.export(scene, lux_context, m1, 'indirect')
-                    m2_name = self.luxrender_mat_layered.namedmaterial2_material
+                    m1.pbrtv3_material.export(scene, lux_context, m1, 'indirect')
+                    m2_name = self.pbrtv3_mat_layered.namedmaterial2_material
 
                     if m2_name:  # core layered mat simply stops when finding empty slot
                         m2 = bpy.data.materials[m2_name]
-                        m2.luxrender_material.export(scene, lux_context, m2, 'indirect')
+                        m2.pbrtv3_material.export(scene, lux_context, m2, 'indirect')
 
-                    m3_name = self.luxrender_mat_layered.namedmaterial3_material
+                    m3_name = self.pbrtv3_mat_layered.namedmaterial3_material
 
                     if m3_name:
                         m3 = bpy.data.materials[m3_name]
-                        m3.luxrender_material.export(scene, lux_context, m3, 'indirect')
+                        m3.pbrtv3_material.export(scene, lux_context, m3, 'indirect')
 
-                    m4_name = self.luxrender_mat_layered.namedmaterial4_material
+                    m4_name = self.pbrtv3_mat_layered.namedmaterial4_material
 
                     if m4_name:
                         m4 = bpy.data.materials[m4_name]
-                        m4.luxrender_material.export(scene, lux_context, m4, 'indirect')
+                        m4.pbrtv3_material.export(scene, lux_context, m4, 'indirect')
 
                 material_params = ParamSet()
-                subtype = getattr(self, 'luxrender_mat_%s' % self.type)
+                subtype = getattr(self, 'pbrtv3_mat_%s' % self.type)
                 alpha_type = None
 
                 # find alpha texture if material should be transparent
-                if hasattr(material, 'luxrender_transparency') and material.luxrender_transparency.transparent:
-                    alpha_type, alpha_amount = material.luxrender_transparency.export(lux_context, material)
+                if hasattr(material, 'pbrtv3_transparency') and material.pbrtv3_transparency.transparent:
+                    alpha_type, alpha_amount = material.pbrtv3_transparency.export(lux_context, material)
 
                 coating_params = None
 
                 # find coating if material should be coated
-                if hasattr(material, 'luxrender_coating') and material.luxrender_coating.use_coating:
-                    coating_params = material.luxrender_coating.export(lux_context, material)
+                if hasattr(material, 'pbrtv3_coating') and material.pbrtv3_coating.use_coating:
+                    coating_params = material.pbrtv3_coating.export(lux_context, material)
 
                 # Bump and normal mapping
                 if self.type not in ['mix', 'null', 'layered']:
                     material_params.update(
-                        luxrender_bumpmap_export(self, lux_context, material, material.name, TF_bumpmap, TF_normalmap))
+                        pbrtv3_bumpmap_export(self, lux_context, material, material.name, TF_bumpmap, TF_normalmap))
 
                 if hasattr(subtype, 'export'):
                     subtype.export(lux_context, material)
@@ -624,8 +624,8 @@ class luxrender_material(declarative_property_group):
                 material_params.update(subtype.get_paramset(material))
 
                 # DistributedPath compositing
-                if scene.luxrender_integrator.surfaceintegrator == 'distributedpath':
-                    material_params.update(self.luxrender_mat_compositing.get_paramset())
+                if scene.pbrtv3_integrator.surfaceintegrator == 'distributedpath':
+                    material_params.update(self.pbrtv3_mat_compositing.get_paramset())
 
                 mat_type = self.type
 
@@ -667,7 +667,7 @@ class luxrender_material(declarative_property_group):
                 elif mode == 'direct':
                     lux_context.material(mat_type, material_params)
 
-        if material.luxrender_emission.use_emission:
+        if material.pbrtv3_emission.use_emission:
             return {'EMITTER'}
         else:
             return set()
@@ -711,22 +711,22 @@ class luxrender_material(declarative_property_group):
 
                 blender_tex = bpy.data.textures[shorten_name(lbm2_obj['name'])]
                 tex_slot.texture = blender_tex
-                lxt = bpy.data.textures[shorten_name(lbm2_obj['name'])].luxrender_texture
+                lxt = bpy.data.textures[shorten_name(lbm2_obj['name'])].pbrtv3_texture
 
                 # Restore default texture settings
                 lxt.reset()
 
-                if (not tex_type.startswith('blender_')) and hasattr(lxt, 'luxrender_tex_%s' % tex_type):
+                if (not tex_type.startswith('blender_')) and hasattr(lxt, 'pbrtv3_tex_%s' % tex_type):
                     lxt.set_type(tex_type)
-                    subtype = getattr(lxt, 'luxrender_tex_%s' % tex_type)
+                    subtype = getattr(lxt, 'pbrtv3_tex_%s' % tex_type)
                     subtype.load_paramset(variant, lbm2_obj['paramset'])
                 else:
                     lxt.set_type('BLENDER')
                     # do the reverse of export.materials.convert_texture
                     import_paramset_to_blender_texture(blender_tex, tex_type, lbm2_obj['paramset'])
 
-                lxt.luxrender_tex_mapping.load_paramset(lbm2_obj['paramset'])
-                lxt.luxrender_tex_transform.load_paramset(lbm2_obj['paramset'])
+                lxt.pbrtv3_tex_mapping.load_paramset(lbm2_obj['paramset'])
+                lxt.pbrtv3_tex_transform.load_paramset(lbm2_obj['paramset'])
 
             # Add back all the materials
             if lbm2_obj['type'] == 'MakeNamedMaterial':
@@ -737,7 +737,7 @@ class luxrender_material(declarative_property_group):
                 blender_obj.material_slots[material_index].material = bpy.data.materials[shorten_name(lbm2_obj['name'])]
 
                 # Update an existing material with data from lbm2
-                lxm = bpy.data.materials[shorten_name(lbm2_obj['name'])].luxrender_material
+                lxm = bpy.data.materials[shorten_name(lbm2_obj['name'])].pbrtv3_material
 
                 # reset this material
                 lxm.reset(prnt=bpy.data.materials[shorten_name(lbm2_obj['name'])])
@@ -752,7 +752,7 @@ class luxrender_material(declarative_property_group):
                 for paramsetitem in lbm2_obj['paramset']:
                     if paramsetitem['name'] == 'type':
                         lxm.set_type(paramsetitem['value'])
-                        subtype = getattr(lxm, 'luxrender_mat_%s' % paramsetitem['value'])
+                        subtype = getattr(lxm, 'pbrtv3_mat_%s' % paramsetitem['value'])
 
                 if subtype is not None:
                     subtype.load_paramset(lbm2_obj['paramset'])
@@ -768,7 +768,7 @@ class luxrender_material(declarative_property_group):
                 if vt_matches.lastindex != 1:
                     continue  # not a valid volume!
 
-                scene_vols = context.scene.luxrender_volumes.volumes
+                scene_vols = context.scene.pbrtv3_volumes.volumes
                 try:
                     # Use existing vol if present
                     volm = scene_vols[lbm2_obj['name']]
@@ -797,13 +797,13 @@ class luxrender_material(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_compositing(declarative_property_group):
+class pbrtv3_mat_compositing(declarative_property_group):
     """
     Storage class for LuxRender Material compositing settings
     for DistributedPath integrator.
     """
 
-    ef_attach_to = ['luxrender_material']
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -1060,14 +1060,14 @@ def gen_CB_update_backface_roughness(chan='u'):
 class TransparencyFloatTextureParameter(FloatTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other ColorTextureParameters
-        return lambda s, c: c.luxrender_transparency
+        return lambda s, c: c.pbrtv3_transparency
 
 
 TF_alpha = TransparencyFloatTextureParameter('alpha', 'Alpha', add_float_value=False, default=1.0, min=0.0, max=1.0)
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_transparency(declarative_property_group):
+class pbrtv3_transparency(declarative_property_group):
     """
     Storage class for LuxRender Material alpha transparency settings.
     """
@@ -1156,7 +1156,7 @@ class luxrender_transparency(declarative_property_group):
     }
 
     def export(self, lux_context, material):
-        lux_material = getattr(material.luxrender_material, 'luxrender_mat_%s' % material.luxrender_material.type)
+        lux_material = getattr(material.pbrtv3_material, 'pbrtv3_mat_%s' % material.pbrtv3_material.type)
         alpha_type = None
 
         if self.alpha_source == 'texture':
@@ -1195,16 +1195,16 @@ class luxrender_transparency(declarative_property_group):
         elif self.alpha_source == 'constant':
             alpha_type = 'float'
             alpha_amount = self.alpha_value
-        elif material.luxrender_material.type in self.sourceMap:
+        elif material.pbrtv3_material.type in self.sourceMap:
             # grab base texture in case it's not diffuse channel
             texture_name = getattr(lux_material,
-                                   '%s_colortexturename' % self.sourceMap[material.luxrender_material.type])
+                                   '%s_colortexturename' % self.sourceMap[material.pbrtv3_material.type])
             if texture_name:
                 texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
-                lux_texture = texture.luxrender_texture
+                lux_texture = texture.pbrtv3_texture
 
                 if lux_texture.type == 'imagemap':
-                    src_texture = lux_texture.luxrender_tex_imagemap
+                    src_texture = lux_texture.pbrtv3_tex_imagemap
 
                     channelMap = {
                         'diffusealpha': 'alpha',
@@ -1220,7 +1220,7 @@ class luxrender_transparency(declarative_property_group):
                     params.add_float('maxanisotropy', src_texture.maxanisotropy)
                     params.add_float('gamma', 1.0)  # Don't gamma correct alpha maps
                     params.add_string('wrap', src_texture.wrap)
-                    params.update(lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
 
                     alpha_type = 'texture'
                     alpha_amount = texture_name + '_alpha'
@@ -1234,7 +1234,7 @@ class luxrender_transparency(declarative_property_group):
                     )
 
                     ExportedTextures.export_new(lux_context)
-                elif texture.luxrender_texture.type == 'BLENDER' and texture.type == 'IMAGE':
+                elif texture.pbrtv3_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                     src_texture = texture.image
 
                     channelMap = {
@@ -1249,7 +1249,7 @@ class luxrender_transparency(declarative_property_group):
                     params.add_string('filtertype', 'bilinear')
                     params.add_float('gamma', 1.0)  # Don't gamma correct alpha maps
                     params.add_string('wrap', 'repeat')
-                    params.update(lux_texture.luxrender_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
 
                     alpha_type = 'texture'
                     alpha_amount = texture_name + '_alpha'
@@ -1274,13 +1274,13 @@ class luxrender_transparency(declarative_property_group):
 class CoatingColorTextureParameter(ColorTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other ColorTextureParameters
-        return lambda s, c: c.luxrender_coating
+        return lambda s, c: c.pbrtv3_coating
 
 
 class CoatingFloatTextureParameter(FloatTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other ColorTextureParameters
-        return lambda s, c: c.luxrender_coating
+        return lambda s, c: c.pbrtv3_coating
 
 # Float Textures
 TF_c_d = CoatingFloatTextureParameter('d', 'Absorption depth (nm)', add_float_value=True, default=0.0, min=0.0,
@@ -1308,7 +1308,7 @@ TC_c_Ks = CoatingColorTextureParameter('Ks', 'Specular color', default=(0.04, 0.
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_coating(declarative_property_group):
+class pbrtv3_coating(declarative_property_group):
     """
     Storage class for LuxRender Material glossy coating settings.
     """
@@ -1466,15 +1466,15 @@ class luxrender_coating(declarative_property_group):
         glossycoating_params.update(TF_c_vroughness.get_paramset(self))
 
         glossycoating_params.update(
-            luxrender_bumpmap_export(self, lux_context, material, material.name + '_coating', TF_c_bumpmap,
+            pbrtv3_bumpmap_export(self, lux_context, material, material.name + '_coating', TF_c_bumpmap,
                                      TF_c_normalmap))
 
         return glossycoating_params
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_carpaint(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_carpaint(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -1601,8 +1601,8 @@ class luxrender_mat_carpaint(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_glass(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_glass(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -1682,8 +1682,8 @@ class luxrender_mat_glass(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_glass2(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_glass2(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -1734,8 +1734,8 @@ class luxrender_mat_glass2(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_roughglass(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_roughglass(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -1864,8 +1864,8 @@ class luxrender_mat_roughglass(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_glossy(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_glossy(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2046,8 +2046,8 @@ class luxrender_mat_glossy(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_matte(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_matte(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2079,8 +2079,8 @@ class luxrender_mat_matte(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_mattetranslucent(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_mattetranslucent(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2135,8 +2135,8 @@ class luxrender_mat_mattetranslucent(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_glossytranslucent(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_glossytranslucent(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2431,8 +2431,8 @@ class luxrender_mat_glossytranslucent(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_glossycoating(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_glossycoating(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2484,7 +2484,7 @@ class luxrender_mat_glossycoating(declarative_property_group):
 
     properties = [
                  ] + \
-                 MaterialParameter('basematerial', 'Base Material', 'luxrender_mat_glossycoating') + \
+                 MaterialParameter('basematerial', 'Base Material', 'pbrtv3_mat_glossycoating') + \
                  [
                      {
                          'type': 'ef_callback',
@@ -2590,8 +2590,8 @@ class luxrender_mat_glossycoating(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_metal(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_metal(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2637,8 +2637,8 @@ class luxrender_mat_metal(declarative_property_group):
                              ('aluminium', 'Aluminium', 'aluminium')
                          ],
                          'default': 'aluminium',
-                         'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material) if hasattr(
-                             c.material, 'luxrender_material') else None,
+                         'update': lambda s, c: c.material.pbrtv3_material.set_master_color(c.material) if hasattr(
+                             c.material, 'pbrtv3_material') else None,
                          'save_in_preset': True
                      },
                      {
@@ -2716,8 +2716,8 @@ class luxrender_mat_metal(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_metal2(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_metal2(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2788,8 +2788,8 @@ class luxrender_mat_metal2(declarative_property_group):
                              ('aluminium', 'Aluminium', 'aluminium')
                          ],
                          'default': 'aluminium',
-                         'update': lambda s, c: c.material.luxrender_material.set_master_color(c.material) if hasattr(
-                             c.material, 'luxrender_material') else None,
+                         'update': lambda s, c: c.material.pbrtv3_material.set_master_color(c.material) if hasattr(
+                             c.material, 'pbrtv3_material') else None,
                          'save_in_preset': True
                      },
                      {
@@ -2903,8 +2903,8 @@ class luxrender_mat_metal2(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_scatter(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_scatter(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -2953,8 +2953,8 @@ class luxrender_mat_scatter(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_shinymetal(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_shinymetal(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -3061,8 +3061,8 @@ class luxrender_mat_shinymetal(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_mirror(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_mirror(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -3106,8 +3106,8 @@ class luxrender_mat_mirror(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_mix(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_mix(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -3121,8 +3121,8 @@ class luxrender_mat_mix(declarative_property_group):
     properties = [
                  ] + \
                  TF_amount.get_properties() + \
-                 MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_mix') + \
-                 MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_mix')
+                 MaterialParameter('namedmaterial1', 'Material 1', 'pbrtv3_mat_mix') + \
+                 MaterialParameter('namedmaterial2', 'Material 2', 'pbrtv3_mat_mix')
 
     def get_paramset(self, material):
         mix_params = ParamSet()
@@ -3148,8 +3148,8 @@ class luxrender_mat_mix(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_layered(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_layered(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -3172,10 +3172,10 @@ class luxrender_mat_layered(declarative_property_group):
 
     properties = [
                  ] + \
-                 MaterialParameter('namedmaterial1', 'Material 1', 'luxrender_mat_layered') + \
-                 MaterialParameter('namedmaterial2', 'Material 2', 'luxrender_mat_layered') + \
-                 MaterialParameter('namedmaterial3', 'Material 3', 'luxrender_mat_layered') + \
-                 MaterialParameter('namedmaterial4', 'Material 4', 'luxrender_mat_layered') + \
+                 MaterialParameter('namedmaterial1', 'Material 1', 'pbrtv3_mat_layered') + \
+                 MaterialParameter('namedmaterial2', 'Material 2', 'pbrtv3_mat_layered') + \
+                 MaterialParameter('namedmaterial3', 'Material 3', 'pbrtv3_mat_layered') + \
+                 MaterialParameter('namedmaterial4', 'Material 4', 'pbrtv3_mat_layered') + \
                  TF_OP1.properties + \
                  TF_OP2.properties + \
                  TF_OP3.properties + \
@@ -3215,8 +3215,8 @@ class luxrender_mat_layered(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_null(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_null(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = []
@@ -3231,8 +3231,8 @@ class luxrender_mat_null(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_velvet(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_velvet(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = TC_Kd.controls + [
@@ -3331,8 +3331,8 @@ class luxrender_mat_velvet(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_mat_cloth(declarative_property_group):
-    ef_attach_to = ['luxrender_material']
+class pbrtv3_mat_cloth(declarative_property_group):
+    ef_attach_to = ['pbrtv3_material']
     alert = {}
 
     controls = [
@@ -3442,9 +3442,9 @@ def EmissionLightGroupParameter():
         {
             'type': 'prop_search',
             'attr': 'lightgroup_chooser',
-            'src': lambda s, c: s.scene.luxrender_lightgroups,
+            'src': lambda s, c: s.scene.pbrtv3_lightgroups,
             'src_attr': 'lightgroups',
-            'trg': lambda s, c: c.luxrender_emission,
+            'trg': lambda s, c: c.pbrtv3_emission,
             'trg_attr': 'lightgroup',
             'name': 'Light Group',
             'icon': 'OUTLINER_OB_LAMP'
@@ -3455,14 +3455,14 @@ def EmissionLightGroupParameter():
 class EmissionColorTextureParameter(ColorTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other ColorTextureParameters
-        return lambda s, c: c.luxrender_emission
+        return lambda s, c: c.pbrtv3_emission
 
 
 TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0, 1.0, 1.0))
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_emission(declarative_property_group):
+class pbrtv3_emission(declarative_property_group):
     """
     Storage class for LuxRender Material emission settings.
     """
@@ -3600,8 +3600,8 @@ class luxrender_emission(declarative_property_group):
     def api_output(self, obj):
         lg_gain = 1.0
 
-        if self.lightgroup in LuxManager.CurrentScene.luxrender_lightgroups.lightgroups:
-            lg_gain = LuxManager.CurrentScene.luxrender_lightgroups.lightgroups[self.lightgroup].gain
+        if self.lightgroup in LuxManager.CurrentScene.pbrtv3_lightgroups.lightgroups:
+            lg_gain = LuxManager.CurrentScene.pbrtv3_lightgroups.lightgroups[self.lightgroup].gain
 
         arealightsource_params = ParamSet() \
             .add_float('importance', self.importance) \

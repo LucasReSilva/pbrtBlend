@@ -85,7 +85,7 @@ class ObjectExporter(object):
             return True
 
         # Duplis and proxies are always instanced
-        if self.is_dupli or (obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh'):
+        if self.is_dupli or (obj.pbrtv3_object.append_proxy and obj.pbrtv3_object.proxy_type == 'plymesh'):
             return True
 
         # If the mesh is only used once, instancing is a waste of memory
@@ -136,8 +136,8 @@ class ObjectExporter(object):
         # Check if object is proxy
         export_proxies = self.blender_scene.luxcore_translatorsettings.export_proxies
 
-        if export_proxies and obj.luxrender_object.append_proxy and obj.luxrender_object.proxy_type == 'plymesh':
-            convert_object = not obj.luxrender_object.hide_proxy_mesh
+        if export_proxies and obj.pbrtv3_object.append_proxy and obj.pbrtv3_object.proxy_type == 'plymesh':
+            convert_object = not obj.pbrtv3_object.hide_proxy_mesh
             self.__convert_proxy(update_material, anim_matrices, convert_object, transform)
 
         # Check if object is duplicator (particle/hair emitter or using dupliverts/frames/...)
@@ -162,7 +162,7 @@ class ObjectExporter(object):
         # Check if object is used as camera clipping plane (don't do this for duplis because they can never be
         # selected as clipping plane)
         if not self.is_dupli and self.blender_scene.camera is not None:
-            if obj.name == self.blender_scene.camera.data.luxrender_camera.clipping_plane_obj:
+            if obj.name == self.blender_scene.camera.data.pbrtv3_camera.clipping_plane_obj:
                 convert_object = False
 
         if not convert_object or obj.data is None:
@@ -197,7 +197,7 @@ class ObjectExporter(object):
 
 
     def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):
-        raw_path = self.blender_object.luxrender_object.external_mesh
+        raw_path = self.blender_object.pbrtv3_object.external_mesh
         path = efutil.filesystem_path(raw_path)
         name = ToValidLuxCoreName(self.blender_object.name + self.dupli_name_suffix)
 
@@ -253,13 +253,13 @@ class ObjectExporter(object):
 
         for mat_slot in self.blender_object.material_slots:
             if mat_slot.material:
-                if mat_slot.material.luxrender_material.nodetree:
+                if mat_slot.material.pbrtv3_material.nodetree:
                     # Material with nodetree, check the nodes for pointiness node
-                    use_pointiness = find_node(mat_slot.material, 'luxrender_texture_pointiness_node')
+                    use_pointiness = find_node(mat_slot.material, 'pbrtv3_texture_pointiness_node')
                 else:
                     # Material without nodetree, check its textures for pointiness texture
                     for tex_slot in mat_slot.material.texture_slots:
-                        if tex_slot and tex_slot.texture and tex_slot.texture.luxrender_texture.type == 'pointiness':
+                        if tex_slot and tex_slot.texture and tex_slot.texture.pbrtv3_texture.type == 'pointiness':
                             use_pointiness = True
                             break
 
@@ -291,8 +291,8 @@ class ObjectExporter(object):
 
         # Motion blur (needs at least 2 matrices in anim_matrices)
         if use_motion_blur:
-            shutter_open, shutter_close = calc_shutter(self.blender_scene, self.blender_scene.camera.data.luxrender_camera)
-            step = (shutter_close - shutter_open) / self.blender_scene.camera.data.luxrender_camera.motion_blur_samples
+            shutter_open, shutter_close = calc_shutter(self.blender_scene, self.blender_scene.camera.data.pbrtv3_camera)
+            step = (shutter_close - shutter_open) / self.blender_scene.camera.data.pbrtv3_camera.motion_blur_samples
 
             for i in range(len(anim_matrices)):
                 time = i * step
@@ -305,7 +305,7 @@ class ObjectExporter(object):
         if self.blender_scene.camera is None:
             return None
 
-        lux_camera = self.blender_scene.camera.data.luxrender_camera
+        lux_camera = self.blender_scene.camera.data.pbrtv3_camera
 
         if lux_camera.usemblur and lux_camera.objectmblur:
             steps = lux_camera.motion_blur_samples

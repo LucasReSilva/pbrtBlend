@@ -31,19 +31,19 @@ from ...extensions_framework.ui import property_group_renderer
 from ... import PBRTv3Addon
 
 
-class luxrender_material_base(bl_ui.properties_material.MaterialButtonsPanel, property_group_renderer):
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+class pbrtv3_material_base(bl_ui.properties_material.MaterialButtonsPanel, property_group_renderer):
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
-class luxrender_material_sub(luxrender_material_base):
+class pbrtv3_material_sub(pbrtv3_material_base):
     LUX_COMPAT = set()
 
     @classmethod
     def poll(cls, context):
         """
-        Only show LuxRender panel if luxrender_material.material in LUX_COMPAT
+        Only show LuxRender panel if pbrtv3_material.material in LUX_COMPAT
         """
-        return super().poll(context) and (context.material.luxrender_material.type in cls.LUX_COMPAT) and (
-            not context.material.luxrender_material.nodetree)
+        return super().poll(context) and (context.material.pbrtv3_material.type in cls.LUX_COMPAT) and (
+            not context.material.pbrtv3_material.nodetree)
 
 

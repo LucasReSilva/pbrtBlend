@@ -166,12 +166,12 @@ class TEXTURE_OT_set_lampspectrum_preset(bpy.types.Operator):
     def poll(cls, context):
         return hasattr(context, 'texture') and \
                context.texture and \
-               context.texture.luxrender_texture and \
-               context.texture.luxrender_texture.luxrender_tex_lampspectrum
+               context.texture.pbrtv3_texture and \
+               context.texture.pbrtv3_texture.pbrtv3_tex_lampspectrum
 
     def execute(self, context):
-        context.texture.luxrender_texture.luxrender_tex_lampspectrum.preset = lampspectrum_names[self.properties.index]
-        context.texture.luxrender_texture.luxrender_tex_lampspectrum.label = self.properties.l_name
+        context.texture.pbrtv3_texture.pbrtv3_tex_lampspectrum.preset = lampspectrum_names[self.properties.index]
+        context.texture.pbrtv3_texture.pbrtv3_tex_lampspectrum.label = self.properties.l_name
         return {'FINISHED'}
 
 

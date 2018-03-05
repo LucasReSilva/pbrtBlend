@@ -37,21 +37,21 @@ from ..export import ParamSet, process_filepath_data, get_worldscale
 from ..outputs import LuxManager
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
-from ..properties import luxrender_texture_node
+from ..properties import pbrtv3_texture_node
 from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
 from ..properties.node_texture import triple_variant_items
-from ..properties.texture import luxrender_tex_transform, luxrender_tex_mapping, luxrender_tex_imagemap
+from ..properties.texture import pbrtv3_tex_transform, pbrtv3_tex_mapping, pbrtv3_tex_imagemap
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_3d_coordinates_node(luxrender_texture_node):
+class pbrtv3_3d_coordinates_node(pbrtv3_texture_node):
     """3D texture coordinates node"""
-    bl_idname = 'luxrender_3d_coordinates_node'
+    bl_idname = 'pbrtv3_3d_coordinates_node'
     bl_label = '3D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
 
-    for prop in luxrender_tex_transform.properties:
+    for prop in pbrtv3_tex_transform.properties:
         if prop['attr'].startswith('coordinates'):
             coordinate_items = prop['items']
 
@@ -71,7 +71,7 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
     }
 
     def init(self, context):
-        self.outputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.outputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
@@ -155,14 +155,14 @@ class luxrender_3d_coordinates_node(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_2d_coordinates_node(luxrender_texture_node):
+class pbrtv3_2d_coordinates_node(pbrtv3_texture_node):
     """2D texture coordinates node"""
-    bl_idname = 'luxrender_2d_coordinates_node'
+    bl_idname = 'pbrtv3_2d_coordinates_node'
     bl_label = '2D Texture Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
-    for prop in luxrender_tex_mapping.properties:
+    for prop in pbrtv3_tex_mapping.properties:
         if prop['attr'].startswith('type'):
             coordinate_items = prop['items']
 
@@ -185,7 +185,7 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
     }
 
     def init(self, context):
-        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.outputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
@@ -277,9 +277,9 @@ class luxrender_2d_coordinates_node(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blackbody(luxrender_texture_node):
+class pbrtv3_texture_type_node_blackbody(pbrtv3_texture_node):
     """Blackbody spectrum node"""
-    bl_idname = 'luxrender_texture_blackbody_node'
+    bl_idname = 'pbrtv3_texture_blackbody_node'
     bl_label = 'Blackbody Spectrum'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -308,9 +308,9 @@ class luxrender_texture_type_node_blackbody(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_gaussian(luxrender_texture_node):
+class pbrtv3_texture_type_node_gaussian(pbrtv3_texture_node):
     """Gaussian spectrum node"""
-    bl_idname = 'luxrender_texture_gaussian_node'
+    bl_idname = 'pbrtv3_texture_gaussian_node'
     bl_label = 'Gaussian Spectrum'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -342,9 +342,9 @@ class luxrender_texture_type_node_gaussian(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
-class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
+class pbrtv3_texture_type_node_glossyexponent(pbrtv3_texture_node):
     """Glossy exponent node"""
-    bl_idname = 'luxrender_texture_glossyexponent_node'
+    bl_idname = 'pbrtv3_texture_glossyexponent_node'
     bl_label = 'Glossy Exponent'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -371,9 +371,9 @@ class luxrender_texture_type_node_glossyexponent(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
+class pbrtv3_texture_type_node_tabulateddata(pbrtv3_texture_node):
     """Tabulated Data spectrum node"""
-    bl_idname = 'luxrender_texture_tabulateddata_node'
+    bl_idname = 'pbrtv3_texture_tabulateddata_node'
     bl_label = 'Tabulated Data Spectrum'
     bl_icon = 'TEXTURE'
 
@@ -398,9 +398,9 @@ class luxrender_texture_type_node_tabulateddata(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_constant(luxrender_texture_node):
+class pbrtv3_texture_type_node_constant(pbrtv3_texture_node):
     """Constant texture node"""
-    bl_idname = 'luxrender_texture_constant_node'
+    bl_idname = 'pbrtv3_texture_constant_node'
     bl_label = 'Value'  # Mimics Cycles/Compositor "input > value" node
     bl_icon = 'TEXTURE'
 
@@ -455,7 +455,7 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
         if self.variant == 'fresnel':
             if not 'Fresnel' in so:
-                self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
                 self.outputs['Fresnel'].needs_link = True
 
             if 'Color' in so:
@@ -490,9 +490,9 @@ class luxrender_texture_type_node_constant(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
+class pbrtv3_texture_type_node_hitpointcolor(pbrtv3_texture_node):
     """Vertex Colors texture node"""
-    bl_idname = 'luxrender_texture_hitpointcolor_node'
+    bl_idname = 'pbrtv3_texture_hitpointcolor_node'
     bl_label = 'Vertex Colors'
     bl_icon = 'TEXTURE'
 
@@ -513,13 +513,13 @@ class luxrender_texture_type_node_hitpointcolor(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
+class pbrtv3_texture_type_node_hitpointgrey(pbrtv3_texture_node):
     """Vertex Grey texture node"""
-    bl_idname = 'luxrender_texture_hitpointgrey_node'
+    bl_idname = 'pbrtv3_texture_hitpointgrey_node'
     bl_label = 'Vertex Mask'
     bl_icon = 'TEXTURE'
 
-    for prop in luxrender_tex_imagemap.properties:
+    for prop in pbrtv3_tex_imagemap.properties:
         if prop['attr'].startswith('channel'):
             channel_items = prop['items']
 
@@ -557,9 +557,9 @@ class luxrender_texture_type_node_hitpointgrey(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_pointiness(luxrender_texture_node):
+class pbrtv3_texture_type_node_pointiness(pbrtv3_texture_node):
     """Pointiness texture node"""
-    bl_idname = 'luxrender_texture_pointiness_node'
+    bl_idname = 'pbrtv3_texture_pointiness_node'
     bl_label = 'Pointiness'
     bl_icon = 'TEXTURE'
     bl_width_min = 190
@@ -572,7 +572,7 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
     curvature_mode = bpy.props.EnumProperty(items=curvature_items, default='both')
 
     def init(self, context):
-        self.inputs.new('luxrender_float_socket', 'Multiplier')
+        self.inputs.new('pbrtv3_float_socket', 'Multiplier')
         self.inputs[0].default_value = 10
         self.outputs.new('NodeSocketFloat', 'Float')
 
@@ -635,9 +635,9 @@ class luxrender_texture_type_node_pointiness(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_python(luxrender_texture_node):
+class pbrtv3_texture_type_node_python(pbrtv3_texture_node):
     """Python expression node"""
-    bl_idname = 'luxrender_texture_python_node'
+    bl_idname = 'pbrtv3_texture_python_node'
     bl_label = 'Python Expression'
     bl_icon = 'TEXTURE'
     bl_width_min = 200
@@ -692,9 +692,9 @@ class luxrender_texture_type_node_python(luxrender_texture_node):
 
 # Hitpointalpha is kind of useless with Blender's vertex color system, so we don't use it
 # @PBRTv3Addon.addon_register_class
-# class luxrender_texture_type_node_hitpointalpha(luxrender_texture_node):
+# class pbrtv3_texture_type_node_hitpointalpha(pbrtv3_texture_node):
 # '''Vertex Alpha texture node'''
-# bl_idname = 'luxrender_texture_hitpointalpha_node'
+# bl_idname = 'pbrtv3_texture_hitpointalpha_node'
 # bl_label = 'Vertex Alpha'
 # bl_icon = 'TEXTURE'
 #

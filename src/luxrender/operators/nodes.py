@@ -58,7 +58,7 @@ def find_node_editor(nodetree_type):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
+class PBRTv3_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
     """"""
     bl_idname = "luxrender.import_multiple_imagenodes"
     bl_label = "Import Multiple Images"
@@ -74,7 +74,7 @@ class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine == 'LUXRENDER_RENDER' and hasattr(context.space_data, "node_tree")
+        return context.scene.render.engine == 'PBRTv3_RENDER' and hasattr(context.space_data, "node_tree")
 
     def execute(self, context):
         location = context.space_data.cursor_location
@@ -90,7 +90,7 @@ class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
                 continue
 
             nodetree = context.space_data.node_tree
-            node = nodetree.nodes.new('luxrender_texture_blender_image_map_node')
+            node = nodetree.nodes.new('pbrtv3_texture_blender_image_map_node')
             node.image_name = image.name
             node.location = location
             # Nodes are spawned in a vertical column
@@ -100,7 +100,7 @@ class LUXRENDER_OT_import_multiple_imagenodes(bpy.types.Operator, ImportHelper):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
+class PBRTv3_OT_add_material_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_material_nodetree"
     bl_label = "Use Material Nodes"
@@ -114,62 +114,62 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         context_data = {'material': context.material, 'lamp': context.lamp}
         idblock = context_data[idtype]
 
-        nt = bpy.data.node_groups.new(idblock.name, type='luxrender_material_nodes')
+        nt = bpy.data.node_groups.new(idblock.name, type='pbrtv3_material_nodes')
         nt.use_fake_user = True
-        idblock.luxrender_material.nodetree = nt.name
+        idblock.pbrtv3_material.nodetree = nt.name
 
-        ctx_mat = context.material.luxrender_material
+        ctx_mat = context.material.pbrtv3_material
 
         # Get the mat type set in editor, todo: find a more iterative way to get context
-        node_type = 'luxrender_material_%s_node' % ctx_mat.type
+        node_type = 'pbrtv3_material_%s_node' % ctx_mat.type
 
         # Some nodes were merged during the introduction of LuxCore node support
         if ctx_mat.type in ['glass2', 'roughglass']:
-            node_type = 'luxrender_material_glass_node'
+            node_type = 'pbrtv3_material_glass_node'
         elif ctx_mat.type == 'metal':
-            node_type = 'luxrender_material_metal2_node'
+            node_type = 'pbrtv3_material_metal2_node'
 
         if ctx_mat.type == 'matte':
-            editor_type = ctx_mat.luxrender_mat_matte
+            editor_type = ctx_mat.pbrtv3_mat_matte
         if ctx_mat.type == 'mattetranslucent':
-            editor_type = ctx_mat.luxrender_mat_mattetranslucent
+            editor_type = ctx_mat.pbrtv3_mat_mattetranslucent
         if ctx_mat.type == 'glossy':
-            editor_type = ctx_mat.luxrender_mat_glossy
+            editor_type = ctx_mat.pbrtv3_mat_glossy
         if ctx_mat.type == 'glossycoating':
-            editor_type = ctx_mat.luxrender_mat_glossycoating
+            editor_type = ctx_mat.pbrtv3_mat_glossycoating
         if ctx_mat.type == 'glossytranslucent':
-            editor_type = ctx_mat.luxrender_mat_glossytranslucent
+            editor_type = ctx_mat.pbrtv3_mat_glossytranslucent
         if ctx_mat.type == 'glass':
-            editor_type = ctx_mat.luxrender_mat_glass
+            editor_type = ctx_mat.pbrtv3_mat_glass
         if ctx_mat.type == 'glass2':
-            editor_type = ctx_mat.luxrender_mat_glass2
+            editor_type = ctx_mat.pbrtv3_mat_glass2
         if ctx_mat.type == 'roughglass':
-            editor_type = ctx_mat.luxrender_mat_roughglass
+            editor_type = ctx_mat.pbrtv3_mat_roughglass
         if ctx_mat.type == 'mirror':
-            editor_type = ctx_mat.luxrender_mat_mirror
+            editor_type = ctx_mat.pbrtv3_mat_mirror
         if ctx_mat.type == 'carpaint':
-            editor_type = ctx_mat.luxrender_mat_carpaint
+            editor_type = ctx_mat.pbrtv3_mat_carpaint
         if ctx_mat.type == 'metal':
-            editor_type = ctx_mat.luxrender_mat_metal
+            editor_type = ctx_mat.pbrtv3_mat_metal
         if ctx_mat.type == 'metal2':
-            editor_type = ctx_mat.luxrender_mat_metal2
+            editor_type = ctx_mat.pbrtv3_mat_metal2
         if ctx_mat.type == 'velvet':
-            editor_type = ctx_mat.luxrender_mat_velvet
+            editor_type = ctx_mat.pbrtv3_mat_velvet
         if ctx_mat.type == 'cloth':
-            editor_type = ctx_mat.luxrender_mat_cloth
+            editor_type = ctx_mat.pbrtv3_mat_cloth
         if ctx_mat.type == 'scatter':
-            editor_type = ctx_mat.luxrender_mat_scatter
+            editor_type = ctx_mat.pbrtv3_mat_scatter
         if ctx_mat.type == 'mix':
-            editor_type = ctx_mat.luxrender_mat_mix
+            editor_type = ctx_mat.pbrtv3_mat_mix
         if ctx_mat.type == 'layered':
-            editor_type = ctx_mat.luxrender_mat_layered
+            editor_type = ctx_mat.pbrtv3_mat_layered
         if ctx_mat.type == 'null':
-            editor_type = ctx_mat.luxrender_mat_null
+            editor_type = ctx_mat.pbrtv3_mat_null
 
         # handling for not existent shinymetal node, just hack atm.
         if ctx_mat.type == 'shinymetal':
-            editor_type = ctx_mat.luxrender_mat_metal2
-            node_type = 'luxrender_material_metal2_node'
+            editor_type = ctx_mat.pbrtv3_mat_metal2
+            node_type = 'pbrtv3_material_metal2_node'
 
         if idtype == 'material':
             shader = nt.nodes.new(node_type)  # create also matnode from editor type
@@ -178,7 +178,7 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
             if ctx_mat.type == 'roughglass':
                 shader.rough = True
 
-            sh_out = nt.nodes.new('luxrender_material_output_node')
+            sh_out = nt.nodes.new('pbrtv3_material_output_node')
             sh_out.interior_volume = ctx_mat.Interior_volume
             sh_out.exterior_volume = ctx_mat.Exterior_volume
             sh_out.location = 500, 400
@@ -285,36 +285,36 @@ class LUXRENDER_OT_add_material_nodetree(bpy.types.Operator):
         #   nt.nodes.new('OutputLightShaderNode')
 
         # Try to find a node editor already set to material nodes
-        node_editor = find_node_editor('luxrender_material_nodes')
+        node_editor = find_node_editor('pbrtv3_material_nodes')
 
         if node_editor:
             # No node editor set to volume nodes, set the last one
-            node_editor.tree_type = 'luxrender_material_nodes'
+            node_editor.tree_type = 'pbrtv3_material_nodes'
 
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
+class PBRTv3_OT_add_volume_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_volume_nodetree"
     bl_label = "Use Volume Nodes"
     bl_description = "Add a LuxRender node tree linked to this volume"
 
     def execute(self, context):
-        current_vol_ind = context.scene.luxrender_volumes.volumes_index
-        current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+        current_vol_ind = context.scene.pbrtv3_volumes.volumes_index
+        current_vol = context.scene.pbrtv3_volumes.volumes[current_vol_ind]
 
-        nt = bpy.data.node_groups.new(current_vol.name, type='luxrender_volume_nodes_a')
+        nt = bpy.data.node_groups.new(current_vol.name, type='pbrtv3_volume_nodes_a')
         nt.use_fake_user = True
         current_vol.nodetree = nt.name
 
         # Volume output
-        sh_out = nt.nodes.new('luxrender_volume_output_node')
+        sh_out = nt.nodes.new('pbrtv3_volume_output_node')
         sh_out.location = 500, 400
 
         # Volume node (use volume type, i.e. clear/homogeneous/heterogeneous)
-        vol_node_type = 'luxrender_volume_%s_node' % current_vol.type
+        vol_node_type = 'pbrtv3_volume_%s_node' % current_vol.type
         volume_node = nt.nodes.new(vol_node_type)
         volume_node.location = 250, 480
         nt.links.new(volume_node.outputs[0], sh_out.inputs[0])
@@ -323,7 +323,7 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
         volume_node.inputs['IOR'].fresnel = current_vol.fresnel_fresnelvalue
 
         # Color at depth node
-        colordepth_node = nt.nodes.new('luxrender_texture_colordepth_node')
+        colordepth_node = nt.nodes.new('pbrtv3_texture_colordepth_node')
         colordepth_node.location = 50, 480
         colordepth_node.depth = current_vol.depth
         nt.links.new(colordepth_node.outputs[0], volume_node.inputs[1])
@@ -335,7 +335,7 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
             colordepth_node.inputs[0].color = absorption_color
         else:
             # Value node (to be able to copy scaled colors)
-            absorption_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+            absorption_color_value_node = nt.nodes.new('pbrtv3_texture_constant_node')
             absorption_color_value_node.location = -150, 480
             absorption_color_value_node.color = absorption_color
             absorption_color_value_node.col_mult = current_vol.absorption_scale
@@ -347,7 +347,7 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
                 volume_node.inputs[2].color = current_vol.sigma_s_color
             else:
                 # Value node (to be able to copy scaled colors)
-                scattering_color_value_node = nt.nodes.new('luxrender_texture_constant_node')
+                scattering_color_value_node = nt.nodes.new('pbrtv3_texture_constant_node')
                 scattering_color_value_node.location = -150, 280
                 scattering_color_value_node.color = current_vol.sigma_s_color
                 scattering_color_value_node.col_mult = current_vol.scattering_scale
@@ -357,10 +357,10 @@ class LUXRENDER_OT_add_volume_nodetree(bpy.types.Operator):
                 volume_node.stepsize = current_vol.stepsize
 
         # Try to find a node editor already set to volume nodes
-        node_editor = find_node_editor('luxrender_volume_nodes_a')
+        node_editor = find_node_editor('pbrtv3_volume_nodes_a')
 
         if node_editor:
             # No node editor set to volume nodes, set the last one
-            node_editor.tree_type = 'luxrender_volume_nodes_a'
+            node_editor.tree_type = 'pbrtv3_volume_nodes_a'
 
         return {'FINISHED'}

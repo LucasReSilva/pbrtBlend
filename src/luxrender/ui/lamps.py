@@ -35,15 +35,15 @@ narrowui = 180
 
 
 class lamps_panel(bl_ui.properties_data_lamp.DataButtonsPanel, property_group_renderer):
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamps(lamps_panel):
+class ui_pbrtv3_lamps(lamps_panel):
     bl_label = 'PBRTv3 Lamps'
 
     display_property_groups = [
-        ( ('lamp',), 'luxrender_lamp' )
+        ( ('lamp',), 'pbrtv3_lamp' )
     ]
 
     # Overridden here and in each sub-type UI to draw some of blender's lamp controls
@@ -61,15 +61,15 @@ class ui_luxrender_lamps(lamps_panel):
             super().draw(context)
 
             if context.lamp.type in ('AREA', 'POINT', 'SPOT'):
-                self.layout.prop(context.lamp.luxrender_lamp, "iesname", text="IES Data")
+                self.layout.prop(context.lamp.pbrtv3_lamp, "iesname", text="IES Data")
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamp_point(lamps_panel):
+class ui_pbrtv3_lamp_point(lamps_panel):
     bl_label = 'PBRTv3 Point Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_point' )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_point' )
     ]
 
     @classmethod
@@ -78,11 +78,11 @@ class ui_luxrender_lamp_point(lamps_panel):
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamp_spot(lamps_panel):
+class ui_pbrtv3_lamp_spot(lamps_panel):
     bl_label = 'PBRTv3 Spot Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_spot' )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_spot' )
     ]
 
     @classmethod
@@ -96,7 +96,7 @@ class ui_luxrender_lamp_spot(lamps_panel):
 
             # SPOT LAMP: Blender Properties
             if context.lamp.type == 'SPOT':
-                projector = context.lamp.luxrender_lamp.luxrender_lamp_spot.projector
+                projector = context.lamp.pbrtv3_lamp.pbrtv3_lamp_spot.projector
 
                 if wide_ui and not projector:
                     col = self.layout.row()
@@ -113,11 +113,11 @@ class ui_luxrender_lamp_spot(lamps_panel):
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamp_sun(lamps_panel):
+class ui_pbrtv3_lamp_sun(lamps_panel):
     bl_label = 'PBRTv3 Sun Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_sun' )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_sun' )
     ]
 
     @classmethod
@@ -131,7 +131,7 @@ class ui_luxrender_lamp_sun(lamps_panel):
             if context.lamp.type == 'SUN':
                 layout = self.layout
 
-                sun_props = context.lamp.luxrender_lamp.luxrender_lamp_sun
+                sun_props = context.lamp.pbrtv3_lamp.pbrtv3_lamp_sun
 
                 if UseLuxCore() and 'sky' in sun_props.sunsky_type:
                     row = layout.row(align=True)
@@ -154,11 +154,11 @@ class ui_luxrender_lamp_sun(lamps_panel):
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamp_hemi(lamps_panel):
+class ui_pbrtv3_lamp_hemi(lamps_panel):
     bl_label = 'PBRTv3 Hemi Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_hemi' )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_hemi' )
     ]
 
     @classmethod
@@ -167,12 +167,12 @@ class ui_luxrender_lamp_hemi(lamps_panel):
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_lamp_area(lamps_panel):
+class ui_pbrtv3_lamp_area(lamps_panel):
     bl_label = 'PBRTv3 Area Lamp'
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_area' ),
-        ( ('lamp', 'luxrender_lamp'), 'luxrender_lamp_laser', lambda: UseLuxCore() )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_area' ),
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_laser', lambda: UseLuxCore() )
     ]
 
     @classmethod
@@ -182,9 +182,9 @@ class ui_luxrender_lamp_area(lamps_panel):
     def draw(self, context):
         if context.lamp is not None:
             wide_ui = context.region.width > narrowui
-            lux_lamp = context.lamp.luxrender_lamp
-            lux_lamp_area = lux_lamp.luxrender_lamp_area
-            is_laser = lux_lamp.luxrender_lamp_laser.is_laser
+            lux_lamp = context.lamp.pbrtv3_lamp
+            lux_lamp_area = lux_lamp.pbrtv3_lamp_area
+            is_laser = lux_lamp.pbrtv3_lamp_laser.is_laser
 
             super().draw(context)
 
@@ -225,7 +225,7 @@ class ui_luxcore_lamp(lamps_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('lamp', 'luxrender_lamp' ), 'luxcore_lamp', lambda: UseLuxCore() )
+        ( ('lamp', 'pbrtv3_lamp' ), 'luxcore_lamp', lambda: UseLuxCore() )
     ]
 
     def draw(self, context):

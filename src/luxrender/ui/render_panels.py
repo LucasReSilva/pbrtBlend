@@ -40,7 +40,7 @@ class render_panel(bl_ui.properties_render.RenderButtonsPanel, property_group_re
     Base class for render engine settings panels
     """
 
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
@@ -52,13 +52,13 @@ class render_settings(render_panel):
     bl_label = 'PBRTv3 Settings'
 
     display_property_groups = [
-        ( ('scene',), 'luxrender_rendermode', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_integrator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_sampler', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_volumeintegrator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_filter', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_accelerator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_halt', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_rendermode', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_integrator', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_sampler', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_volumeintegrator', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_filter', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_accelerator', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_halt', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
     ]
 
@@ -70,7 +70,7 @@ class render_settings(render_panel):
             row = layout.row(align=True)
             rd = context.scene.render
             split = layout.split()
-            row.menu("LUXRENDER_MT_presets_engine", text=bpy.types.LUXRENDER_MT_presets_engine.bl_label)
+            row.menu("PBRTv3_MT_presets_engine", text=bpy.types.PBRTv3_MT_presets_engine.bl_label)
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 
@@ -225,7 +225,7 @@ class device_settings(render_panel):
 
     def draw(self, context):
         engine_settings = context.scene.luxcore_enginesettings
-        render_mode = context.scene.luxrender_rendermode.rendermode
+        render_mode = context.scene.pbrtv3_rendermode.rendermode
     
         if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore()) \
                 or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'TILEPATH']
@@ -275,7 +275,7 @@ class device_settings(render_panel):
 
         if not UseLuxCore() and not 'ocl' in render_mode:
             # Classic Threads
-            threads = context.scene.luxrender_engine
+            threads = context.scene.pbrtv3_engine
             row = self.layout.row()
             row.prop(threads, 'threads_auto')
             if not threads.threads_auto:
@@ -296,8 +296,8 @@ class translator(render_panel):
 
     display_property_groups = [
         ( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
-        ( ('scene',), 'luxrender_engine', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxrender_testing', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_engine', lambda: not UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_testing', lambda: not UseLuxCore() ),
         ( ('scene',), 'luxcore_translatorsettings', lambda: UseLuxCore() ),
     ]
 
@@ -321,17 +321,17 @@ class networking(render_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('scene',), 'luxrender_networking', lambda: not UseLuxCore() )
+        ( ('scene',), 'pbrtv3_networking', lambda: not UseLuxCore() )
     ]
 
     def draw_header(self, context):
         if not UseLuxCore():
-            self.layout.prop(context.scene.luxrender_networking, "use_network_servers", text="")
+            self.layout.prop(context.scene.pbrtv3_networking, "use_network_servers", text="")
 
     def draw(self, context):
         if not UseLuxCore():
             row = self.layout.row(align=True)
-            row.menu("LUXRENDER_MT_presets_networking", text=bpy.types.LUXRENDER_MT_presets_networking.bl_label)
+            row.menu("PBRTv3_MT_presets_networking", text=bpy.types.PBRTv3_MT_presets_networking.bl_label)
             row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
         else:

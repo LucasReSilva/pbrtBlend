@@ -23,17 +23,17 @@
 #
 
 import bpy
-bpy.context.scene.luxrender_rendermode.rendermode = 'bidirectional'
-bpy.context.scene.luxrender_engine.fixed_seed = False
-bpy.context.scene.luxrender_sampler.sampler = 'metropolis'
-bpy.context.scene.luxrender_sampler.largemutationprob = 0.4000000059604645
-bpy.context.scene.luxrender_sampler.maxconsecrejects = 512
-bpy.context.scene.luxrender_sampler.usecooldown = False
-bpy.context.scene.luxrender_integrator.lightpathstrategy = 'auto'
-bpy.context.scene.luxrender_integrator.lightstrategy = 'auto'
-bpy.context.scene.luxrender_integrator.eyedepth = 48
-bpy.context.scene.luxrender_integrator.lightdepth = 48
-bpy.context.scene.luxrender_integrator.eyerrthreshold = 0.0
-bpy.context.scene.luxrender_integrator.lightrrthreshold = 0.0
-bpy.context.scene.luxrender_volumeintegrator.volumeintegrator = 'multi'
-bpy.context.scene.luxrender_volumeintegrator.stepsize = 1.0
+bpy.context.scene.pbrtv3_rendermode.rendermode = 'bidirectional'
+bpy.context.scene.pbrtv3_engine.fixed_seed = False
+bpy.context.scene.pbrtv3_sampler.sampler = 'metropolis'
+bpy.context.scene.pbrtv3_sampler.largemutationprob = 0.4000000059604645
+bpy.context.scene.pbrtv3_sampler.maxconsecrejects = 512
+bpy.context.scene.pbrtv3_sampler.usecooldown = False
+bpy.context.scene.pbrtv3_integrator.lightpathstrategy = 'auto'
+bpy.context.scene.pbrtv3_integrator.lightstrategy = 'auto'
+bpy.context.scene.pbrtv3_integrator.eyedepth = 48
+bpy.context.scene.pbrtv3_integrator.lightdepth = 48
+bpy.context.scene.pbrtv3_integrator.eyerrthreshold = 0.0
+bpy.context.scene.pbrtv3_integrator.lightrrthreshold = 0.0
+bpy.context.scene.pbrtv3_volumeintegrator.volumeintegrator = 'multi'
+bpy.context.scene.pbrtv3_volumeintegrator.stepsize = 1.0

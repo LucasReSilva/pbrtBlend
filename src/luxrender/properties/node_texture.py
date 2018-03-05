@@ -44,10 +44,10 @@ from ..extensions_framework import util as efutil
 from ..outputs import LuxManager
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
-from ..properties import (luxrender_texture_node, get_linked_node, check_node_get_paramset)
+from ..properties import (pbrtv3_texture_node, get_linked_node, check_node_get_paramset)
 from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
-from ..properties.texture import luxrender_tex_brick, luxrender_tex_imagemap, luxrender_tex_normalmap
+from ..properties.texture import pbrtv3_tex_brick, pbrtv3_tex_imagemap, pbrtv3_tex_normalmap
 
 
 # Define the list of noise types globally, this gets used by a few different nodes
@@ -82,9 +82,9 @@ triple_variant_items = [
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_blend(pbrtv3_texture_node):
     """Blend texture node"""
-    bl_idname = 'luxrender_texture_blender_blend_node'
+    bl_idname = 'pbrtv3_texture_blender_blend_node'
     bl_label = 'Blend Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -122,7 +122,7 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
     }
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -170,14 +170,14 @@ class luxrender_texture_type_node_blender_blend(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_brick(luxrender_texture_node):
+class pbrtv3_texture_type_node_brick(pbrtv3_texture_node):
     """Brick texture node"""
-    bl_idname = 'luxrender_texture_brick_node'
+    bl_idname = 'pbrtv3_texture_brick_node'
     bl_label = 'Brick Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
-    for prop in luxrender_tex_brick.properties:
+    for prop in pbrtv3_tex_brick.properties:
         if prop['attr'].startswith('brickbond'):
             brickbond_items = prop['items']
 
@@ -191,7 +191,7 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
     height = bpy.props.FloatProperty(name='Height', default=0.10, subtype='DISTANCE', unit='LENGTH')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         if not UseLuxCore():
@@ -212,9 +212,9 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
         if self.variant == 'color' or UseLuxCore():
             if not 'Brick Color' in si:  # If there aren't color inputs, create them
-                self.inputs.new('luxrender_TC_brickmodtex_socket', 'Brick Modulation Color')
-                self.inputs.new('luxrender_TC_bricktex_socket', 'Brick Color')
-                self.inputs.new('luxrender_TC_mortartex_socket', 'Mortar Color')
+                self.inputs.new('pbrtv3_TC_brickmodtex_socket', 'Brick Modulation Color')
+                self.inputs.new('pbrtv3_TC_bricktex_socket', 'Brick Color')
+                self.inputs.new('pbrtv3_TC_mortartex_socket', 'Mortar Color')
 
             if 'Brick Value' in si:  # If there are float inputs, destory them
                 self.inputs.remove(self.inputs['Brick Modulation Value'])
@@ -229,9 +229,9 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
         elif self.variant == 'float':
             if not 'Brick Value' in si:
-                self.inputs.new('luxrender_TF_brickmodtex_socket', 'Brick Modulation Value')
-                self.inputs.new('luxrender_TF_bricktex_socket', 'Brick Value')
-                self.inputs.new('luxrender_TF_mortartex_socket', 'Mortar Value')
+                self.inputs.new('pbrtv3_TF_brickmodtex_socket', 'Brick Modulation Value')
+                self.inputs.new('pbrtv3_TF_bricktex_socket', 'Brick Value')
+                self.inputs.new('pbrtv3_TF_mortartex_socket', 'Mortar Value')
 
             if 'Brick Color' in si:
                 self.inputs.remove(self.inputs['Brick Modulation Color'])
@@ -291,9 +291,9 @@ class luxrender_texture_type_node_brick(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_checker(luxrender_texture_node):
+class pbrtv3_texture_type_node_checker(pbrtv3_texture_node):
     """Checker texture node"""
-    bl_idname = 'luxrender_texture_checker_node'
+    bl_idname = 'pbrtv3_texture_checker_node'
     bl_label = 'Checkerboard Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -310,12 +310,12 @@ class luxrender_texture_type_node_checker(luxrender_texture_node):
                                        update=change_dimension)
 
     def init(self, context):
-        self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs.new('pbrtv3_color_socket', 'Color 1')
         self.inputs['Color 1'].default_value = [0.05] * 3
-        self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs.new('pbrtv3_color_socket', 'Color 2')
         self.inputs['Color 2'].default_value = [0.5] * 3
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.inputs[mapping_3d_socketname].enabled = False # Disabled by default because 2D is default dimension
 
         self.outputs.new('NodeSocketColor', 'Color')
@@ -351,9 +351,9 @@ class luxrender_texture_type_node_checker(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_clouds(pbrtv3_texture_node):
     """Clouds texture node"""
-    bl_idname = 'luxrender_texture_blender_clouds_node'
+    bl_idname = 'pbrtv3_texture_blender_clouds_node'
     bl_label = 'Clouds Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -368,7 +368,7 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -419,9 +419,9 @@ class luxrender_texture_type_node_blender_clouds(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_distortednoise(pbrtv3_texture_node):
     """Distorted noise texture node"""
-    bl_idname = 'luxrender_texture_blender_distortednoise_node'
+    bl_idname = 'pbrtv3_texture_blender_distortednoise_node'
     bl_label = 'Distorted Noise Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -437,7 +437,7 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -491,9 +491,9 @@ class luxrender_texture_type_node_blender_distortednoise(luxrender_texture_node)
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_fbm(luxrender_texture_node):
+class pbrtv3_texture_type_node_fbm(pbrtv3_texture_node):
     """FBM texture node"""
-    bl_idname = 'luxrender_texture_fbm_node'
+    bl_idname = 'pbrtv3_texture_fbm_node'
     bl_label = 'FBM Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -509,7 +509,7 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -581,9 +581,9 @@ class luxrender_texture_type_node_fbm(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_harlequin(luxrender_texture_node):
+class pbrtv3_texture_type_node_harlequin(pbrtv3_texture_node):
     """Harlequin texture node"""
-    bl_idname = 'luxrender_texture_harlequin_node'
+    bl_idname = 'pbrtv3_texture_harlequin_node'
     bl_label = 'Harlequin Texture'
     bl_icon = 'TEXTURE'
 
@@ -599,14 +599,14 @@ class luxrender_texture_type_node_harlequin(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_image_map(luxrender_texture_node):
-    """Image map texture node (deprecated, replaced by luxrender_texture_type_node_blender_image_map)"""
-    bl_idname = 'luxrender_texture_image_map_node'
+class pbrtv3_texture_type_node_image_map(pbrtv3_texture_node):
+    """Image map texture node (deprecated, replaced by pbrtv3_texture_type_node_blender_image_map)"""
+    bl_idname = 'pbrtv3_texture_image_map_node'
     bl_label = 'Classic Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
-    for prop in luxrender_tex_imagemap.properties:
+    for prop in pbrtv3_tex_imagemap.properties:
         if prop['attr'].startswith('filtertype'):
             filter_items = prop['items']
         if prop['attr'].startswith('wrap'):
@@ -627,7 +627,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
     discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         if UseLuxCore():
@@ -715,7 +715,7 @@ class luxrender_texture_type_node_image_map(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
+class PBRTv3_OT_open_image_wrapper(bpy.types.Operator):
     """
     Wrapper for Blender's load_image() function so we know which image was opened
     """
@@ -734,7 +734,7 @@ class LUXRENDER_OT_open_image_wrapper(bpy.types.Operator):
 
         # Find the node that requested the opened image and assign the image name, then reset its "requested" flag
         for node in context.space_data.node_tree.nodes:
-            if node.bl_idname == 'luxrender_texture_blender_image_map_node' and node.requested_image_load:
+            if node.bl_idname == 'pbrtv3_texture_blender_image_map_node' and node.requested_image_load:
                 node.image_name = image.name
                 node.requested_image_load = False
                 break
@@ -746,9 +746,9 @@ preview_collections = {}
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_image_map(pbrtv3_texture_node):
     """Blender image map texture node"""
-    bl_idname = 'luxrender_texture_blender_image_map_node'
+    bl_idname = 'pbrtv3_texture_blender_image_map_node'
     bl_label = 'Image Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
@@ -842,7 +842,7 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
     advanced = bpy.props.BoolProperty(name='Advanced', default=False, description='Show advanced options')
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketColor', 'Color')
         self.outputs.new('NodeSocketFloat', 'Bump')
         self.outputs['Bump'].enabled = False
@@ -1015,9 +1015,9 @@ class luxrender_texture_type_node_blender_image_map(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_marble(pbrtv3_texture_node):
     """Marble texture node"""
-    bl_idname = 'luxrender_texture_blender_marble_node'
+    bl_idname = 'pbrtv3_texture_blender_marble_node'
     bl_label = 'Marble Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1049,7 +1049,7 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1110,9 +1110,9 @@ class luxrender_texture_type_node_blender_marble(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_musgrave(pbrtv3_texture_node):
     """Musgrave texture node"""
-    bl_idname = 'luxrender_texture_blender_musgrave_node'
+    bl_idname = 'pbrtv3_texture_blender_musgrave_node'
     bl_label = 'Musgrave Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1140,7 +1140,7 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1219,14 +1219,14 @@ class luxrender_texture_type_node_blender_musgrave(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_normal_map(luxrender_texture_node):
+class pbrtv3_texture_type_node_normal_map(pbrtv3_texture_node):
     """Normal map texture node"""
-    bl_idname = 'luxrender_texture_normal_map_node'
+    bl_idname = 'pbrtv3_texture_normal_map_node'
     bl_label = 'Normal Map Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 220
 
-    for prop in luxrender_tex_normalmap.properties:
+    for prop in pbrtv3_tex_normalmap.properties:
         if prop['attr'].startswith('filtertype'):
             filter_items = prop['items']
         if prop['attr'].startswith('wrap'):
@@ -1241,7 +1241,7 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
     discardmipmaps = bpy.props.IntProperty(name='Discard Mipmaps', default=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1301,9 +1301,9 @@ class luxrender_texture_type_node_normal_map(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_stucci(pbrtv3_texture_node):
     """Stucci texture node"""
-    bl_idname = 'luxrender_texture_blender_stucci_node'
+    bl_idname = 'pbrtv3_texture_blender_stucci_node'
     bl_label = 'Stucci Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1326,7 +1326,7 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1379,14 +1379,14 @@ class luxrender_texture_type_node_blender_stucci(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_uv(luxrender_texture_node):
+class pbrtv3_texture_type_node_uv(pbrtv3_texture_node):
     """UV texture node"""
-    bl_idname = 'luxrender_texture_uv_node'
+    bl_idname = 'pbrtv3_texture_uv_node'
     bl_label = 'UV Test Texture'
     bl_icon = 'TEXTURE'
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
 
         self.outputs.new('NodeSocketColor', 'Color')
 
@@ -1416,9 +1416,9 @@ class luxrender_texture_type_node_uv(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_voronoi(pbrtv3_texture_node):
     """Voronoi texture node"""
-    bl_idname = 'luxrender_texture_blender_voronoi_node'
+    bl_idname = 'pbrtv3_texture_blender_voronoi_node'
     bl_label = 'Voronoi Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1447,7 +1447,7 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1511,15 +1511,15 @@ class luxrender_texture_type_node_blender_voronoi(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_windy(luxrender_texture_node):
+class pbrtv3_texture_type_node_windy(pbrtv3_texture_node):
     """Windy texture node"""
-    bl_idname = 'luxrender_texture_windy_node'
+    bl_idname = 'pbrtv3_texture_windy_node'
     bl_label = 'Windy Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 160
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def export_texture(self, make_texture):
@@ -1547,9 +1547,9 @@ class luxrender_texture_type_node_windy(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
+class pbrtv3_texture_type_node_blender_wood(pbrtv3_texture_node):
     """Wood texture node"""
-    bl_idname = 'luxrender_texture_blender_wood_node'
+    bl_idname = 'pbrtv3_texture_blender_wood_node'
     bl_label = 'Wood Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1580,7 +1580,7 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
     contrast = bpy.props.FloatProperty(name='Contrast', default=1.0, min=0)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1637,9 +1637,9 @@ class luxrender_texture_type_node_blender_wood(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
+class pbrtv3_texture_type_node_wrinkled(pbrtv3_texture_node):
     """Wrinkled texture node"""
-    bl_idname = 'luxrender_texture_wrinkled_node'
+    bl_idname = 'pbrtv3_texture_wrinkled_node'
     bl_label = 'Wrinkled Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 160
@@ -1648,7 +1648,7 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
     roughness = bpy.props.FloatProperty(name='Roughness', default=0.5, min=0, max=1)
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1684,9 +1684,9 @@ class luxrender_texture_type_node_wrinkled(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_cloud(luxrender_texture_node):
+class pbrtv3_texture_type_node_cloud(pbrtv3_texture_node):
     """Cloud volume texture node"""
-    bl_idname = 'luxrender_texture_vol_cloud_node'
+    bl_idname = 'pbrtv3_texture_vol_cloud_node'
     bl_label = 'Cloud Volume Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -1715,7 +1715,7 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
                                          description='Maxiumum size of cumulus spheres')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1758,9 +1758,9 @@ class luxrender_texture_type_node_cloud(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
+class pbrtv3_texture_type_node_vol_exponential(pbrtv3_texture_node):
     """Exponential texture node"""
-    bl_idname = 'luxrender_texture_vol_exponential_node'
+    bl_idname = 'pbrtv3_texture_vol_exponential_node'
     bl_label = 'Exponential Volume Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 230
@@ -1793,14 +1793,14 @@ class luxrender_texture_type_node_vol_exponential(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
+class pbrtv3_texture_type_node_vol_smoke_data(pbrtv3_texture_node):
     """Smoke Data node"""
-    bl_idname = 'luxrender_texture_vol_smoke_data_node'
+    bl_idname = 'pbrtv3_texture_vol_smoke_data_node'
     bl_label = 'Smoke Data Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 230
 
-    for prop in luxrender_tex_imagemap.properties:
+    for prop in pbrtv3_tex_imagemap.properties:
         if prop['attr'].startswith('wrap'):
             wrap_items = prop['items']
 
@@ -1814,7 +1814,7 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
     wrap = bpy.props.EnumProperty(name='Wrapping', items=wrap_items, default='black')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
@@ -1903,18 +1903,18 @@ class luxrender_texture_type_node_vol_smoke_data(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_dots(luxrender_texture_node):
+class pbrtv3_texture_type_node_dots(pbrtv3_texture_node):
     """Dots node"""
-    bl_idname = 'luxrender_texture_dots_node'
+    bl_idname = 'pbrtv3_texture_dots_node'
     bl_label = 'Dots Texture'
     bl_icon = 'TEXTURE'
     bl_width_min = 190
 
     def init(self, context):
-        self.inputs.new('luxrender_color_socket', 'Inside')
-        self.inputs.new('luxrender_color_socket', 'Outside')
+        self.inputs.new('pbrtv3_color_socket', 'Inside')
+        self.inputs.new('pbrtv3_color_socket', 'Outside')
         self.inputs['Outside'].default_value = (0.05, 0.05, 0.05)
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
@@ -1940,20 +1940,20 @@ class luxrender_texture_type_node_dots(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_bilerp(luxrender_texture_node):
+class pbrtv3_texture_type_node_bilerp(pbrtv3_texture_node):
     """Bilerp node"""
-    bl_idname = 'luxrender_texture_bilerp_node'
+    bl_idname = 'pbrtv3_texture_bilerp_node'
     bl_label = 'Bilerp'
     bl_icon = 'TEXTURE'
     bl_width_min = 190
 
     def init(self, context):
-        self.inputs.new('luxrender_color_socket', 'texture00')
+        self.inputs.new('pbrtv3_color_socket', 'texture00')
         self.inputs['texture00'].default_value = (0.05, 0.05, 0.05)
-        self.inputs.new('luxrender_color_socket', 'texture01')
+        self.inputs.new('pbrtv3_color_socket', 'texture01')
         self.inputs['texture01'].default_value = (0.05, 0.05, 0.05)
-        self.inputs.new('luxrender_color_socket', 'texture10')
-        self.inputs.new('luxrender_color_socket', 'texture11')
+        self.inputs.new('pbrtv3_color_socket', 'texture10')
+        self.inputs.new('pbrtv3_color_socket', 'texture11')
 
         self.outputs.new('NodeSocketColor', 'Color')
 

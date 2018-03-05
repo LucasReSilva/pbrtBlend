@@ -227,7 +227,7 @@ class ConfigExporter(object):
 
         if self.blender_scene.camera:
             export_to_luxcoreui = self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui'
-            transparent_film = self.blender_scene.camera.data.luxrender_camera.luxcore_imagepipeline.transparent_film
+            transparent_film = self.blender_scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film
             force_black_background = transparent_film and not export_to_luxcoreui
         else:
             force_black_background = False
@@ -414,12 +414,12 @@ class ConfigExporter(object):
         if self.blender_scene.camera is None:
             return
 
-        luxrender_camera = self.blender_scene.camera.data.luxrender_camera
-        output_switcher_channel = luxrender_camera.luxcore_imagepipeline.output_switcher_pass
-        channels = self.blender_scene.luxrender_channels
+        pbrtv3_camera = self.blender_scene.camera.data.pbrtv3_camera
+        output_switcher_channel = pbrtv3_camera.luxcore_imagepipeline.output_switcher_pass
+        channels = self.blender_scene.pbrtv3_channels
 
         convert_channels = channels.enable_aovs and (channels.import_into_blender or channels.saveToDisk)
-        transparent_film = luxrender_camera.luxcore_imagepipeline.transparent_film
+        transparent_film = pbrtv3_camera.luxcore_imagepipeline.transparent_film
 
         if convert_channels:
             if channels.RGB:
@@ -479,7 +479,7 @@ class ConfigExporter(object):
 
 
     def __convert_lightgroups(self):
-        if not self.blender_scene.luxrender_lightgroups.ignore:
+        if not self.blender_scene.pbrtv3_lightgroups.ignore:
             for i in range(len(self.luxcore_exporter.lightgroup_cache)):
                 self.convert_channel('RADIANCE_GROUP', i)
 

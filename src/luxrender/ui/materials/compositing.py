@@ -25,19 +25,19 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.materials import luxrender_material_base
+from ...ui.materials import pbrtv3_material_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_luxrender_mat_compositing(luxrender_material_base):
+class ui_pbrtv3_mat_compositing(pbrtv3_material_base):
     bl_label = 'PBRTv3 Material Compositing'
 
     display_property_groups = [
-        ( ('material', 'luxrender_material'), 'luxrender_mat_compositing' )
+        ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_compositing' )
     ]
 
     @classmethod
     def poll(cls, context):
-        if not hasattr(context.scene, 'luxrender_integrator'):
+        if not hasattr(context.scene, 'pbrtv3_integrator'):
             return False
-        return context.scene.luxrender_integrator.surfaceintegrator == 'distributedpath' and super().poll(context)
+        return context.scene.pbrtv3_integrator.surfaceintegrator == 'distributedpath' and super().poll(context)

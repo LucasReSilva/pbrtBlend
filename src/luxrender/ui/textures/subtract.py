@@ -25,15 +25,15 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_subtract(luxrender_texture_base):
+class ui_texture_subtract(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Subtract Texture'
 
     LUX_COMPAT = {'subtract'}
 
     display_property_groups = [
-        ( ('texture', 'luxrender_texture'), 'luxrender_tex_subtract' )
+        ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_subtract' )
     ]

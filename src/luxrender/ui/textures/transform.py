@@ -25,11 +25,11 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_transform(luxrender_texture_base):
+class ui_texture_transform(pbrtv3_texture_base):
     bl_label = 'PBRTv3 3D Texture Transform'
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -38,5 +38,5 @@ class ui_texture_transform(luxrender_texture_base):
     BL_COMPAT = {'BLEND', 'CLOUDS', 'DISTORTED_NOISE', 'MAGIC', 'MARBLE', 'MUSGRAVE', 'STUCCI', 'VORONOI', 'WOOD'}
 
     display_property_groups = [
-        ( ('texture', 'luxrender_texture'), 'luxrender_tex_transform' )
+        ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_transform' )
     ]

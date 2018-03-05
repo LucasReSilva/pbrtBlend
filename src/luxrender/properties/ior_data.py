@@ -355,7 +355,7 @@ ior_dict = {
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
+class PBRTv3_OT_set_old_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_old_ior_preset'
     bl_label = 'Apply IOR preset'
 
@@ -400,27 +400,27 @@ class LUXRENDER_OT_set_old_ior_preset(bpy.types.Operator):
                     lm.cauchy_n_presetstring = name
 
         else:
-            if context.material and context.material.luxrender_material and not context.texture:
-                lm = context.material.luxrender_material
+            if context.material and context.material.pbrtv3_material and not context.texture:
+                lm = context.material.pbrtv3_material
                 for mat_type in ('glass', 'roughglass', 'glossy', 'glossycoating', 'glossy_lossy', 'glossytranslucent'):
                     if lm.type == mat_type:
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).index_floatvalue = ior
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).index_presetvalue = ior
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).index_presetstring = name
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).index_floatvalue = ior
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).index_presetvalue = ior
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).index_presetstring = name
                 for mat_type in ('mirror', 'shinymetal'):
                     if lm.type == mat_type:
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).filmindex_floatvalue = ior
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).filmindex_presetvalue = ior
-                        getattr(lm, 'luxrender_mat_%s' % mat_type).filmindex_presetstring = name
-            elif context.texture.luxrender_texture.luxrender_tex_cauchy:
-                context.texture.luxrender_texture.luxrender_tex_cauchy.ior = ior
-                context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetvalue = ior
-                context.texture.luxrender_texture.luxrender_tex_cauchy.ior_presetstring = name
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).filmindex_floatvalue = ior
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).filmindex_presetvalue = ior
+                        getattr(lm, 'pbrtv3_mat_%s' % mat_type).filmindex_presetstring = name
+            elif context.texture.pbrtv3_texture.pbrtv3_tex_cauchy:
+                context.texture.pbrtv3_texture.pbrtv3_tex_cauchy.ior = ior
+                context.texture.pbrtv3_texture.pbrtv3_tex_cauchy.ior_presetvalue = ior
+                context.texture.pbrtv3_texture.pbrtv3_tex_cauchy.ior_presetstring = name
         return {'FINISHED'}
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
+class PBRTv3_OT_set_volume_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_volume_ior_preset'
     bl_label = 'Apply Volume IOR preset'
 
@@ -431,9 +431,9 @@ class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
         ior = ior_dict[self.properties.index]
         name = self.properties.l_name
 
-        if context.scene and context.scene.luxrender_volumes and not context.texture:
-            vi = context.scene.luxrender_volumes.volumes_index
-            lv = context.scene.luxrender_volumes.volumes[vi]
+        if context.scene and context.scene.pbrtv3_volumes and not context.texture:
+            vi = context.scene.pbrtv3_volumes.volumes_index
+            lv = context.scene.pbrtv3_volumes.volumes[vi]
             lv.fresnel_fresnelvalue = ior
             lv.fresnel_presetvalue = ior
             lv.fresnel_presetstring = name
@@ -442,7 +442,7 @@ class LUXRENDER_OT_set_volume_ior_preset(bpy.types.Operator):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
+class PBRTv3_OT_set_coating_ior_preset(bpy.types.Operator):
     bl_idname = 'luxrender.set_coating_ior_preset'
     bl_label = 'Apply IOR preset'
 
@@ -453,8 +453,8 @@ class LUXRENDER_OT_set_coating_ior_preset(bpy.types.Operator):
         ior = ior_dict[self.properties.index]
         name = self.properties.l_name
 
-        if context.material and context.material.luxrender_coating:
-            lc = context.material.luxrender_coating
+        if context.material and context.material.pbrtv3_coating:
+            lc = context.material.pbrtv3_coating
             lc.index_floatvalue = ior
             lc.index_presetvalue = ior
             lc.index_presetstring = name
@@ -479,7 +479,7 @@ def draw_generator(operator, m_names):
 def create_ior_menu(name, opname):
     submenus = []
     for label, iors in ior_tree:
-        submenu_idname = 'LUXRENDER_MT_ior_%s_cat%d' % (name, len(submenus))
+        submenu_idname = 'PBRTv3_MT_ior_%s_cat%d' % (name, len(submenus))
         submenus.append(
             PBRTv3Addon.addon_register_class(type(
                 submenu_idname,
@@ -495,7 +495,7 @@ def create_ior_menu(name, opname):
     return submenus
 
 
-class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
+class PBRTv3_MT_ior_presets_base(bpy.types.Menu):
     def draw(self, context):
         sl = self.layout
 
@@ -504,21 +504,21 @@ class LUXRENDER_MT_ior_presets_base(bpy.types.Menu):
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_ior_presets(LUXRENDER_MT_ior_presets_base):
+class PBRTv3_MT_ior_presets(PBRTv3_MT_ior_presets_base):
     bl_label = 'IOR Presets'
 
-    submenus = create_ior_menu('old', 'LUXRENDER_OT_set_old_ior_preset')
+    submenus = create_ior_menu('old', 'PBRTv3_OT_set_old_ior_preset')
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_ior_presets_volumes(LUXRENDER_MT_ior_presets_base):
+class PBRTv3_MT_ior_presets_volumes(PBRTv3_MT_ior_presets_base):
     bl_label = 'Volume IOR Presets'
 
-    submenus = create_ior_menu('volume', 'LUXRENDER_OT_set_volume_ior_preset')
+    submenus = create_ior_menu('volume', 'PBRTv3_OT_set_volume_ior_preset')
 
 
 @PBRTv3Addon.addon_register_class
-class LUXRENDER_MT_coating_ior_presets(LUXRENDER_MT_ior_presets_base):
+class PBRTv3_MT_coating_ior_presets(PBRTv3_MT_ior_presets_base):
     bl_label = 'IOR Presets'
 
-    submenus = create_ior_menu('coating', 'LUXRENDER_OT_set_coating_ior_preset')
+    submenus = create_ior_menu('coating', 'PBRTv3_OT_set_coating_ior_preset')

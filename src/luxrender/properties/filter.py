@@ -31,7 +31,7 @@ from ..export import ParamSet
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_filter(declarative_property_group):
+class pbrtv3_filter(declarative_property_group):
     """
     Storage class for LuxRender PixelFilter settings.
     """
@@ -76,7 +76,7 @@ class luxrender_filter(declarative_property_group):
             'attr': 'filter',
             'name': 'Filter',
             'description': 'Pixel splatting filter',
-            'default': 'blackmanharris',
+            'default': 'box',
             'items': [
                 ('box', 'Box', 'Box filter'),
                 ('gaussian', 'Gaussian', 'Gaussian filter'),
@@ -101,7 +101,7 @@ class luxrender_filter(declarative_property_group):
             'attr': 'filter_width',
             'name': 'Filter Width',
             'description': 'Width of pixel filter curve. Higher values are smoother and more blurred',
-            'default': 2.0,
+            'default': 0.5,
             'min': 0.5,
             'soft_min': 0.5,
             'max': 10.0,

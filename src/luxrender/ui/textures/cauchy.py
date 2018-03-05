@@ -25,26 +25,26 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ... import PBRTv3Addon
-from ...ui.textures import luxrender_texture_base
+from ...ui.textures import pbrtv3_texture_base
 
 
 @PBRTv3Addon.addon_register_class
-class ui_texture_cauchy(luxrender_texture_base):
+class ui_texture_cauchy(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Cauchy Texture'
 
     LUX_COMPAT = {'cauchy'}
 
     display_property_groups = [
-        ( ('texture', 'luxrender_texture'), 'luxrender_tex_cauchy' )
+        ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_cauchy' )
     ]
 
     def draw_ior_menu(self, context):
         """
         This is a draw callback from property_group_renderer, due
-        to ef_callback item in luxrender_tex_<tex>.properties
+        to ef_callback item in pbrtv3_tex_<tex>.properties
         """
 
-        lmg = context.texture.luxrender_texture.luxrender_tex_cauchy
+        lmg = context.texture.pbrtv3_texture.pbrtv3_tex_cauchy
 
         if lmg.ior == lmg.ior_presetvalue:
             menu_text = lmg.ior_presetstring
@@ -52,4 +52,4 @@ class ui_texture_cauchy(luxrender_texture_base):
             menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
-        cl.menu('LUXRENDER_MT_ior_presets', text=menu_text)
+        cl.menu('PBRTv3_MT_ior_presets', text=menu_text)

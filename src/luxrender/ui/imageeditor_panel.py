@@ -35,7 +35,7 @@ from .. import PBRTv3Addon
 class imageeditor_panel(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     @classmethod
     def poll(cls, context):
@@ -46,7 +46,7 @@ class imageeditor_panel(property_group_renderer):
 @PBRTv3Addon.addon_register_class
 class rendering_controls_panel(imageeditor_panel):
     bl_label = 'LuxRender Controls'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):
         if context.scene.luxcore_rendering_controls.pause_render:
@@ -63,7 +63,7 @@ class rendering_controls_panel(imageeditor_panel):
 @PBRTv3Addon.addon_register_class
 class tonemapping_panel(imageeditor_panel):
     bl_label = 'LuxRender Imagepipeline'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):
         layout = self.layout
@@ -76,7 +76,7 @@ class tonemapping_panel(imageeditor_panel):
             layout.label('No camera in scene.')
             return
 
-        lux_cam = context.scene.camera.data.luxrender_camera
+        lux_cam = context.scene.camera.data.pbrtv3_camera
         imagepipeline_settings = lux_cam.luxcore_imagepipeline
 
         layout.prop(imagepipeline_settings, 'displayinterval')
@@ -115,7 +115,7 @@ class tonemapping_panel(imageeditor_panel):
         layout.label('Analog Film Simulation:')
         layout.prop(imagepipeline_settings, 'crf_type', expand=True)
         if imagepipeline_settings.crf_type == 'PRESET':
-            layout.menu('IMAGEPIPELINE_MT_luxrender_crf', text=imagepipeline_settings.crf_preset)
+            layout.menu('IMAGEPIPELINE_MT_pbrtv3_crf', text=imagepipeline_settings.crf_preset)
         elif imagepipeline_settings.crf_type == 'FILE':
             layout.prop(imagepipeline_settings, 'crf_file')
 
@@ -133,10 +133,10 @@ class tonemapping_panel(imageeditor_panel):
 
         # Background plugin (needs alpha pass. If alpha pass is not available, it cannot be activated during render)
         alpha_pass_available = True
-        if not context.scene.luxrender_channels.enable_aovs:
+        if not context.scene.pbrtv3_channels.enable_aovs:
             layout.label('Not available (passes disabled)', icon='ERROR')
             alpha_pass_available = False
-        elif not context.scene.luxrender_channels.ALPHA:
+        elif not context.scene.pbrtv3_channels.ALPHA:
             layout.label('Not available (Alpha pass disabled)', icon='ERROR')
             alpha_pass_available = False
 
@@ -151,10 +151,10 @@ class tonemapping_panel(imageeditor_panel):
 
         # Mist plugin (needs depth pass. If depth pass is not available, it cannot be activated during render)
         depth_pass_available = True
-        if not context.scene.luxrender_channels.enable_aovs:
+        if not context.scene.pbrtv3_channels.enable_aovs:
             layout.label('Not available (passes disabled)', icon='ERROR')
             depth_pass_available = False
-        elif not context.scene.luxrender_channels.DEPTH:
+        elif not context.scene.pbrtv3_channels.DEPTH:
             layout.label('Not available (Depth pass disabled)', icon='ERROR')
             depth_pass_available = False
 
@@ -174,7 +174,7 @@ class tonemapping_panel(imageeditor_panel):
 @PBRTv3Addon.addon_register_class
 class halt_conditions_panel(imageeditor_panel):
     bl_label = 'LuxRender Halt Conditions'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
     @classmethod
@@ -208,7 +208,7 @@ class halt_conditions_panel(imageeditor_panel):
 @PBRTv3Addon.addon_register_class
 class rendering_statistics_panel(imageeditor_panel):
     bl_label = 'LuxRender Statistics'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):
         box = self.layout.box()

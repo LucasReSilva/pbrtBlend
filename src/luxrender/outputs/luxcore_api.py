@@ -83,7 +83,7 @@ def FlattenStrCollection(coll):
 
 
 def UseLuxCore():
-    return True if bpy.context.scene.luxrender_engine.selected_luxrender_api == 'luxcore' else False
+    return True if bpy.context.scene.pbrtv3_engine.selected_pbrtv3_api == 'luxcore' else False
 
 
 def ScenePrefix():

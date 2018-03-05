@@ -37,7 +37,7 @@ class luxcore_lamp(declarative_property_group):
     Storage class for LuxCore lamp settings.
     """
 
-    ef_attach_to = ['luxrender_lamp']
+    ef_attach_to = ['pbrtv3_lamp']
 
     controls = [
         ['label_rgb_gain', 'gain_r', 'gain_g', 'gain_b'],

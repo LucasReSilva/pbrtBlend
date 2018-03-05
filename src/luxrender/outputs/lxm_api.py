@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ..outputs import LuxLog
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 
 
 class Custom_Context(object):
@@ -94,7 +94,7 @@ class Custom_Context(object):
 
     def portalInstance(self, name):
         # Backwards compatibility
-        if LUXRENDER_VERSION < '0.8':
+        if PBRTv3_VERSION < '0.8':
             LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
             self._api('ObjectInstance ', [name, []])
         else:

@@ -40,7 +40,7 @@ class render_layers_panel(bl_ui.properties_render.RenderButtonsPanel, property_g
     Base class for render layer settings panels
     """
 
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
@@ -186,15 +186,15 @@ class lightgroups_base(object):
         # Merge button
         if not self.is_imageeditor_panel:
             row = self.layout.row()
-            row.prop(context.scene.luxrender_lightgroups, 'ignore')
+            row.prop(context.scene.pbrtv3_lightgroups, 'ignore')
 
         # Default lightgroup (LuxCore only)
         if UseLuxCore():
-            draw_lightgroup(context.scene.luxrender_lightgroups)
+            draw_lightgroup(context.scene.pbrtv3_lightgroups)
 
         # Normal light groups, this is a "special" panel section
-        for lg_index in range(len(context.scene.luxrender_lightgroups.lightgroups)):
-            lg = context.scene.luxrender_lightgroups.lightgroups[lg_index]
+        for lg_index in range(len(context.scene.pbrtv3_lightgroups.lightgroups)):
+            lg = context.scene.pbrtv3_lightgroups.lightgroups[lg_index]
             draw_lightgroup(lg, lg_index)
 
         if not self.is_imageeditor_panel:
@@ -215,7 +215,7 @@ class lightgroups_imageeditor(lightgroups_base, imageeditor_panel):
 class lightgroups_lamps(lightgroups_base, lamps_panel):
     @classmethod
     def poll(cls, context):
-        return super().poll(context) and context.lamp.luxrender_lamp.lightgroup
+        return super().poll(context) and context.lamp.pbrtv3_lamp.lightgroup
 
 
 @PBRTv3Addon.addon_register_class
@@ -266,8 +266,8 @@ class materialgroups(render_layers_panel):
                 row.prop(mg, 'create_BY_MATERIAL_ID')
 
         # Draw all material groups
-        for mg_index in range(len(context.scene.luxrender_materialgroups.materialgroups)):
-            mg = context.scene.luxrender_materialgroups.materialgroups[mg_index]
+        for mg_index in range(len(context.scene.pbrtv3_materialgroups.materialgroups)):
+            mg = context.scene.pbrtv3_materialgroups.materialgroups[mg_index]
             draw_materialgroup(mg, mg_index)
 
         self.layout.operator('luxrender.materialgroup_add', text='Add Materialgroup', icon='ZOOMIN')
@@ -284,7 +284,7 @@ class passes_aov(render_layers_panel):
     bl_context = "render_layer"
 
     display_property_groups = [
-        ( ('scene',), 'luxrender_lightgroups' )
+        ( ('scene',), 'pbrtv3_lightgroups' )
     ]
 
     def draw_header(self, context):
@@ -296,7 +296,7 @@ class passes_aov(render_layers_panel):
 
         if UseLuxCore():
             # Show AOV channel panel
-            channels = context.scene.luxrender_channels
+            channels = context.scene.pbrtv3_channels
             split = layout.split()
             col = split.column()
 

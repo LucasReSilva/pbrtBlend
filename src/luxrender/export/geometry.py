@@ -40,7 +40,7 @@ from ..export.materials import get_material_volume_defs
 from ..export import LuxManager
 from ..export import is_obj_visible
 from ..properties import find_node
-from ..properties.node_material import luxrender_texture_maker
+from ..properties.node_material import pbrtv3_texture_maker
 
 
 class InvalidGeometryException(Exception):
@@ -123,28 +123,28 @@ class GeometryExporter(object):
 
         # Mesh data name first for portal reasons
         ext_mesh_name = '%s_%s_ext' % (obj.data.name, self.geometry_scene.name)
-        if obj.luxrender_object.append_proxy:
-            if obj.luxrender_object.hide_proxy_mesh:
+        if obj.pbrtv3_object.append_proxy:
+            if obj.pbrtv3_object.hide_proxy_mesh:
                 export_original = False
 
             if self.allow_instancing(obj) and self.ExportedMeshes.have(ext_mesh_name):
                 mesh_definitions.append(self.ExportedMeshes.get(ext_mesh_name))
             else:
                 ext_params = ParamSet()
-                if obj.luxrender_object.proxy_type in {'plymesh', 'stlmesh'}:
+                if obj.pbrtv3_object.proxy_type in {'plymesh', 'stlmesh'}:
                     ext_params.add_string('filename',
-                                          efutil.path_relative_to_export(obj.luxrender_object.external_mesh))
-                    ext_params.add_bool('smooth', obj.luxrender_object.use_smoothing)
-                if obj.luxrender_object.proxy_type in {'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'}:
-                    ext_params.add_float('radius', obj.luxrender_object.radius)
-                    ext_params.add_float('phimax', obj.luxrender_object.phimax * (180 / math.pi))
-                if obj.luxrender_object.proxy_type in {'cylinder', 'paraboloid'}:
-                    ext_params.add_float('zmax', obj.luxrender_object.zmax)
-                if obj.luxrender_object.proxy_type == 'cylinder':
-                    ext_params.add_float('zmin', obj.luxrender_object.zmin)
+                                          efutil.path_relative_to_export(obj.pbrtv3_object.external_mesh))
+                    ext_params.add_bool('smooth', obj.pbrtv3_object.use_smoothing)
+                if obj.pbrtv3_object.proxy_type in {'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'}:
+                    ext_params.add_float('radius', obj.pbrtv3_object.radius)
+                    ext_params.add_float('phimax', obj.pbrtv3_object.phimax * (180 / math.pi))
+                if obj.pbrtv3_object.proxy_type in {'cylinder', 'paraboloid'}:
+                    ext_params.add_float('zmax', obj.pbrtv3_object.zmax)
+                if obj.pbrtv3_object.proxy_type == 'cylinder':
+                    ext_params.add_float('zmin', obj.pbrtv3_object.zmin)
 
                 proxy_material = obj.active_material.name if obj.active_material else ""
-                mesh_definition = (ext_mesh_name, proxy_material, obj.luxrender_object.proxy_type, ext_params)
+                mesh_definition = (ext_mesh_name, proxy_material, obj.pbrtv3_object.proxy_type, ext_params)
                 mesh_definitions.append(mesh_definition)
 
                 # Only export objectBegin..objectEnd and cache this mesh_definition if we plan to use instancing
@@ -154,13 +154,13 @@ class GeometryExporter(object):
 
         if export_original:
             # Choose the mesh export type, if set, or use the default
-            mesh_type = obj.data.luxrender_mesh.mesh_type
+            mesh_type = obj.data.pbrtv3_mesh.mesh_type
 
             # If the rendering is INT and not writing to disk, we must use native mesh format
-            internal_nofiles = self.visibility_scene.luxrender_engine.export_type == 'INT' and not \
-                self.visibility_scene.luxrender_engine.write_files
+            internal_nofiles = self.visibility_scene.pbrtv3_engine.export_type == 'INT' and not \
+                self.visibility_scene.pbrtv3_engine.write_files
 
-            global_type = 'native' if internal_nofiles else self.visibility_scene.luxrender_engine.mesh_type
+            global_type = 'native' if internal_nofiles else self.visibility_scene.pbrtv3_engine.mesh_type
 
             if mesh_type == 'native' or (mesh_type == 'global' and global_type == 'native'):
                 mesh_definitions.extend(self.buildNativeMesh(obj))
@@ -244,7 +244,7 @@ class GeometryExporter(object):
                     # skip writing the PLY file if the box is checked
                     skip_exporting = obj in self.KnownExportedObjects and not obj in self.KnownModifiedObjects
 
-                    if not os.path.exists(ply_path) or not (self.visibility_scene.luxrender_engine.partial_ply and
+                    if not os.path.exists(ply_path) or not (self.visibility_scene.pbrtv3_engine.partial_ply and
                                                                 skip_exporting):
 
                         GeometryExporter.NewExportedObjects.add(obj)
@@ -430,7 +430,7 @@ class GeometryExporter(object):
                     shape_params = ParamSet().add_string('filename', efutil.path_relative_to_export(ply_path))
 
                     # Add subdiv etc options
-                    shape_params.update(obj.data.luxrender_mesh.get_paramset())
+                    shape_params.update(obj.data.pbrtv3_mesh.get_paramset())
 
                     mesh_definition = (mesh_name, i, 'plymesh', shape_params)
                     mesh_definitions.append(mesh_definition)
@@ -500,11 +500,11 @@ class GeometryExporter(object):
                     # mesh_name must start with mesh data name to match with portals
                     mesh_name = '%s-%s_m%03d' % (obj.data.name, self.geometry_scene.name, i)
 
-                    if self.visibility_scene.luxrender_testing.object_analysis:
+                    if self.visibility_scene.pbrtv3_testing.object_analysis:
                         print(' -> NativeMesh:')
-                    if self.visibility_scene.luxrender_testing.object_analysis:
+                    if self.visibility_scene.pbrtv3_testing.object_analysis:
                         print('  -> Material index: %d' % i)
-                    if self.visibility_scene.luxrender_testing.object_analysis:
+                    if self.visibility_scene.pbrtv3_testing.object_analysis:
                         print('  -> derived mesh name: %s' % mesh_name)
 
                     uv_textures = mesh.tessface_uv_textures
@@ -590,7 +590,7 @@ class GeometryExporter(object):
                         shape_params.add_float('uv', uvs)
 
                     # Add other properties from LuxRender Mesh panel
-                    shape_params.update(obj.data.luxrender_mesh.get_paramset())
+                    shape_params.update(obj.data.pbrtv3_mesh.get_paramset())
 
                     mesh_definition = (mesh_name, i, 'mesh', shape_params)
                     mesh_definitions.append(mesh_definition)
@@ -615,11 +615,11 @@ class GeometryExporter(object):
 
     def allow_instancing(self, obj):
         # Portals are always instances
-        if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
+        if obj.type == 'MESH' and obj.data.pbrtv3_mesh.portal:
             return True
 
-        if obj.type == 'MESH' and obj.data.luxrender_mesh.instancing_mode != 'auto':
-            return obj.data.luxrender_mesh.instancing_mode == 'always'
+        if obj.type == 'MESH' and obj.data.pbrtv3_mesh.instancing_mode != 'auto':
+            return obj.data.pbrtv3_mesh.instancing_mode == 'always'
 
         # If the object is animated, for motion blur we need instances
         if self.is_object_animated(obj)[0]:
@@ -665,7 +665,7 @@ class GeometryExporter(object):
 
         # We need the transform in the object definition if this is a portal, since
         # an objectInstance won't be exported for it.
-        if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
+        if obj.type == 'MESH' and obj.data.pbrtv3_mesh.portal:
             self.lux_context.transform(matrix_to_list(obj.matrix_world, apply_worldscale=True))
 
         me_shape_params.add_string('name', obj.name)
@@ -682,7 +682,7 @@ class GeometryExporter(object):
 
         # Emission check
         if ob_mat is not None:
-            output_node = find_node(ob_mat, 'luxrender_material_output_node')
+            output_node = find_node(ob_mat, 'pbrtv3_material_output_node')
             object_is_emitter = False
             light_node = None
 
@@ -694,19 +694,19 @@ class GeometryExporter(object):
                     object_is_emitter = light_socket.is_linked
             else:
                 # No node tree, so check the classic mat editor
-                object_is_emitter = ob_mat.luxrender_emission.use_emission
+                object_is_emitter = ob_mat.pbrtv3_emission.use_emission
 
             # Only add the AreaLightSource if this object's emission lightgroup is enabled
             if object_is_emitter and \
-                    self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
-                if not self.visibility_scene.luxrender_lightgroups.ignore:
-                    self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+                    self.visibility_scene.pbrtv3_lightgroups.is_enabled(ob_mat.pbrtv3_emission.lightgroup):
+                if not self.visibility_scene.pbrtv3_lightgroups.ignore:
+                    self.lux_context.lightGroup(ob_mat.pbrtv3_emission.lightgroup, [])
 
-                if not ob_mat.luxrender_material.nodetree:
-                    self.lux_context.areaLightSource(*ob_mat.luxrender_emission.api_output(ob_mat))
+                if not ob_mat.pbrtv3_material.nodetree:
+                    self.lux_context.areaLightSource(*ob_mat.pbrtv3_emission.api_output(ob_mat))
                 elif light_node is not None:
                     # Texture exporting
-                    tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+                    tex_maker = pbrtv3_texture_maker(self.lux_context, ob_mat.pbrtv3_material.nodetree)
                     self.lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
 
         self.lux_context.shape(me_shape_type, me_shape_params)
@@ -724,15 +724,15 @@ class GeometryExporter(object):
         # object motion blur
         is_object_animated = False
 
-        if self.visibility_scene.camera.data.luxrender_camera.usemblur and \
-                self.visibility_scene.camera.data.luxrender_camera.objectmblur:
+        if self.visibility_scene.camera.data.pbrtv3_camera.usemblur and \
+                self.visibility_scene.camera.data.pbrtv3_camera.objectmblur:
             if matrix is not None and matrix[1] is not None:
                 next_matrices = [matrix[1]]
                 is_object_animated = True
             else:
                 # grab a bunch of fractional-frame fcurve_matrices and export
                 # several motionInstances for non-linear motion blur
-                steps = self.geometry_scene.camera.data.luxrender_camera.motion_blur_samples
+                steps = self.geometry_scene.camera.data.pbrtv3_camera.motion_blur_samples
 
                 # object_anim_matrices returns steps+1 matrices, ie start and end of frame
                 # we don't want the start matrix
@@ -746,7 +746,7 @@ class GeometryExporter(object):
 
     def exportShapeInstances(self, obj, mesh_definitions, matrix=None, parent=None):
         # Don't export instances of portal meshes
-        if obj.type == 'MESH' and obj.data.luxrender_mesh.portal:
+        if obj.type == 'MESH' and obj.data.pbrtv3_mesh.portal:
             return
 
         # or empty definitions
@@ -807,21 +807,21 @@ class GeometryExporter(object):
                 # Export material definition
                 if self.lux_context.API_TYPE == 'FILE':
                     self.lux_context.set_output_file(Files.MATS)
-                    mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context,
+                    mat_export_result = ob_mat.pbrtv3_material.export(self.visibility_scene, self.lux_context,
                                                                          ob_mat, mode='indirect')
                     self.lux_context.set_output_file(Files.GEOM)
 
                     if not 'CLAY' in mat_export_result:
                         self.lux_context.namedMaterial(ob_mat.name)
                 elif self.lux_context.API_TYPE == 'PURE':
-                    mat_export_result = ob_mat.luxrender_material.export(self.visibility_scene, self.lux_context,
+                    mat_export_result = ob_mat.pbrtv3_material.export(self.visibility_scene, self.lux_context,
                                                                          ob_mat, mode='direct')
 
                 # We need to check the material's output node for a light-emission connection
-                output_node = find_node(ob_mat, 'luxrender_material_output_node')
+                output_node = find_node(ob_mat, 'pbrtv3_material_output_node')
                 light_node = None
 
-                if ob_mat.luxrender_material.nodetree:
+                if ob_mat.pbrtv3_material.nodetree:
                     object_is_emitter = False
 
                 if output_node is not None:
@@ -831,20 +831,20 @@ class GeometryExporter(object):
                         light_node = light_socket.links[0].from_node
                         object_is_emitter = light_socket.is_linked
                 else:  # no node tree, so check the classic mat editor
-                    object_is_emitter = ob_mat.luxrender_emission.use_emission
+                    object_is_emitter = ob_mat.pbrtv3_emission.use_emission
 
                 # If exporting an instance, we need to set emission in the ObjectBegin/End block
                 if object_is_emitter and not self.allow_instancing(mat_object):
                     # Only add the AreaLightSource if this object's emission lightgroup is enabled
-                    if self.visibility_scene.luxrender_lightgroups.is_enabled(ob_mat.luxrender_emission.lightgroup):
-                        if not self.visibility_scene.luxrender_lightgroups.ignore:
-                            self.lux_context.lightGroup(ob_mat.luxrender_emission.lightgroup, [])
+                    if self.visibility_scene.pbrtv3_lightgroups.is_enabled(ob_mat.pbrtv3_emission.lightgroup):
+                        if not self.visibility_scene.pbrtv3_lightgroups.ignore:
+                            self.lux_context.lightGroup(ob_mat.pbrtv3_emission.lightgroup, [])
 
-                        if not ob_mat.luxrender_material.nodetree:
-                            self.lux_context.areaLightSource(*ob_mat.luxrender_emission.api_output(ob_mat))
+                        if not ob_mat.pbrtv3_material.nodetree:
+                            self.lux_context.areaLightSource(*ob_mat.pbrtv3_emission.api_output(ob_mat))
                         elif light_node is not None:
                             # texture exporting
-                            tex_maker = luxrender_texture_maker(self.lux_context, ob_mat.luxrender_material.nodetree)
+                            tex_maker = pbrtv3_texture_maker(self.lux_context, ob_mat.pbrtv3_material.nodetree)
                             self.lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
                     else:
                         object_is_emitter = False
@@ -852,12 +852,12 @@ class GeometryExporter(object):
                 int_v, ext_v = get_material_volume_defs(ob_mat)
                 if int_v:
                     self.lux_context.interior(int_v)
-                elif self.geometry_scene.luxrender_world.default_interior_volume:
-                    self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
+                elif self.geometry_scene.pbrtv3_world.default_interior_volume:
+                    self.lux_context.interior(self.geometry_scene.pbrtv3_world.default_interior_volume)
                 if ext_v:
                     self.lux_context.exterior(ext_v)
-                elif self.geometry_scene.luxrender_world.default_exterior_volume:
-                    self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
+                elif self.geometry_scene.pbrtv3_world.default_exterior_volume:
+                    self.lux_context.exterior(self.geometry_scene.pbrtv3_world.default_exterior_volume)
 
             else:
                 object_is_emitter = False
@@ -932,7 +932,7 @@ class GeometryExporter(object):
             LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
             return
 
-        if not bpy.context.scene.luxrender_engine.export_hair:
+        if not bpy.context.scene.pbrtv3_engine.export_hair:
             return
 
         for mod in obj.modifiers:
@@ -947,10 +947,10 @@ class GeometryExporter(object):
 
         LuxLog('Exporting Hair system "%s"...' % psys.name)
 
-        hair_size = psys.settings.luxrender_hair.hair_size
-        root_width = psys.settings.luxrender_hair.root_width
-        tip_width = psys.settings.luxrender_hair.tip_width
-        width_offset = psys.settings.luxrender_hair.width_offset
+        hair_size = psys.settings.pbrtv3_hair.hair_size
+        root_width = psys.settings.pbrtv3_hair.root_width
+        tip_width = psys.settings.pbrtv3_hair.tip_width
+        width_offset = psys.settings.pbrtv3_hair.width_offset
 
         psys.set_resolution(self.geometry_scene, obj, 'RENDER')
         steps = 2 ** psys.settings.render_step
@@ -969,7 +969,7 @@ class GeometryExporter(object):
         det = DupliExportProgressThread()
         det.start(num_parents + num_children)
 
-        if psys.settings.luxrender_hair.use_binary_output:
+        if psys.settings.pbrtv3_hair.use_binary_output:
             # Put HAIR_FILES files in frame-numbered subfolders to avoid
             # clobbering when rendering animations
             sc_fr = '%s/%s/%s/%05d' % (
@@ -1003,14 +1003,14 @@ class GeometryExporter(object):
 
             has_vertex_colors = vertex_color.active and vertex_color.active.data
 
-            if psys.settings.luxrender_hair.export_color == 'vertex_color':
+            if psys.settings.pbrtv3_hair.export_color == 'vertex_color':
                 if has_vertex_colors:
                     vertex_color_layer = vertex_color.active.data
                     colorflag = 1
 
             if uv_textures.active and uv_textures.active.data:
                 uv_tex = uv_textures.active.data
-                if psys.settings.luxrender_hair.export_color == 'uv_texture_map':
+                if psys.settings.pbrtv3_hair.export_color == 'uv_texture_map':
                     if uv_tex[0].image:
                         image_width = uv_tex[0].image.size[0]
                         image_height = uv_tex[0].image.size[1]
@@ -1072,7 +1072,7 @@ class GeometryExporter(object):
 
                             uv_coords.append(uv_co)
 
-                        if psys.settings.luxrender_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
+                        if psys.settings.pbrtv3_hair.export_color == 'uv_texture_map' and not len(image_pixels) == 0:
                             if not col:
                                 x_co = round(uv_co[0] * (image_width - 1))
                                 y_co = round(uv_co[1] * (image_height - 1))
@@ -1085,7 +1085,7 @@ class GeometryExporter(object):
                                 col = (r, g, b)
 
                             colors.append(col)
-                        elif psys.settings.luxrender_hair.export_color == 'vertex_color' and has_vertex_colors:
+                        elif psys.settings.pbrtv3_hair.export_color == 'vertex_color' and has_vertex_colors:
                             if not col:
                                 col = psys.mcol_on_emitter(mod, psys.particles[i], pindex, vertex_color.active_index)
 
@@ -1148,17 +1148,17 @@ class GeometryExporter(object):
             hair_shape_params.add_string('filename', hair_file_path)
             hair_shape_params.add_string('name', bpy.path.clean_name(partsys_name))
             hair_shape_params.add_point('camerapos', bpy.context.scene.camera.location)
-            hair_shape_params.add_string('tesseltype', psys.settings.luxrender_hair.tesseltype)
-            hair_shape_params.add_string('acceltype', psys.settings.luxrender_hair.acceltype)
+            hair_shape_params.add_string('tesseltype', psys.settings.pbrtv3_hair.tesseltype)
+            hair_shape_params.add_string('acceltype', psys.settings.pbrtv3_hair.acceltype)
 
-            if psys.settings.luxrender_hair.tesseltype in ['ribbonadaptive', 'solidadaptive']:
-                hair_shape_params.add_integer('adaptive_maxdepth', psys.settings.luxrender_hair.adaptive_maxdepth)
-                hair_shape_params.add_float('adaptive_error', psys.settings.luxrender_hair.adaptive_error)
+            if psys.settings.pbrtv3_hair.tesseltype in ['ribbonadaptive', 'solidadaptive']:
+                hair_shape_params.add_integer('adaptive_maxdepth', psys.settings.pbrtv3_hair.adaptive_maxdepth)
+                hair_shape_params.add_float('adaptive_error', psys.settings.pbrtv3_hair.adaptive_error)
 
-            if psys.settings.luxrender_hair.tesseltype in ['solid', 'solidadaptive']:
-                hair_shape_params.add_integer('solid_sidecount', psys.settings.luxrender_hair.solid_sidecount)
-                hair_shape_params.add_bool('solid_capbottom', psys.settings.luxrender_hair.solid_capbottom)
-                hair_shape_params.add_bool('solid_captop', psys.settings.luxrender_hair.solid_captop)
+            if psys.settings.pbrtv3_hair.tesseltype in ['solid', 'solidadaptive']:
+                hair_shape_params.add_integer('solid_sidecount', psys.settings.pbrtv3_hair.solid_sidecount)
+                hair_shape_params.add_bool('solid_capbottom', psys.settings.pbrtv3_hair.solid_capbottom)
+                hair_shape_params.add_bool('solid_captop', psys.settings.pbrtv3_hair.solid_captop)
 
             # Export shape definition to .LXO file
             self.lux_context.attributeBegin('hairfile_%s' % partsys_name)
@@ -1169,18 +1169,18 @@ class GeometryExporter(object):
 
             if int_v:
                 self.lux_context.interior(int_v)
-            elif self.geometry_scene.luxrender_world.default_interior_volume:
-                self.lux_context.interior(self.geometry_scene.luxrender_world.default_interior_volume)
+            elif self.geometry_scene.pbrtv3_world.default_interior_volume:
+                self.lux_context.interior(self.geometry_scene.pbrtv3_world.default_interior_volume)
 
             if ext_v:
                 self.lux_context.exterior(ext_v)
-            elif self.geometry_scene.luxrender_world.default_exterior_volume:
-                self.lux_context.exterior(self.geometry_scene.luxrender_world.default_exterior_volume)
+            elif self.geometry_scene.pbrtv3_world.default_exterior_volume:
+                self.lux_context.exterior(self.geometry_scene.pbrtv3_world.default_exterior_volume)
 
             self.lux_context.shape('hairfile', hair_shape_params)
             self.lux_context.attributeEnd()
             self.lux_context.set_output_file(Files.MATS)
-            mat_export_result = hair_mat.luxrender_material.export(self.visibility_scene, self.lux_context, hair_mat,
+            mat_export_result = hair_mat.pbrtv3_material.export(self.visibility_scene, self.lux_context, hair_mat,
                                                                    mode='indirect')
             self.lux_context.set_output_file(Files.GEOM)
 
@@ -1374,7 +1374,7 @@ class GeometryExporter(object):
             LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 
     def handler_MESH(self, obj, *args, **kwargs):
-        if self.visibility_scene.luxrender_testing.object_analysis:
+        if self.visibility_scene.pbrtv3_testing.object_analysis:
             print(' -> handler_MESH: %s' % obj)
 
         if 'matrix' in kwargs.keys():
@@ -1402,7 +1402,7 @@ class GeometryExporter(object):
         for obj in geometry_scene.objects:
             progress_thread.exported_objects += 1
 
-            if self.visibility_scene.luxrender_testing.object_analysis:
+            if self.visibility_scene.pbrtv3_testing.object_analysis:
                 print('Analysing object %s : %s' % (obj, obj.type))
 
             try:
@@ -1416,11 +1416,11 @@ class GeometryExporter(object):
                 number_psystems = len(obj.particle_systems)
 
                 if obj.is_duplicator and number_psystems < 1:
-                    if self.visibility_scene.luxrender_testing.object_analysis:
+                    if self.visibility_scene.pbrtv3_testing.object_analysis:
                         print(' -> is duplicator without particle systems')
                     if obj.dupli_type in self.valid_duplis_callbacks:
                         self.callbacks['duplis'][obj.dupli_type](obj)
-                    elif self.visibility_scene.luxrender_testing.object_analysis:
+                    elif self.visibility_scene.pbrtv3_testing.object_analysis:
                         print(' -> Unsupported Dupli type: %s' % obj.dupli_type)
 
                 # Some dupli types should hide the original
@@ -1429,19 +1429,19 @@ class GeometryExporter(object):
                 else:
                     export_originals[obj] = True
 
-                if number_psystems > 0 and bpy.context.scene.luxrender_engine.export_particles:
+                if number_psystems > 0 and bpy.context.scene.pbrtv3_engine.export_particles:
                     export_originals[obj] = False
-                    if self.visibility_scene.luxrender_testing.object_analysis:
+                    if self.visibility_scene.pbrtv3_testing.object_analysis:
                         print(' -> has %i particle systems' % number_psystems)
                     for psys in obj.particle_systems:
                         export_originals[obj] = export_originals[obj] or psys.settings.use_render_emitter
                         if psys.settings.render_type in self.valid_particles_callbacks:
                             self.callbacks['particles'][psys.settings.render_type](obj, particle_system=psys)
-                        elif self.visibility_scene.luxrender_testing.object_analysis:
+                        elif self.visibility_scene.pbrtv3_testing.object_analysis:
                             print(' -> Unsupported Particle system type: %s' % psys.settings.render_type)
 
             except UnexportableObjectException as err:
-                if self.visibility_scene.luxrender_testing.object_analysis:
+                if self.visibility_scene.pbrtv3_testing.object_analysis:
                     print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 
         export_originals_keys = export_originals.keys()
@@ -1460,7 +1460,7 @@ class GeometryExporter(object):
                 self.callbacks['objects'][obj.type](obj)
 
             except UnexportableObjectException as err:
-                if self.visibility_scene.luxrender_testing.object_analysis:
+                if self.visibility_scene.pbrtv3_testing.object_analysis:
                     print(' -> Unexportable object: %s : %s : %s' % (obj, obj.type, err))
 
         progress_thread.stop()

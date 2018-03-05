@@ -35,21 +35,21 @@ from .. import PBRTv3Addon
 @PBRTv3Addon.addon_register_class
 class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_renderer):
     bl_label = 'PBRTv3 Mesh Options'
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     display_property_groups = [
-        ( ('mesh',), 'luxrender_mesh' )
+        ( ('mesh',), 'pbrtv3_mesh' )
     ]
 
     def draw(self, context):
         if UseLuxCore():
             self.layout.label('Displacement and portals not yet supported by LuxCore', icon='INFO')
 
-            if context.object.data.luxrender_mesh.portal:
+            if context.object.data.pbrtv3_mesh.portal:
                 self.layout.label('This mesh was flagged as portal and won\'t be exported', icon='INFO')
 
         else:
-            if context.object.luxrender_object.append_proxy and context.object.luxrender_object.hide_proxy_mesh:
+            if context.object.pbrtv3_object.append_proxy and context.object.pbrtv3_object.hide_proxy_mesh:
                 msg = ['Mesh options not available when',
                        'object is used as a render proxy',
                        'and \"Don\'t Render Original\" is set.'

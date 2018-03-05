@@ -36,8 +36,8 @@ from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore
 
 
 def check_renderer_settings(context):
-    lre = context.scene.luxrender_rendermode
-    lri = context.scene.luxrender_integrator
+    lre = context.scene.pbrtv3_rendermode
+    lri = context.scene.pbrtv3_integrator
 
     def clear_renderer_alert():
         if 'surfaceintegrator' in lri.alert.keys():
@@ -82,7 +82,7 @@ def find_apis():
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_testing(declarative_property_group):
+class pbrtv3_testing(declarative_property_group):
     """
     Properties related to exporter and scene testing
     """
@@ -123,7 +123,7 @@ class luxrender_testing(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_engine(declarative_property_group):
+class pbrtv3_engine(declarative_property_group):
     """
     Storage class for LuxRender Engine settings.
     """
@@ -231,7 +231,7 @@ class luxrender_engine(declarative_property_group):
         },
         {
             'type': 'enum',
-            'attr': 'selected_luxrender_api',
+            'attr': 'selected_pbrtv3_api',
             'name': 'LuxRender API version',
             'description': 'Choose between LuxRender v1.x and v2.x API',
             'default': 'classic',
@@ -369,7 +369,7 @@ class luxrender_engine(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_networking(declarative_property_group):
+class pbrtv3_networking(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [

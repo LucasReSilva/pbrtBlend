@@ -34,7 +34,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..export.materials import ExportedTextures
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import UseLuxCore
 from ..outputs.luxcore_api import ScenePrefix
 from ..properties.material import texture_append_visibility
@@ -56,9 +56,9 @@ def WorldVolumeParameter(attr, name):
         {
             'type': 'prop_search',
             'attr': attr,
-            'src': lambda s, c: s.scene.luxrender_volumes,
+            'src': lambda s, c: s.scene.pbrtv3_volumes,
             'src_attr': 'volumes',
-            'trg': lambda s, c: c.luxrender_world,
+            'trg': lambda s, c: c.pbrtv3_world,
             'trg_attr': '%s_volume' % attr,
             'name': name,
             'icon': 'MOD_FLUIDSIM'
@@ -67,7 +67,7 @@ def WorldVolumeParameter(attr, name):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_world(declarative_property_group):
+class pbrtv3_world(declarative_property_group):
     ef_attach_to = ['Scene']
 
     controls = [
@@ -159,10 +159,10 @@ def volume_types():
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volume_data(declarative_property_group):
+class pbrtv3_volume_data(declarative_property_group):
     """
     Storage class for LuxRender volume data. The
-    luxrender_volumes object will store 1 or more of
+    pbrtv3_volumes object will store 1 or more of
     these in its CollectionProperty 'volumes'.
     """
 
@@ -665,7 +665,7 @@ class luxrender_volume_data(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_volumes(declarative_property_group):
+class pbrtv3_volumes(declarative_property_group):
     """
     Storage class for LuxRender Material volumes.
     """
@@ -682,7 +682,7 @@ class luxrender_volumes(declarative_property_group):
     properties = [
         {
             'type': 'collection',
-            'ptype': luxrender_volume_data,
+            'ptype': pbrtv3_volume_data,
             'name': 'volumes',
             'attr': 'volumes',
             'items': []
@@ -696,9 +696,9 @@ class luxrender_volumes(declarative_property_group):
             'type': 'template_list',
             'name': 'volumes_select',
             'attr': 'volumes_select',
-            'trg': lambda sc, c: c.luxrender_volumes,
+            'trg': lambda sc, c: c.pbrtv3_volumes,
             'trg_attr': 'volumes_index',
-            'src': lambda sc, c: c.luxrender_volumes,
+            'src': lambda sc, c: c.pbrtv3_volumes,
             'src_attr': 'volumes',
         },
         {
@@ -719,10 +719,10 @@ class luxrender_volumes(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lightgroup_data(declarative_property_group):
+class pbrtv3_lightgroup_data(declarative_property_group):
     """
     Storage class for LuxRender light group settings. The
-    luxrender_lightgroups object will store 1 or more of
+    pbrtv3_lightgroups object will store 1 or more of
     these in its CollectionProperty 'lightgroups'.
     """
 
@@ -798,7 +798,7 @@ class luxrender_lightgroup_data(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lightgroups(declarative_property_group):
+class pbrtv3_lightgroups(declarative_property_group):
     """
     Storage class for LuxRender Light Groups.
     """
@@ -812,7 +812,7 @@ class luxrender_lightgroups(declarative_property_group):
     properties = [
         {
             'type': 'collection',
-            'ptype': luxrender_lightgroup_data,
+            'ptype': pbrtv3_lightgroup_data,
             'name': 'lightgroups',
             'attr': 'lightgroups',
             'items': []
@@ -905,10 +905,10 @@ class luxrender_lightgroups(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_materialgroup_data(declarative_property_group):
+class pbrtv3_materialgroup_data(declarative_property_group):
     """
     Storage class for LuxRender material group settings. The
-    luxrender_materialgroups object will store 1 or more of
+    pbrtv3_materialgroups object will store 1 or more of
     these in its CollectionProperty 'materialgroups'.
     """
 
@@ -988,7 +988,7 @@ class luxrender_materialgroup_data(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_materialgroups(declarative_property_group):
+class pbrtv3_materialgroups(declarative_property_group):
     """
     Storage class for LuxRender Material Groups.
     """
@@ -1002,7 +1002,7 @@ class luxrender_materialgroups(declarative_property_group):
     properties = [
         {
             'type': 'collection',
-            'ptype': luxrender_materialgroup_data,
+            'ptype': pbrtv3_materialgroup_data,
             'name': 'materialgroups',
             'attr': 'materialgroups',
             'items': []
@@ -1021,7 +1021,7 @@ class luxrender_materialgroups(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_channels(declarative_property_group):
+class pbrtv3_channels(declarative_property_group):
     """
     Storage class for LuxCore AOVs
     """

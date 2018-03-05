@@ -60,7 +60,7 @@ def attr_light(scene, lux_context, light, name, group, light_type, params, trans
     else:
         lux_context.attributeBegin(comment=name, file=Files.MAIN)
 
-    if light.type == 'SPOT' and light.luxrender_lamp.luxrender_lamp_spot.projector:
+    if light.type == 'SPOT' and light.pbrtv3_lamp.pbrtv3_lamp_spot.projector:
         lux_context.rotate(180, 0, 1, 0)
 
     lux_context.lightGroup(group, [])
@@ -72,10 +72,10 @@ def attr_light(scene, lux_context, light, name, group, light_type, params, trans
         lux_context.transformBegin(file=Files.MAIN)
         lux_context.scale(-1, 1, 1)
 
-    if light.luxrender_lamp.Exterior_volume:
-        lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-    elif scene.luxrender_world.default_exterior_volume:
-        lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+    if light.pbrtv3_lamp.Exterior_volume:
+        lux_context.exterior(light.pbrtv3_lamp.Exterior_volume)
+    elif scene.pbrtv3_world.default_exterior_volume:
+        lux_context.exterior(scene.pbrtv3_world.default_exterior_volume)
 
     lux_context.lightSource(light_type, params)
 
@@ -95,7 +95,7 @@ def checkLightEnabled(scene, lamp):
     # This is a separate function because it's used in the export pre-process phase
 
     # If this lamp's light group is disabled, skip it
-    if not scene.luxrender_lightgroups.is_enabled(lamp.luxrender_lamp.lightgroup):
+    if not scene.pbrtv3_lightgroups.is_enabled(lamp.pbrtv3_lamp.lightgroup):
         return False
     else:
         return True
@@ -105,47 +105,47 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
     light = ob.data
 
     lg_gain = 1.0
-    light_group = light.luxrender_lamp.lightgroup
+    light_group = light.pbrtv3_lamp.lightgroup
 
     if not checkLightEnabled(scene, light):
         return False
 
-    if light_group in scene.luxrender_lightgroups.lightgroups:
-        lg_gain = scene.luxrender_lightgroups.lightgroups[light_group].gain
+    if light_group in scene.pbrtv3_lightgroups.lightgroups:
+        lg_gain = scene.pbrtv3_lightgroups.lightgroups[light_group].gain
 
     # Light groups don't work with exphotonmap
-    if scene.luxrender_lightgroups.ignore or not light.luxrender_lamp.lightgroup or \
-                    scene.luxrender_integrator.surfaceintegrator == 'exphotonmap':
+    if scene.pbrtv3_lightgroups.ignore or not light.pbrtv3_lamp.lightgroup or \
+                    scene.pbrtv3_integrator.surfaceintegrator == 'exphotonmap':
         light_group = 'default'
 
     # Params common to all light types
     light_params = ParamSet() \
         .add_float('gain', light.energy * lg_gain) \
-        .add_float('importance', light.luxrender_lamp.importance)
+        .add_float('importance', light.pbrtv3_lamp.importance)
 
     ies_data = ParamSet()
-    if light.luxrender_lamp.iesname:
+    if light.pbrtv3_lamp.iesname:
         if light.library is not None:
-            iespath = bpy.path.abspath(light.luxrender_lamp.iesname, light.library.filepath)
+            iespath = bpy.path.abspath(light.pbrtv3_lamp.iesname, light.library.filepath)
         else:
-            iespath = light.luxrender_lamp.iesname
+            iespath = light.pbrtv3_lamp.iesname
 
         ies_data = ParamSet().add_string('iesname', efutil.path_relative_to_export(iespath))
 
     # Params from light sub-types
-    light_params.update(getattr(light.luxrender_lamp, 'luxrender_lamp_%s' % light.type.lower()).get_paramset(ob))
+    light_params.update(getattr(light.pbrtv3_lamp, 'pbrtv3_lamp_%s' % light.type.lower()).get_paramset(ob))
 
     # Other lamp params from lamp object
     if light.type == 'SUN':
         invmatrix = matrix.inverted()
         invmatrix = fix_matrix_order(invmatrix)  # matrix indexing hack
-        sunsky_type = light.luxrender_lamp.luxrender_lamp_sun.sunsky_type
-        legacy_sky = light.luxrender_lamp.luxrender_lamp_sun.legacy_sky
+        sunsky_type = light.pbrtv3_lamp.pbrtv3_lamp_sun.sunsky_type
+        legacy_sky = light.pbrtv3_lamp.pbrtv3_lamp_sun.legacy_sky
 
-        if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type in ['sun', 'sunsky']:
+        if light.pbrtv3_lamp.pbrtv3_lamp_sun.sunsky_type in ['sun', 'sunsky']:
             light_params.add_vector('sundir', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
 
-        if light.luxrender_lamp.luxrender_lamp_sun.sunsky_type == 'distant':
+        if light.pbrtv3_lamp.pbrtv3_lamp_sun.sunsky_type == 'distant':
             light_params.add_point('from', (invmatrix[2][0], invmatrix[2][1], invmatrix[2][2]))
             light_params.add_point('to', (0, 0, 0))  # This combo will produce the same result as sundir
 
@@ -160,7 +160,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         return True
 
     if light.type == 'HEMI':
-        infinite_type = 'infinitesample' if light.luxrender_lamp.luxrender_lamp_hemi.hdri_infinitesample else 'infinite'
+        infinite_type = 'infinitesample' if light.pbrtv3_lamp.pbrtv3_lamp_hemi.hdri_infinitesample else 'infinite'
         attr_light(scene, lux_context, light, ob.name, light_group, infinite_type, light_params,
                    transform=matrix_to_list(matrix, apply_worldscale=True), portals=portals)
         return True
@@ -170,7 +170,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         coneangle = degrees(light.spot_size) * 0.5
         conedeltaangle = degrees(light.spot_size * 0.5 * light.spot_blend)
 
-        if light.luxrender_lamp.luxrender_lamp_spot.projector:
+        if light.pbrtv3_lamp.pbrtv3_lamp_spot.projector:
             light_type = 'projection'
             light_params.add_float('fov', coneangle * 2)
         else:
@@ -189,21 +189,21 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
 
         # Here the use sphere option kicks in. If true, export an spherical area light
         # (using Lux's geometric sphere primitive) rather than a true point light
-        if light.luxrender_lamp.luxrender_lamp_point.usesphere and \
-                        scene.luxrender_rendermode.renderer != 'hybrid':  # no sphere primitives with hybrid!
+        if light.pbrtv3_lamp.pbrtv3_lamp_point.usesphere and \
+                        scene.pbrtv3_rendermode.renderer != 'hybrid':  # no sphere primitives with hybrid!
             light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
             # Add this in manually, it is not used for the true point and thus is not in the normal parameter set
-            light_params.add_integer('nsamples', [light.luxrender_lamp.luxrender_lamp_point.nsamples])
+            light_params.add_integer('nsamples', [light.pbrtv3_lamp.pbrtv3_lamp_point.nsamples])
             lux_context.attributeBegin(ob.name, file=Files.MAIN)
             lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
             lux_context.lightGroup(light_group, [])
 
-            if light.luxrender_lamp.Exterior_volume:
-                lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-            elif scene.luxrender_world.default_exterior_volume:
-                lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+            if light.pbrtv3_lamp.Exterior_volume:
+                lux_context.exterior(light.pbrtv3_lamp.Exterior_volume)
+            elif scene.pbrtv3_world.default_exterior_volume:
+                lux_context.exterior(scene.pbrtv3_world.default_exterior_volume)
 
-            if light.luxrender_lamp.luxrender_lamp_point.null_lamp:
+            if light.pbrtv3_lamp.pbrtv3_lamp_point.null_lamp:
                 mat_params = ParamSet()
 
                 mat_params.add_string('type', 'null')
@@ -221,7 +221,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
             shape_params = ParamSet()
 
             # Fetch point light size and use it for the sphere primitive's radius param
-            shape_params.add_float('radius', [light.luxrender_lamp.luxrender_lamp_point.pointsize])
+            shape_params.add_float('radius', [light.pbrtv3_lamp.pbrtv3_lamp_point.pointsize])
             shape_params.add_string('name', light.name)
             lux_context.shape('sphere', shape_params)
 
@@ -245,16 +245,16 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
         lux_context.lightGroup(light_group, [])
 
-        if light.luxrender_lamp.Exterior_volume:
-            lux_context.exterior(light.luxrender_lamp.Exterior_volume)
-        elif scene.luxrender_world.default_exterior_volume:
-            lux_context.exterior(scene.luxrender_world.default_exterior_volume)
+        if light.pbrtv3_lamp.Exterior_volume:
+            lux_context.exterior(light.pbrtv3_lamp.Exterior_volume)
+        elif scene.pbrtv3_world.default_exterior_volume:
+            lux_context.exterior(scene.pbrtv3_world.default_exterior_volume)
 
-        if light.luxrender_lamp.luxrender_lamp_area.null_lamp:
+        if light.pbrtv3_lamp.pbrtv3_lamp_area.null_lamp:
             mat_params = ParamSet()
 
             # Workaround: LuxCoreRenderer supports only area lights with constant ConstantRGBColorTexture
-            if scene.luxrender_rendermode.renderer == 'luxcore':
+            if scene.pbrtv3_rendermode.renderer == 'luxcore':
                 mat_params.add_string('type', 'matte')
             else:
                 mat_params.add_string('type', 'null')
@@ -328,7 +328,7 @@ def lights(lux_context, geometry_scene, visibility_scene, mesh_definitions):
 
     for obdata in mesh_def_keys_keys:
         # match the mesh data against the keys in mesh_definitions
-        if obdata.luxrender_mesh.portal:
+        if obdata.pbrtv3_mesh.portal:
             for mesh_def_key in mesh_def_keys[obdata]:
                 portal_shapes.append(mesh_definitions.get(mesh_def_key)[0])
 

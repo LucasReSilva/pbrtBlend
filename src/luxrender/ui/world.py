@@ -31,11 +31,11 @@ from ..outputs.luxcore_api import UseLuxCore
 
 from .. import PBRTv3Addon
 from .lamps import lamps_panel
-from .materials import luxrender_material_base
+from .materials import pbrtv3_material_base
 
 
 class world_panel(bl_ui.properties_world.WorldButtonsPanel, property_group_renderer):
-    COMPAT_ENGINES = 'LUXRENDER_RENDER'
+    COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
 @PBRTv3Addon.addon_register_class
@@ -67,7 +67,7 @@ class world(world_panel):
     bl_label = 'PBRTv3 World Settings'
 
     display_property_groups = [
-        ( ('scene',), 'luxrender_world' )
+        ( ('scene',), 'pbrtv3_world' )
     ]
 
 class volumes_base(object):
@@ -77,16 +77,16 @@ class volumes_base(object):
     bl_label = 'PBRTv3 Volumes'
 
     display_property_groups = [
-        ( ('scene',), 'luxrender_volumes' )
+        ( ('scene',), 'pbrtv3_volumes' )
     ]
 
     def draw_ior_menu(self, context):
         """
         This is a draw callback from property_group_renderer, due
-        to ef_callback item in luxrender_volume_data.properties
+        to ef_callback item in pbrtv3_volume_data.properties
         """
-        vi = context.scene.luxrender_volumes.volumes_index
-        lv = context.scene.luxrender_volumes.volumes[vi]
+        vi = context.scene.pbrtv3_volumes.volumes_index
+        lv = context.scene.pbrtv3_volumes.volumes[vi]
 
         if lv.fresnel_fresnelvalue == lv.fresnel_presetvalue:
             menu_text = lv.fresnel_presetstring
@@ -94,22 +94,22 @@ class volumes_base(object):
             menu_text = '-- Choose IOR preset --'
 
         cl = self.layout.column(align=True)
-        cl.menu('LUXRENDER_MT_ior_presets_volumes', text=menu_text)
+        cl.menu('PBRTv3_MT_ior_presets_volumes', text=menu_text)
 
-    # overridden in order to draw the selected luxrender_volume_data property group
+    # overridden in order to draw the selected pbrtv3_volume_data property group
     def draw(self, context):
         super().draw(context)
 
         # row = self.layout.row(align=True)
-        # row.menu("LUXRENDER_MT_presets_volume", text=bpy.types.LUXRENDER_MT_presets_volume.bl_label)
+        # row.menu("PBRTv3_MT_presets_volume", text=bpy.types.PBRTv3_MT_presets_volume.bl_label)
         # row.operator("luxrender.preset_volume_add", text="", icon="ZOOMIN")
         # row.operator("luxrender.preset_volume_add", text="", icon="ZOOMOUT").remove_active = True
 
-        if len(context.scene.luxrender_volumes.volumes) > 0:
-            current_vol_ind = context.scene.luxrender_volumes.volumes_index
-            current_vol = context.scene.luxrender_volumes.volumes[current_vol_ind]
+        if len(context.scene.pbrtv3_volumes.volumes) > 0:
+            current_vol_ind = context.scene.pbrtv3_volumes.volumes_index
+            current_vol = context.scene.pbrtv3_volumes.volumes[current_vol_ind]
 
-            # Here we draw the currently selected luxrender_volumes_data property group
+            # Here we draw the currently selected pbrtv3_volumes_data property group
             if current_vol.nodetree:
                 if not UseLuxCore():
                     self.layout.label('Volume nodes not supported in Classic API', icon='ERROR')
@@ -121,7 +121,7 @@ class volumes_base(object):
 
                     output_node = None
                     for node in nodetree.nodes:
-                        if node.bl_idname == 'luxrender_volume_output_node':
+                        if node.bl_idname == 'pbrtv3_volume_output_node':
                             output_node = node
                             break
 
@@ -144,7 +144,7 @@ class volumes_base(object):
                     self.layout.label('Volume nodes not supported in Classic API', icon='INFO')
                 self.layout.separator()
 
-                # Here we draw the currently selected luxrender_volumes_data property group
+                # Here we draw the currently selected pbrtv3_volumes_data property group
                 for control in current_vol.controls:
                     # Don't show the "Light Emitter" checkbox in Classic API mode, can't do this in properties/world.py
                     if not (not UseLuxCore() and control == 'use_emission'):
@@ -163,11 +163,11 @@ class volumes_world(volumes_base, world_panel):
 
 
 @PBRTv3Addon.addon_register_class
-class volumes_material(volumes_base, luxrender_material_base):
+class volumes_material(volumes_base, pbrtv3_material_base):
     @classmethod
     def poll(cls, context):
         return super().poll(context) and (
-            context.material.luxrender_material.Interior_volume
+            context.material.pbrtv3_material.Interior_volume
             or
-            context.material.luxrender_material.Exterior_volume
+            context.material.pbrtv3_material.Exterior_volume
         )

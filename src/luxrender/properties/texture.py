@@ -116,10 +116,10 @@ class TextureParameterBase(object):
 
     def texture_slot_set_attr(self):
         def set_attr(s, c):
-            if type(c).__name__ == 'luxrender_material':
-                return getattr(c, 'luxrender_mat_%s' % c.type)
+            if type(c).__name__ == 'pbrtv3_material':
+                return getattr(c, 'pbrtv3_mat_%s' % c.type)
             else:
-                return getattr(c, 'luxrender_tex_%s' % c.type)
+                return getattr(c, 'pbrtv3_tex_%s' % c.type)
 
         return set_attr
 
@@ -201,7 +201,7 @@ def check_texture_variant(self, context, attr, expected_variant):
         return
 
     if tn in bpy.data.textures:
-        lt = bpy.data.textures[tn].luxrender_texture
+        lt = bpy.data.textures[tn].pbrtv3_texture
         # print('CHECK TEXTURE: lt          %s' % lt)
 
         if lt.type == 'BLENDER':
@@ -209,7 +209,7 @@ def check_texture_variant(self, context, attr, expected_variant):
             if bpy.data.textures[tn].type == 'IMAGE':
                 valid = True
         else:
-            lst = getattr(lt, 'luxrender_tex_%s' % lt.type)
+            lst = getattr(lt, 'pbrtv3_tex_%s' % lt.type)
             # print('CHECK TEXTURE: lst         %s' % lst)
             # print('CHECK TEXTURE: lst.variant %s' % lst.variant)
 
@@ -307,8 +307,8 @@ class ColorTextureParameter(TextureParameterBase):
                        'soft_max': self.max,
                        'subtype': 'COLOR',
                        'update': lambda s, c: refresh_preview(s, c) or (
-                           c.material.luxrender_material.set_master_color(c.material)
-                           if hasattr(c.material, 'luxrender_material') else None),
+                           c.material.pbrtv3_material.set_master_color(c.material)
+                           if hasattr(c.material, 'pbrtv3_material') else None),
                        'save_in_preset': True
                    },
                    {
@@ -673,7 +673,7 @@ class FresnelTextureParameter(TextureParameterBase):
         return TC_params
 
 # ------------------------------------------------------------------------------
-# The main luxrender_texture property group
+# The main pbrtv3_texture property group
 # ------------------------------------------------------------------------------
 
 tex_names = (
@@ -743,8 +743,8 @@ tex_names = (
 
 
 @PBRTv3Addon.addon_register_class
-class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
-    bl_idname = 'texture.set_luxrender_type'
+class TEXTURE_OT_set_pbrtv3_type(bpy.types.Operator):
+    bl_idname = 'texture.set_pbrtv3_type'
     bl_label = 'Set LuxRender texture type'
 
     tex_name = bpy.props.StringProperty()
@@ -752,17 +752,17 @@ class TEXTURE_OT_set_luxrender_type(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return hasattr(context, 'texture') and context.texture and context.texture.luxrender_texture
+        return hasattr(context, 'texture') and context.texture and context.texture.pbrtv3_texture
 
     def execute(self, context):
-        lux_tex = context.texture.luxrender_texture
+        lux_tex = context.texture.pbrtv3_texture
 
         lux_tex.type = self.properties.tex_name
         lux_tex.type_label = self.properties.tex_label
 
         # This is what the user needs in almost all cases
         if lux_tex.type == 'densitygrid':
-            lux_tex.luxrender_tex_transform.coordinates = 'smoke_domain'
+            lux_tex.pbrtv3_tex_transform.coordinates = 'smoke_domain'
 
         return {'FINISHED'}
 
@@ -780,7 +780,7 @@ def draw_generator(operator, m_names):
 
 
 @PBRTv3Addon.addon_register_class
-class TEXTURE_MT_luxrender_type(bpy.types.Menu):
+class TEXTURE_MT_pbrtv3_type(bpy.types.Menu):
     bl_label = 'Texture Type'
     submenus = []
 
@@ -790,7 +790,7 @@ class TEXTURE_MT_luxrender_type(bpy.types.Menu):
             sl.menu(sm.bl_idname)
 
     for tex_cat, tex_cat_list in tex_names:
-        submenu_idname = 'TEXTURE_MT_luxrender_tex_cat%d' % len(submenus)
+        submenu_idname = 'TEXTURE_MT_pbrtv3_tex_cat%d' % len(submenus)
         submenus.append(
             PBRTv3Addon.addon_register_class(type(
                 submenu_idname,
@@ -798,14 +798,14 @@ class TEXTURE_MT_luxrender_type(bpy.types.Menu):
                 {
                     'bl_idname': submenu_idname,
                     'bl_label': tex_cat,
-                    'draw': draw_generator('TEXTURE_OT_set_luxrender_type', tex_cat_list)
+                    'draw': draw_generator('TEXTURE_OT_set_pbrtv3_type', tex_cat_list)
                 }
             ))
         )
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture(declarative_property_group):
+class pbrtv3_texture(declarative_property_group):
     """
     Storage class for LuxRender Texture settings.
     """
@@ -854,7 +854,7 @@ class luxrender_texture(declarative_property_group):
         for cat, texs in tex_names:
             for a, b in texs:
                 if a != 'BLENDER':
-                    getattr(self, 'luxrender_tex_%s' % a).reset()
+                    getattr(self, 'pbrtv3_tex_%s' % a).reset()
 
     def get_paramset(self, scene, texture):
         """
@@ -867,17 +867,17 @@ class luxrender_texture(declarative_property_group):
         """
 
         # this requires part of the sub-IDPropertyGroup name to be the same as the texture name
-        if hasattr(self, 'luxrender_tex_%s' % self.type):
-            lux_texture = getattr(self, 'luxrender_tex_%s' % self.type)
+        if hasattr(self, 'pbrtv3_tex_%s' % self.type):
+            lux_texture = getattr(self, 'pbrtv3_tex_%s' % self.type)
             features, params = lux_texture.get_paramset(scene, texture)
 
             # 2D Mapping options
             if '2DMAPPING' in features:
-                params.update(self.luxrender_tex_mapping.get_paramset(scene))
+                params.update(self.pbrtv3_tex_mapping.get_paramset(scene))
 
             # 3D Mapping options
             if '3DMAPPING' in features:
-                params.update(self.luxrender_tex_transform.get_paramset(scene))
+                params.update(self.pbrtv3_tex_transform.get_paramset(scene))
 
             return lux_texture.variant, params
         else:
@@ -886,7 +886,7 @@ class luxrender_texture(declarative_property_group):
             return variant, paramset
 
 # ------------------------------------------------------------------------------
-# Sub property groups of luxrender_texture follow
+# Sub property groups of pbrtv3_texture follow
 # ------------------------------------------------------------------------------
 
 # Float Texture Parameters
@@ -940,8 +940,8 @@ for i in range(1, BAND_MAX_TEX + 1):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_add(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_add(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1037,8 +1037,8 @@ class luxrender_tex_add(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_band(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_band(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1207,8 +1207,8 @@ class luxrender_tex_band(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_bilerp(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_bilerp(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1402,8 +1402,8 @@ class luxrender_tex_bilerp(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_blackbody(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_blackbody(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1443,8 +1443,8 @@ class luxrender_tex_blackbody(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_brick(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_brick(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1666,8 +1666,8 @@ class luxrender_tex_brick(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_abbe(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_abbe(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -1898,8 +1898,8 @@ class luxrender_tex_abbe(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_cauchy(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_cauchy(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2007,8 +2007,8 @@ class luxrender_tex_cauchy(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_checkerboard(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_checkerboard(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2096,8 +2096,8 @@ class luxrender_tex_checkerboard(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_cloud(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_cloud(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2288,8 +2288,8 @@ class luxrender_tex_cloud(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_constant(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_constant(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2381,8 +2381,8 @@ class luxrender_tex_constant(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_colordepth(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_colordepth(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2444,8 +2444,8 @@ class luxrender_tex_colordepth(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_densitygrid(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_densitygrid(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
     controls = [
         'domain',
@@ -2456,7 +2456,7 @@ class luxrender_tex_densitygrid(declarative_property_group):
     properties = [
                  ] + \
                  ObjectParameter('domain', 'Domain', 'Domain object for smoke simulation',
-                                 'luxrender_tex_densitygrid') + \
+                                 'pbrtv3_tex_densitygrid') + \
                  [
                      {
                          'attr': 'source',
@@ -2525,8 +2525,8 @@ class luxrender_tex_densitygrid(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_dots(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_dots(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [  # None
@@ -2575,8 +2575,8 @@ class luxrender_tex_dots(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_equalenergy(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_equalenergy(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2621,8 +2621,8 @@ class luxrender_tex_equalenergy(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_exponential(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_exponential(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2686,8 +2686,8 @@ class luxrender_tex_exponential(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_fbm(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_fbm(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2748,8 +2748,8 @@ class luxrender_tex_fbm(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_fresnelcolor(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_fresnelcolor(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2785,8 +2785,8 @@ class luxrender_tex_fresnelcolor(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_fresnelname(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_fresnelname(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2855,8 +2855,8 @@ class luxrender_tex_fresnelname(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_gaussian(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_gaussian(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -2929,8 +2929,8 @@ class luxrender_tex_gaussian(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_harlequin(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_harlequin(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [  # None
@@ -2956,8 +2956,8 @@ class luxrender_tex_harlequin(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_hitpointcolor(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_hitpointcolor(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = []
@@ -2982,8 +2982,8 @@ class luxrender_tex_hitpointcolor(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_hitpointgrey(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_hitpointgrey(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = []
@@ -3008,8 +3008,8 @@ class luxrender_tex_hitpointgrey(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_hitpointalpha(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_hitpointalpha(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = []
@@ -3034,8 +3034,8 @@ class luxrender_tex_hitpointalpha(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_imagemap(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_imagemap(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3208,8 +3208,8 @@ class luxrender_tex_imagemap(declarative_property_group):
 # This class holds the parameters for the image sampling panel
 # which exposes Lux params when blender's image texture is selected
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_imagesampling(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_imagesampling(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3362,8 +3362,8 @@ class luxrender_tex_imagesampling(declarative_property_group):
 
 # We do not build a paramset for imagesampling, that is handled by convert_texture in export/materials.py
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_normalmap(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_normalmap(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3474,8 +3474,8 @@ class luxrender_tex_normalmap(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_lampspectrum(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_lampspectrum(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [  # Preset menu is drawn manually in the ui class
@@ -3521,8 +3521,8 @@ class luxrender_tex_lampspectrum(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_mapping(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_mapping(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3683,8 +3683,8 @@ class luxrender_tex_mapping(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_marble(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_marble(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3775,8 +3775,8 @@ class luxrender_tex_marble(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_mix(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_mix(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -3886,8 +3886,8 @@ class luxrender_tex_mix(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_multimix(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_multimix(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4044,8 +4044,8 @@ class luxrender_tex_multimix(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_sellmeier(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_sellmeier(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4133,8 +4133,8 @@ class luxrender_tex_sellmeier(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_scale(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_scale(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4229,8 +4229,8 @@ class luxrender_tex_scale(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_subtract(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_subtract(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4385,26 +4385,26 @@ class tabulatedfresnel(tabulatedbase):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_tabulateddata(tabulatedcolor):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_tabulateddata(tabulatedcolor):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_luxpop(tabulatedfresnel):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_luxpop(tabulatedfresnel):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_sopra(tabulatedfresnel):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_sopra(tabulatedfresnel):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_transform(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_transform(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4478,8 +4478,8 @@ class luxrender_tex_transform(declarative_property_group):
 
         if self.coordinates == 'smoke_domain':
             for tex in bpy.data.textures:
-                if bpy.data.textures[tex.name].luxrender_texture.type == 'densitygrid':
-                    domain = bpy.data.textures[tex.name].luxrender_texture.luxrender_tex_densitygrid.domain_object
+                if bpy.data.textures[tex.name].pbrtv3_texture.type == 'densitygrid':
+                    domain = bpy.data.textures[tex.name].pbrtv3_texture.pbrtv3_tex_densitygrid.domain_object
 
             obj = bpy.context.scene.objects[domain]
             vloc = mathutils.Vector((obj.bound_box[0][0], obj.bound_box[0][1], obj.bound_box[0][2]))
@@ -4511,8 +4511,8 @@ class luxrender_tex_transform(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_uv(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_uv(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = []
@@ -4537,8 +4537,8 @@ class luxrender_tex_uv(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_uvmask(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_uvmask(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = \
@@ -4579,8 +4579,8 @@ class luxrender_tex_uvmask(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_windy(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_windy(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = []
@@ -4605,8 +4605,8 @@ class luxrender_tex_windy(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_wrinkled(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_wrinkled(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [
@@ -4667,8 +4667,8 @@ class luxrender_tex_wrinkled(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_hsv(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_hsv(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = (
@@ -4701,8 +4701,8 @@ class luxrender_tex_hsv(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_tex_pointiness(declarative_property_group):
-    ef_attach_to = ['luxrender_texture']
+class pbrtv3_tex_pointiness(declarative_property_group):
+    ef_attach_to = ['pbrtv3_texture']
     alert = {}
 
     controls = [

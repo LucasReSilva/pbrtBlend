@@ -36,16 +36,16 @@ from ..export import ParamSet, get_worldscale
 
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
-from ..properties import luxrender_texture_node, get_linked_node, check_node_export_texture
+from ..properties import pbrtv3_texture_node, get_linked_node, check_node_export_texture
 from ..properties.node_material import get_socket_paramsets
 from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
 from ..properties.node_texture import variant_items, triple_variant_items
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_add(luxrender_texture_node):
+class pbrtv3_texture_type_node_add(pbrtv3_texture_node):
     """Add texture node"""
-    bl_idname = 'luxrender_texture_add_node'
+    bl_idname = 'pbrtv3_texture_add_node'
     bl_label = 'Add'
     bl_icon = 'TEXTURE'
 
@@ -58,8 +58,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
         so = self.outputs.keys()
         if self.variant == 'color':
             if not 'Color 1' in si:  # If there aren't color inputs, create them
-                self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
-                self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+                self.inputs.new('pbrtv3_TC_tex1_socket', 'Color 1')
+                self.inputs.new('pbrtv3_TC_tex2_socket', 'Color 2')
 
             if 'Float 1' in si:  # If there are float inputs, destory them
                 self.inputs.remove(self.inputs['Float 1'])
@@ -72,8 +72,8 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
                 self.outputs.remove(self.outputs['Float'])
         if self.variant == 'float':
             if not 'Float 1' in si:
-                self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
-                self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+                self.inputs.new('pbrtv3_TF_tex1_socket', 'Float 1')
+                self.inputs.new('pbrtv3_TF_tex2_socket', 'Float 2')
 
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
@@ -105,9 +105,9 @@ class luxrender_texture_type_node_add(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_bump_map(luxrender_texture_node):
+class pbrtv3_texture_type_node_bump_map(pbrtv3_texture_node):
     """Bump map texture node"""
-    bl_idname = 'luxrender_texture_bump_map_node'
+    bl_idname = 'pbrtv3_texture_bump_map_node'
     bl_label = 'Bump Height'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -120,7 +120,7 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
         return self.bump_height * get_worldscale(as_scalematrix=False)
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_bump_socket', 'Float')
+        self.inputs.new('pbrtv3_TF_bump_socket', 'Float')
         self.outputs.new('NodeSocketFloat', 'Bump')
 
     def draw_buttons(self, context, layout):
@@ -155,9 +155,9 @@ class luxrender_texture_type_node_bump_map(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_mix(luxrender_texture_node):
+class pbrtv3_texture_type_node_mix(pbrtv3_texture_node):
     """Mix texture node"""
-    bl_idname = 'luxrender_texture_mix_node'
+    bl_idname = 'pbrtv3_texture_mix_node'
     bl_label = 'Mix'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -165,7 +165,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
     variant = bpy.props.EnumProperty(name='Variant', items=triple_variant_items, default='color')
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_amount_socket', 'Mix Amount')
+        self.inputs.new('pbrtv3_TF_amount_socket', 'Mix Amount')
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'variant')
@@ -175,8 +175,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
         if self.variant == 'color':
             if not 'Color 1' in si:
-                self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
-                self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+                self.inputs.new('pbrtv3_TC_tex1_socket', 'Color 1')
+                self.inputs.new('pbrtv3_TC_tex2_socket', 'Color 2')
 
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
@@ -197,8 +197,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
         if self.variant == 'float':
             if not 'Float 1' in si:
-                self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
-                self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+                self.inputs.new('pbrtv3_TF_tex1_socket', 'Float 1')
+                self.inputs.new('pbrtv3_TF_tex2_socket', 'Float 2')
 
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
@@ -219,8 +219,8 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
         if self.variant == 'fresnel':
             if not 'IOR 1' in si:
-                self.inputs.new('luxrender_TFR_tex1_socket', 'IOR 1')
-                self.inputs.new('luxrender_TFR_tex2_socket', 'IOR 2')
+                self.inputs.new('pbrtv3_TFR_tex1_socket', 'IOR 1')
+                self.inputs.new('pbrtv3_TFR_tex2_socket', 'IOR 2')
 
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
@@ -231,7 +231,7 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
                 self.inputs.remove(self.inputs['Float 2'])
 
             if not 'Fresnel' in so:
-                self.outputs.new('luxrender_fresnel_socket', 'Fresnel')
+                self.outputs.new('pbrtv3_fresnel_socket', 'Fresnel')
                 self.outputs['Fresnel'].needs_link = True
 
             if 'Color' in so:
@@ -262,9 +262,9 @@ class luxrender_texture_type_node_mix(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_scale(luxrender_texture_node):
+class pbrtv3_texture_type_node_scale(pbrtv3_texture_node):
     """Scale texture node"""
-    bl_idname = 'luxrender_texture_scale_node'
+    bl_idname = 'pbrtv3_texture_scale_node'
     bl_label = 'Scale'
     bl_icon = 'TEXTURE'
 
@@ -278,8 +278,8 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 
         if self.variant == 'color':
             if not 'Color 1' in si:
-                self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
-                self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+                self.inputs.new('pbrtv3_TC_tex1_socket', 'Color 1')
+                self.inputs.new('pbrtv3_TC_tex2_socket', 'Color 2')
 
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
@@ -292,8 +292,8 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
                 self.outputs.remove(self.outputs['Float'])
         if self.variant == 'float':
             if not 'Float 1' in si:
-                self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
-                self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+                self.inputs.new('pbrtv3_TF_tex1_socket', 'Float 1')
+                self.inputs.new('pbrtv3_TF_tex2_socket', 'Float 2')
 
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
@@ -325,9 +325,9 @@ class luxrender_texture_type_node_scale(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_subtract(luxrender_texture_node):
+class pbrtv3_texture_type_node_subtract(pbrtv3_texture_node):
     """Subtract texture node"""
-    bl_idname = 'luxrender_texture_subtract_node'
+    bl_idname = 'pbrtv3_texture_subtract_node'
     bl_label = 'Subtract'
     bl_icon = 'TEXTURE'
 
@@ -340,8 +340,8 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
         so = self.outputs.keys()
         if self.variant == 'color':
             if not 'Color 1' in si:
-                self.inputs.new('luxrender_TC_tex1_socket', 'Color 1')
-                self.inputs.new('luxrender_TC_tex2_socket', 'Color 2')
+                self.inputs.new('pbrtv3_TC_tex1_socket', 'Color 1')
+                self.inputs.new('pbrtv3_TC_tex2_socket', 'Color 2')
 
             if 'Float 1' in si:
                 self.inputs.remove(self.inputs['Float 1'])
@@ -355,8 +355,8 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 
         if self.variant == 'float':
             if not 'Float 1' in si:
-                self.inputs.new('luxrender_TF_tex1_socket', 'Float 1')
-                self.inputs.new('luxrender_TF_tex2_socket', 'Float 2')
+                self.inputs.new('pbrtv3_TF_tex1_socket', 'Float 1')
+                self.inputs.new('pbrtv3_TF_tex2_socket', 'Float 2')
 
             if 'Color 1' in si:
                 self.inputs.remove(self.inputs['Color 1'])
@@ -388,16 +388,16 @@ class luxrender_texture_type_node_subtract(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_colordepth(luxrender_texture_node):
+class pbrtv3_texture_type_node_colordepth(pbrtv3_texture_node):
     """Color at Depth node"""
-    bl_idname = 'luxrender_texture_colordepth_node'
+    bl_idname = 'pbrtv3_texture_colordepth_node'
     bl_label = 'Color at Depth'
     bl_icon = 'TEXTURE'
 
     depth = bpy.props.FloatProperty(name='Depth', default=1.0, subtype='DISTANCE', unit='LENGTH')
 
     def init(self, context):
-        self.inputs.new('luxrender_TC_Kt_socket', 'Transmission Color')
+        self.inputs.new('pbrtv3_TC_Kt_socket', 'Transmission Color')
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
@@ -423,9 +423,9 @@ class luxrender_texture_type_node_colordepth(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_math(luxrender_texture_node):
+class pbrtv3_texture_type_node_math(pbrtv3_texture_node):
     """Math node with several math operations"""
-    bl_idname = 'luxrender_texture_math_node'
+    bl_idname = 'pbrtv3_texture_math_node'
     bl_label = 'Math'
     bl_icon = 'TEXTURE'
 
@@ -476,9 +476,9 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
     clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
 
     def init(self, context):
-        self.inputs.new('luxrender_float_socket', 'Value 1')
-        self.inputs.new('luxrender_float_socket', 'Value 2')
-        self.inputs.new('luxrender_float_socket', 'Value 3') # for mix mode
+        self.inputs.new('pbrtv3_float_socket', 'Value 1')
+        self.inputs.new('pbrtv3_float_socket', 'Value 2')
+        self.inputs.new('pbrtv3_float_socket', 'Value 3') # for mix mode
         self.inputs[2].enabled = False
 
         self.outputs.new('NodeSocketFloat', 'Value')
@@ -538,9 +538,9 @@ class luxrender_texture_type_node_math(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_colormix(luxrender_texture_node):
+class pbrtv3_texture_type_node_colormix(pbrtv3_texture_node):
     """ColorMix node with several mixing methods"""
-    bl_idname = 'luxrender_texture_colormix_node'
+    bl_idname = 'pbrtv3_texture_colormix_node'
     bl_label = 'ColorMix'
     bl_icon = 'TEXTURE'
 
@@ -587,11 +587,11 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
     clamp_output = bpy.props.BoolProperty(name='Clamp', default=False, description='Limit the output value to 0..1 range')
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_amount_socket', 'Fac')
+        self.inputs.new('pbrtv3_TF_amount_socket', 'Fac')
         self.inputs[0].default_value = 1
-        self.inputs.new('luxrender_color_socket', 'Color 1')
+        self.inputs.new('pbrtv3_color_socket', 'Color 1')
         self.inputs[1].default_value = (0.04, 0.04, 0.04)
-        self.inputs.new('luxrender_color_socket', 'Color 2')
+        self.inputs.new('pbrtv3_color_socket', 'Color 2')
         self.inputs[2].default_value = (0.7, 0.7, 0.7)
 
         self.outputs.new('NodeSocketColor', 'Color')
@@ -657,16 +657,16 @@ class luxrender_texture_type_node_colormix(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
+class pbrtv3_texture_type_node_colorinvert(pbrtv3_texture_node):
     """ColorInvert node"""
-    bl_idname = 'luxrender_texture_colorinvert_node'
+    bl_idname = 'pbrtv3_texture_colorinvert_node'
     bl_label = 'Invert'
     bl_icon = 'TEXTURE'
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_amount_socket', 'Fac')
+        self.inputs.new('pbrtv3_TF_amount_socket', 'Fac')
         self.inputs[0].default_value = 1
-        self.inputs.new('luxrender_color_socket', 'Color')
+        self.inputs.new('pbrtv3_color_socket', 'Color')
         self.outputs.new('NodeSocketColor', 'Color')
 
     def draw_buttons(self, context, layout):
@@ -696,17 +696,17 @@ class luxrender_texture_type_node_colorinvert(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_hsv(luxrender_texture_node):
+class pbrtv3_texture_type_node_hsv(pbrtv3_texture_node):
     """Color at Depth node"""
-    bl_idname = 'luxrender_texture_hsv_node'
+    bl_idname = 'pbrtv3_texture_hsv_node'
     bl_label = 'Hue Saturation Value'
     bl_icon = 'TEXTURE'
 
     def init(self, context):
-        self.inputs.new('luxrender_color_socket', 'Color')
-        self.inputs.new('luxrender_float_limited_0_1_socket', 'Hue')
-        self.inputs.new('luxrender_float_limited_0_2_socket', 'Saturation')
-        self.inputs.new('luxrender_float_limited_0_2_socket', 'Value')
+        self.inputs.new('pbrtv3_color_socket', 'Color')
+        self.inputs.new('pbrtv3_float_limited_0_1_socket', 'Hue')
+        self.inputs.new('pbrtv3_float_limited_0_2_socket', 'Saturation')
+        self.inputs.new('pbrtv3_float_limited_0_2_socket', 'Value')
 
         self.inputs['Hue'].default_value = 0.5
         self.inputs['Saturation'].default_value = 1
@@ -739,15 +739,15 @@ class ColorRampItem(bpy.types.PropertyGroup):
     value = bpy.props.FloatVectorProperty(name='', min=0, soft_max=1, subtype='COLOR')
 
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_band(luxrender_texture_node):
+class pbrtv3_texture_type_node_band(pbrtv3_texture_node):
     """Band texture node"""
-    bl_idname = 'luxrender_texture_band_node'
+    bl_idname = 'pbrtv3_texture_band_node'
     bl_label = 'Band'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
 
     def init(self, context):
-        self.inputs.new('luxrender_TF_amount_socket', 'Amount')
+        self.inputs.new('pbrtv3_TF_amount_socket', 'Amount')
 
         self.outputs.new('NodeSocketColor', 'Color')
 
@@ -834,9 +834,9 @@ class luxrender_texture_type_node_band(luxrender_texture_node):
 
 '''
 @PBRTv3Addon.addon_register_class
-class luxrender_texture_type_node_colorramp(luxrender_texture_node):
+class pbrtv3_texture_type_node_colorramp(pbrtv3_texture_node):
     """Colorramp texture node"""
-    bl_idname = 'luxrender_texture_colorramp_node'
+    bl_idname = 'pbrtv3_texture_colorramp_node'
     bl_label = 'ColorRamp'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
@@ -869,7 +869,7 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
         so = self.outputs.keys()
 
         if not 'Amount' in si:
-            self.inputs.new('luxrender_TF_amount_socket', 'Amount')
+            self.inputs.new('pbrtv3_TF_amount_socket', 'Amount')
 
         if not 'Color' in so:
             self.outputs.new('NodeSocketColor', 'Color')
@@ -880,9 +880,9 @@ class luxrender_texture_type_node_colorramp(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
+class pbrtv3_manipulate_3d_mapping_node(pbrtv3_texture_node):
     """Manipulate 3D texture coordinates node"""
-    bl_idname = 'luxrender_manipulate_3d_mapping_node'
+    bl_idname = 'pbrtv3_manipulate_3d_mapping_node'
     bl_label = 'Manipulate 3D Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 260
@@ -898,8 +898,8 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
                                                description='Use the same scale value for all axis')
 
     def init(self, context):
-        self.inputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
-        self.outputs.new('luxrender_coordinate_socket', mapping_3d_socketname)
+        self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
+        self.outputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
@@ -947,9 +947,9 @@ class luxrender_manipulate_3d_mapping_node(luxrender_texture_node):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
+class pbrtv3_manipulate_2d_mapping_node(pbrtv3_texture_node):
     """Manipulate 2D texture coordinates node"""
-    bl_idname = 'luxrender_manipulate_2d_mapping_node'
+    bl_idname = 'pbrtv3_manipulate_2d_mapping_node'
     bl_label = 'Manipulate 2D Mapping'
     bl_icon = 'TEXTURE'
     bl_width_min = 180
@@ -960,8 +960,8 @@ class luxrender_manipulate_2d_mapping_node(luxrender_texture_node):
     vdelta = bpy.props.FloatProperty(name='V', default=0.0, min=-10000.0, max=10000.0)
 
     def init(self, context):
-        self.inputs.new('luxrender_transform_socket', mapping_2d_socketname)
-        self.outputs.new('luxrender_transform_socket', mapping_2d_socketname)
+        self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
+        self.outputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)

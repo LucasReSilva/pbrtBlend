@@ -34,7 +34,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_object(declarative_property_group):
+class pbrtv3_object(declarative_property_group):
     ef_attach_to = ['Object']
 
     controls = [
@@ -66,7 +66,7 @@ class luxrender_object(declarative_property_group):
         {
             'type': 'operator',
             'attr': 'convert_to_proxy',
-            'operator': 'export.export_luxrender_proxy',
+            'operator': 'export.export_pbrtv3_proxy',
             'text': 'Convert Selection to Proxies',
         },
         {

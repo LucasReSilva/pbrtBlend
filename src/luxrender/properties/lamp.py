@@ -51,9 +51,9 @@ def LampVolumeParameter(attr, name):
         {
             'type': 'prop_search',
             'attr': attr,
-            'src': lambda s, c: s.scene.luxrender_volumes,
+            'src': lambda s, c: s.scene.pbrtv3_volumes,
             'src_attr': 'volumes',
-            'trg': lambda s, c: c.luxrender_lamp,
+            'trg': lambda s, c: c.pbrtv3_lamp,
             'trg_attr': '%s_volume' % attr,
             'name': name,
             'icon': 'MOD_FLUIDSIM'
@@ -73,9 +73,9 @@ def LampLightGroupParameter():
         {
             'type': 'prop_search',
             'attr': 'lightgroup_chooser',
-            'src': lambda s, c: s.scene.luxrender_lightgroups,
+            'src': lambda s, c: s.scene.pbrtv3_lightgroups,
             'src_attr': 'lightgroups',
-            'trg': lambda s, c: c.luxrender_lamp,
+            'trg': lambda s, c: c.pbrtv3_lamp,
             'trg_attr': 'lightgroup',
             'name': 'Light Group',
             'icon': 'OUTLINER_OB_LAMP'
@@ -85,7 +85,7 @@ def LampLightGroupParameter():
 
 class LampColorTextureParameter(ColorTextureParameter):
     def texture_slot_set_attr(self):
-        return lambda s, c: getattr(c, 'luxrender_lamp_%s' % s.lamp.type.lower())
+        return lambda s, c: getattr(c, 'pbrtv3_lamp_%s' % s.lamp.type.lower())
 
     def texture_collection_finder(self):
         return lambda s, c: s.object.data
@@ -102,7 +102,7 @@ TC_L = LampColorTextureParameter('L', 'Colour', default=(1.0, 1.0, 1.0))
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp(declarative_property_group):
+class pbrtv3_lamp(declarative_property_group):
     """
     Storage class for LuxRender Lamp settings.
     """
@@ -150,7 +150,7 @@ class luxrender_lamp(declarative_property_group):
         return params
 
 
-class luxrender_lamp_basic(declarative_property_group):
+class pbrtv3_lamp_basic(declarative_property_group):
     controls = TC_L.controls
     visibility = TC_L.visibility
     properties = TC_L.properties
@@ -163,8 +163,8 @@ class luxrender_lamp_basic(declarative_property_group):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_point(luxrender_lamp_basic):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_point(pbrtv3_lamp_basic):
+    ef_attach_to = ['pbrtv3_lamp']
 
     def sphere_lamp_prop(self, context):
         context.lamp.use_sphere = self.usesphere
@@ -183,7 +183,7 @@ class luxrender_lamp_point(luxrender_lamp_basic):
     ]
 
     visibility = dict_merge(
-        luxrender_lamp_basic.visibility,
+        pbrtv3_lamp_basic.visibility,
         {'projector': lambda: UseLuxCore()},
         {'mapname': A([{'projector': True}, lambda: UseLuxCore()])}, # Only supported by LuxCore
         {'usesphere': lambda: not UseLuxCore()},
@@ -289,10 +289,10 @@ class luxrender_lamp_point(luxrender_lamp_basic):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_spot(luxrender_lamp_basic):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_spot(pbrtv3_lamp_basic):
+    ef_attach_to = ['pbrtv3_lamp']
 
-    controls = luxrender_lamp_basic.controls[:] + [
+    controls = pbrtv3_lamp_basic.controls[:] + [
         'projector',
         'mapname',
         'gamma',
@@ -301,7 +301,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
     ]
 
     visibility = dict_merge(
-        luxrender_lamp_basic.visibility,
+        pbrtv3_lamp_basic.visibility,
         {'mapname': {'projector': True}},
     )
 
@@ -309,7 +309,7 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
         context.lamp.use_square = self.projector  # Toggle the "square" option to give something of a preview \
         # for projector
 
-    properties = luxrender_lamp_basic.properties[:] + [
+    properties = pbrtv3_lamp_basic.properties[:] + [
         {
             'type': 'bool',
             'attr': 'projector',
@@ -369,8 +369,8 @@ class luxrender_lamp_spot(luxrender_lamp_basic):
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_sun(declarative_property_group):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_sun(declarative_property_group):
+    ef_attach_to = ['pbrtv3_lamp']
 
     controls = [
                    'sunsky_type',
@@ -586,7 +586,7 @@ class luxrender_lamp_sun(declarative_property_group):
 class OpacityFloatTextureParameter(FloatTextureParameter):
     def texture_slot_set_attr(self):
         # Looks in a different location than other FloatTextureParameters
-        return lambda s, c: c.luxrender_lamp_area
+        return lambda s, c: c.pbrtv3_lamp_area
 
     def get_properties(self):
         props = super().get_properties()
@@ -602,8 +602,8 @@ TF_opacity = OpacityFloatTextureParameter('opacity', 'Opacity', add_float_value=
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_area(declarative_property_group):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_area(declarative_property_group):
+    ef_attach_to = ['pbrtv3_lamp']
 
     controls = TC_L.controls[:] + [
         'nsamples',
@@ -699,8 +699,8 @@ emitting side, as it emits its own light',
 
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_hemi(declarative_property_group):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_hemi(declarative_property_group):
+    ef_attach_to = ['pbrtv3_lamp']
 
     controls = [
         'infinite_map',
@@ -811,8 +811,8 @@ images. Will disable use of portals for this light!',
 #####################################
 
 @PBRTv3Addon.addon_register_class
-class luxrender_lamp_laser(declarative_property_group):
-    ef_attach_to = ['luxrender_lamp']
+class pbrtv3_lamp_laser(declarative_property_group):
+    ef_attach_to = ['pbrtv3_lamp']
 
     controls = [
         'is_laser'

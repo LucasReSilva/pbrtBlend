@@ -31,17 +31,17 @@ from ..export.geometry import GeometryExporter
 from ..export.materials import ExportedTextures, convert_texture, get_material_volume_defs, get_preview_flip, \
     get_preview_zoom
 from ..outputs import LuxLog, LuxManager
-from ..outputs.pure_api import LUXRENDER_VERSION
+from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
-from ..properties.node_material import luxrender_texture_maker
+from ..properties.node_material import pbrtv3_texture_maker
 
 
 def export_preview_texture(lux_context, texture):
     texture_name = texture.name
-    if texture.luxrender_texture.type != 'BLENDER':
-        tex_luxrender_texture = texture.luxrender_texture
-        lux_tex_variant, paramset = tex_luxrender_texture.get_paramset(LuxManager.CurrentScene, texture)
-        lux_tex_name = tex_luxrender_texture.type
+    if texture.pbrtv3_texture.type != 'BLENDER':
+        tex_pbrtv3_texture = texture.pbrtv3_texture
+        lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(LuxManager.CurrentScene, texture)
+        lux_tex_name = tex_pbrtv3_texture.type
     else:
         lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture,
                                                                   variant_hint='color')
@@ -49,9 +49,9 @@ def export_preview_texture(lux_context, texture):
             texture_name = texture_name + "_" + lux_tex_variant
 
             # running bonds shown from the side in tex-preview
-    if texture.luxrender_texture.type == 'brick' and texture.luxrender_texture.luxrender_tex_brick.brickbond in (
+    if texture.pbrtv3_texture.type == 'brick' and texture.pbrtv3_texture.pbrtv3_tex_brick.brickbond in (
             'running', 'flemish'):
-        brick_rot = texture.luxrender_texture.luxrender_tex_transform.rotate[:]
+        brick_rot = texture.pbrtv3_texture.pbrtv3_tex_transform.rotate[:]
         paramset.add_vector('rotate', [brick_rot[0] + 90, brick_rot[1], brick_rot[2]])
 
     # if lux_tex_variant == 'color':
@@ -89,7 +89,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     lux_context.camera('perspective', camera_params)
 
     # Film
-    xr, yr = scene.camera.data.luxrender_camera.luxrender_film.resolution(scene)
+    xr, yr = scene.camera.data.pbrtv3_camera.pbrtv3_film.resolution(scene)
 
     film_params = ParamSet() \
         .add_integer('xresolution', xr) \
@@ -160,7 +160,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     for scn in bpy.data.scenes:
         LuxManager.SetCurrentScene(scn)
 
-        for volume in scn.luxrender_volumes.volumes:
+        for volume in scn.pbrtv3_volumes.volumes:
             if volume.type == 'heterogeneous':
                 vol_param = ParamSet().add_color('sigma_s', (1.0, 1.0, 1.0))
                 lux_context.makeNamedVolume(volume.name, 'heterogeneous', vol_param)
@@ -172,7 +172,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     # Light
     # For usability, previev_scale is not an own property but calculated from the object dimensions
     # A user can directly judge mappings on an adjustable object_size, we simply scale the whole preview
-    preview_scale = bl_scene.luxrender_world.preview_object_size / 2
+    preview_scale = bl_scene.pbrtv3_world.preview_object_size / 2
     lux_context.attributeBegin()
     if mat.preview_render_type == 'FLAT' and mat_preview_xz:
         lux_context.transform([
@@ -215,8 +215,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             .add_float('gain', 1.0 / preview_scale) \
             .add_float('importance', 1.0)
 
-    if bl_scene.luxrender_world.default_exterior_volume:
-        lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+    if bl_scene.pbrtv3_world.default_exterior_volume:
+        lux_context.exterior(bl_scene.pbrtv3_world.default_exterior_volume)
 
     lux_context.areaLightSource('area', light_params)
     areax = 1
@@ -236,8 +236,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     lux_context.attributeEnd()
 
     # Add a background color (light)
-    if bl_scene.luxrender_world.default_exterior_volume:
-        lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+    if bl_scene.pbrtv3_world.default_exterior_volume:
+        lux_context.exterior(bl_scene.pbrtv3_world.default_exterior_volume)
 
     if tex is None:
         inf_gain = 0.1
@@ -358,11 +358,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         ])
         lux_context.shape('loopsubdiv', bd_shape_params)
 
-    if bl_scene.luxrender_world.default_interior_volume:
-        lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
+    if bl_scene.pbrtv3_world.default_interior_volume:
+        lux_context.interior(bl_scene.pbrtv3_world.default_interior_volume)
 
-    if bl_scene.luxrender_world.default_exterior_volume:
-        lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+    if bl_scene.pbrtv3_world.default_exterior_volume:
+        lux_context.exterior(bl_scene.pbrtv3_world.default_exterior_volume)
 
     lux_context.attributeEnd()
 
@@ -441,7 +441,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
 
                     lux_context.material('matte', ParamSet().add_texture('Kd', texture_name))
                 else:
-                    mat.luxrender_material.export(scene, lux_context, mat, mode='direct')
+                    mat.pbrtv3_material.export(scene, lux_context, mat, mode='direct')
                     int_v, ext_v = get_material_volume_defs(mat)
 
                     if int_v or ext_v:
@@ -451,15 +451,15 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                         if ext_v:
                             lux_context.exterior(ext_v)
 
-                    if not int_v and bl_scene.luxrender_world.default_interior_volume:
-                        lux_context.interior(bl_scene.luxrender_world.default_interior_volume)
+                    if not int_v and bl_scene.pbrtv3_world.default_interior_volume:
+                        lux_context.interior(bl_scene.pbrtv3_world.default_interior_volume)
 
-                    if not ext_v and bl_scene.luxrender_world.default_exterior_volume:
-                        lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+                    if not ext_v and bl_scene.pbrtv3_world.default_exterior_volume:
+                        lux_context.exterior(bl_scene.pbrtv3_world.default_exterior_volume)
 
-                    output_node = find_node(mat, 'luxrender_material_output_node')
+                    output_node = find_node(mat, 'pbrtv3_material_output_node')
 
-                    if mat.luxrender_material.nodetree:
+                    if mat.pbrtv3_material.nodetree:
                         object_is_emitter = False
 
                         if output_node is not None:
@@ -469,14 +469,14 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
                                 light_node = light_socket.links[0].from_node
                                 object_is_emitter = light_socket.is_linked
                     else:
-                        object_is_emitter = hasattr(mat, 'luxrender_emission') and mat.luxrender_emission.use_emission
+                        object_is_emitter = hasattr(mat, 'pbrtv3_emission') and mat.pbrtv3_emission.use_emission
 
                     if object_is_emitter:
-                        if not mat.luxrender_material.nodetree:
-                            # lux_context.lightGroup(mat.luxrender_emission.lightgroup, [])
-                            lux_context.areaLightSource(*mat.luxrender_emission.api_output(obj))
+                        if not mat.pbrtv3_material.nodetree:
+                            # lux_context.lightGroup(mat.pbrtv3_emission.lightgroup, [])
+                            lux_context.areaLightSource(*mat.pbrtv3_emission.api_output(obj))
                         else:
-                            tex_maker = luxrender_texture_maker(lux_context, mat.luxrender_material.nodetree)
+                            tex_maker = pbrtv3_texture_maker(lux_context, mat.pbrtv3_material.nodetree)
                             lux_context.areaLightSource(*light_node.export(tex_maker.make_texture))
 
                 lux_context.shape(mesh_type, mesh_params)
@@ -486,8 +486,8 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
         lux_context.attributeEnd()
 
     # Default 'Camera' Exterior, just before WorldEnd
-    if bl_scene.luxrender_world.default_exterior_volume:
-        lux_context.exterior(bl_scene.luxrender_world.default_exterior_volume)
+    if bl_scene.pbrtv3_world.default_exterior_volume:
+        lux_context.exterior(bl_scene.pbrtv3_world.default_exterior_volume)
 
     return int(xr), int(yr)
 
