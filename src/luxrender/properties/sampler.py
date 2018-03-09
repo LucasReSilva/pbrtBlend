@@ -57,7 +57,7 @@ class pbrtv3_sampler(declarative_property_group):
     visibility = {
         'spacer': {'advanced': True},
         'pixelsampler': {'sampler': O(['lowdiscrepancy', 'random'])},
-        'pixelsamples': {'sampler': O(['lowdiscrepancy', 'random'])},
+        'pixelsamples': {'sampler': O(['lowdiscrepancy', 'random', 'sobol'])},
         # 'adaptive_largemutationprob':	{ 'sampler': 'metropolis' },
         'largemutationprob': A([{'sampler': 'metropolis'}, ]),  # { 'adaptive_largemutationprob': False },
         'usecooldown': A([{'advanced': True}, {'sampler': 'metropolis'}, ]),
@@ -181,7 +181,7 @@ class pbrtv3_sampler(declarative_property_group):
             'name': 'Pixel Samples',
             'description': 'Average number of samples taken per pixel. More samples create a higher quality image at \
             the cost of render time',
-            'default': 4,
+            'default': 64,
             'min': 1,
             'max': 8192,
             'save_in_preset': True
@@ -197,9 +197,9 @@ class pbrtv3_sampler(declarative_property_group):
 
         params = ParamSet()
 
-        if self.sampler in ['random', 'lowdiscrepancy']:
+        if self.sampler in ['random', 'lowdiscrepancy', 'sobol']:
             params.add_integer('pixelsamples', self.pixelsamples)
-            params.add_string('pixelsampler', self.pixelsampler)
+            #params.add_string('pixelsampler', self.pixelsampler)
 
             # if self.sampler == 'metropolis':
         # params.add_bool('adaptive_largemutationprob', self.adaptive_largemutationprob)
