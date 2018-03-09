@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -175,7 +175,7 @@ class GeometryExporter(object):
         """
         Convert supported blender objects into a MESH, and then split into parts
         according to vertex material assignment, and construct a mesh_name and
-        ParamSet for each part which will become a LuxRender PLYShape statement
+        ParamSet for each part which will become a PBRTv3 PLYShape statement
         wrapped within objectBegin..objectEnd or placed in an
         attributeBegin..attributeEnd scope, depending if instancing is allowed.
         The actual geometry will be dumped to a binary ply file.
@@ -363,7 +363,7 @@ class GeometryExporter(object):
                         with open(ply_path, 'wb') as ply:
                             ply.write(b'ply\n')
                             ply.write(b'format binary_little_endian 1.0\n')
-                            ply.write(b'comment Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net\n')
+                            ply.write(b'comment Created by LuxBlend 2.6 exporter for PBRTv3 - www.luxrender.net\n')
 
                             # vert_index == the number of actual verts needed
                             ply.write(('element vertex %d\n' % vert_index).encode())
@@ -455,7 +455,7 @@ class GeometryExporter(object):
         """
         Convert supported blender objects into a MESH, and then split into parts
         according to vertex material assignment, and construct a mesh_name and
-        ParamSet for each part which will become a LuxRender Shape statement
+        ParamSet for each part which will become a PBRTv3 Shape statement
         wrapped within objectBegin..objectEnd or placed in an
         attributeBegin..attributeEnd scope, depending if instancing is allowed.
         """
@@ -589,7 +589,7 @@ class GeometryExporter(object):
                     if uv_layer:
                         shape_params.add_float('uv', uvs)
 
-                    # Add other properties from LuxRender Mesh panel
+                    # Add other properties from PBRTv3 Mesh panel
                     shape_params.update(obj.data.pbrtv3_mesh.get_paramset())
 
                     mesh_definition = (mesh_name, i, 'mesh', shape_params)
@@ -1018,7 +1018,7 @@ class GeometryExporter(object):
                         colorflag = 1
                 uvflag = 1
 
-            info = 'Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net'
+            info = 'Created by LuxBlend 2.6 exporter for PBRTv3 - www.luxrender.net'
 
             transform = obj.matrix_world.inverted()
             total_strand_count = 0

@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -161,7 +161,7 @@ def volume_types():
 @PBRTv3Addon.addon_register_class
 class pbrtv3_volume_data(declarative_property_group):
     """
-    Storage class for LuxRender volume data. The
+    Storage class for PBRTv3 volume data. The
     pbrtv3_volumes object will store 1 or more of
     these in its CollectionProperty 'volumes'.
     """
@@ -667,7 +667,7 @@ class pbrtv3_volume_data(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_volumes(declarative_property_group):
     """
-    Storage class for LuxRender Material volumes.
+    Storage class for PBRTv3 Material volumes.
     """
 
     ef_attach_to = ['Scene']
@@ -721,7 +721,7 @@ class pbrtv3_volumes(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_lightgroup_data(declarative_property_group):
     """
-    Storage class for LuxRender light group settings. The
+    Storage class for PBRTv3 light group settings. The
     pbrtv3_lightgroups object will store 1 or more of
     these in its CollectionProperty 'lightgroups'.
     """
@@ -800,7 +800,7 @@ class pbrtv3_lightgroup_data(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_lightgroups(declarative_property_group):
     """
-    Storage class for LuxRender Light Groups.
+    Storage class for PBRTv3 Light Groups.
     """
 
     ef_attach_to = ['Scene']
@@ -907,7 +907,7 @@ class pbrtv3_lightgroups(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_materialgroup_data(declarative_property_group):
     """
-    Storage class for LuxRender material group settings. The
+    Storage class for PBRTv3 material group settings. The
     pbrtv3_materialgroups object will store 1 or more of
     these in its CollectionProperty 'materialgroups'.
     """
@@ -990,7 +990,7 @@ class pbrtv3_materialgroup_data(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_materialgroups(declarative_property_group):
     """
-    Storage class for LuxRender Material Groups.
+    Storage class for PBRTv3 Material Groups.
     """
 
     ef_attach_to = ['Scene']
@@ -1151,13 +1151,13 @@ class pbrtv3_channels(declarative_property_group):
         {
             'type': 'text',
             'attr': 'aov_label',
-            'name': 'LuxRender Passes (AOVs)',
+            'name': 'PBRTv3 Passes (AOVs)',
         },
         {
             'type': 'bool',
             'attr': 'enable_aovs',
             'name': 'Enable',
-            'description': 'Enable LuxRender Passes',
+            'description': 'Enable PBRTv3 Passes',
             'default': True
         },
         {

@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-"""Main LuxRender extension class definition"""
+"""Main PBRTv3 extension class definition"""
 
 # System libs
 import os
@@ -97,7 +97,7 @@ def _register_elm(elm, required=False):
         elm.COMPAT_ENGINES.add('PBRTv3_RENDER')
     except:
         if required:
-            LuxLog('Failed to add LuxRender to ' + elm.__name__)
+            LuxLog('Failed to add PBRTv3 to ' + elm.__name__)
 
 # Add standard Blender Interface elements
 _register_elm(bl_ui.properties_render.RENDER_PT_render, required=True)
@@ -203,7 +203,7 @@ def lux_output_hints(self, context):
         # in this case, none of these buttons do anything, so don't even bother drawing the label
         if not pipe_mode:
             col = self.layout.column()
-            col.label("LuxRender Output Formats")
+            col.label("PBRTv3 Output Formats")
         row = self.layout.row()
         if not pipe_mode:
             row.prop(context.scene.camera.data.pbrtv3_camera.pbrtv3_film, "write_png", text="PNG")
@@ -308,7 +308,7 @@ def render_start_options(self, context):
         if UseLuxCore() and context.scene.render.display_mode == 'WINDOW':
             col.label("Window mode can cause crashes!", icon="ERROR")
 
-        col.prop(context.scene.pbrtv3_engine, "selected_pbrtv3_api", text="LuxRender API")
+        col.prop(context.scene.pbrtv3_engine, "selected_pbrtv3_api", text="PBRTv3 API")
 
         if UseLuxCore():
             col.prop(context.scene.luxcore_translatorsettings, "export_type")
@@ -390,7 +390,7 @@ def lux_texture_chooser(self, context):
         self.layout.separator()
         row = self.layout.row(align=True)
         if context.texture:
-            row.label('LuxRender type')
+            row.label('PBRTv3 type')
             row.menu('TEXTURE_MT_pbrtv3_type', text=context.texture.pbrtv3_texture.type_label)
 
             if UseLuxCore():
@@ -399,7 +399,7 @@ def lux_texture_chooser(self, context):
                 if context.texture.use_color_ramp:
                     self.layout.template_color_ramp(context.texture, 'color_ramp', expand=True)
 
-                    # The first element has a default alpha of 0, which makes no sense for LuxRender - set it to 1
+                    # The first element has a default alpha of 0, which makes no sense for PBRTv3 - set it to 1
                     first_color = context.texture.color_ramp.elements[0].color
                     if first_color[3] < 1:
                         first_color[3] = 1
@@ -449,7 +449,7 @@ _register_elm(bpy.types.NODE_HT_header.append(draw_button_show_imagemap_previews
 @PBRTv3Addon.addon_register_class
 class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     """
-    LuxRender Engine Exporter/Integration class
+    PBRTv3 Engine Exporter/Integration class
     """
 
     bl_idname = 'PBRTv3_RENDER'
@@ -465,7 +465,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         """
         scene:  bpy.types.Scene
 
-        Export the given scene to LuxRender.
+        Export the given scene to PBRTv3.
         Choose from one of several methods depending on what needs to be rendered.
 
         Returns None
@@ -493,7 +493,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     ############################################################################
     #
-    # LuxRender classic API
+    # PBRTv3 classic API
     #
     ############################################################################
 
@@ -847,10 +847,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def append_lux_binary_name(self, scene, pbrtv3_path, binary_name):
         if sys.platform == 'darwin':
             # Get binary from OSX bundle
-            pbrtv3_path += 'LuxRender.app/Contents/MacOS/%s' % binary_name
+            pbrtv3_path += 'PBRTv3.app/Contents/MacOS/%s' % binary_name
             if not os.path.exists(pbrtv3_path):
-                LuxLog('LuxRender not found at path: %s' % pbrtv3_path, ', trying default LuxRender location')
-                pbrtv3_path = '/Applications/LuxRender/LuxRender.app/Contents/MacOS/%s' % \
+                LuxLog('PBRTv3 not found at path: %s' % pbrtv3_path, ', trying default PBRTv3 location')
+                pbrtv3_path = '/Applications/PBRTv3/PBRTv3.app/Contents/MacOS/%s' % \
                                  binary_name  # try fallback to default installation path
         elif sys.platform == 'win32':
             pbrtv3_path += '%s.exe' % binary_name
@@ -874,7 +874,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         pbrtv3_path = self.append_lux_binary_name(scene, pbrtv3_path, binary_name)
 
         if not os.path.exists(pbrtv3_path):
-            raise Exception('LuxRender not found at path: %s' % pbrtv3_path)
+            raise Exception('PBRTv3 not found at path: %s' % pbrtv3_path)
 
         return pbrtv3_path
 
@@ -929,7 +929,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for k, v in config_updates.items():
                 efutil.write_config_value('luxrender', 'defaults', k, v)
         except Exception as err:
-            LuxLog('WARNING: Saving LuxRender config failed, please set your user scripts dir: %s' % err)
+            LuxLog('WARNING: Saving PBRTv3 config failed, please set your user scripts dir: %s' % err)
 
         return cmd_args
 
@@ -959,12 +959,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # Begin rendering
         if start_rendering:
-            LuxLog('Starting LuxRender')
+            LuxLog('Starting PBRTv3')
             if internal:
 
                 self.LuxManager.lux_context.logVerbosity(scene.pbrtv3_engine.log_verbosity)
 
-                self.update_stats('', 'LuxRender: Building %s' % scene.pbrtv3_accelerator.accelerator)
+                self.update_stats('', 'PBRTv3: Building %s' % scene.pbrtv3_accelerator.accelerator)
                 self.LuxManager.start()
 
                 self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.pbrtv3_engine.integratedimaging
@@ -1040,7 +1040,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         LC = self.LuxManager.lux_context
 
-        self.update_stats('', 'LuxRender: Rendering %s' % self.LuxManager.stats_thread.stats_string)
+        self.update_stats('', 'PBRTv3: Rendering %s' % self.LuxManager.stats_thread.stats_string)
 
         if hasattr(self, 'update_progress') and LC.getAttribute('renderer_statistics', 'percentComplete') > 0:
             prg = LC.getAttribute('renderer_statistics', 'percentComplete') / 100.0

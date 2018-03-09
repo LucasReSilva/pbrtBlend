@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -61,7 +61,7 @@ class world_helper(world_panel):
 @PBRTv3Addon.addon_register_class
 class world(world_panel):
     """
-    LuxRender World Settings
+    PBRTv3 World Settings
     """
 
     bl_label = 'PBRTv3 World Settings'

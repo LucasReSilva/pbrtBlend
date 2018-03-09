@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -161,7 +161,7 @@ class TextureParameterBase(object):
 
     def get_paramset(self, property_group):
         """
-        Return a LuxRender ParamSet of the properties
+        Return a PBRTv3 ParamSet of the properties
         defined in this Texture, getting parameters
         from the property_group
         """
@@ -682,7 +682,7 @@ tex_names = (
          ('BLENDER', 'Use Blender Texture'),
      )),
 
-    ('LuxRender Textures',
+    ('PBRTv3 Textures',
      (
          ('brick', 'Brick'),
          ('checkerboard', 'Checkerboard'),
@@ -745,7 +745,7 @@ tex_names = (
 @PBRTv3Addon.addon_register_class
 class TEXTURE_OT_set_pbrtv3_type(bpy.types.Operator):
     bl_idname = 'texture.set_pbrtv3_type'
-    bl_label = 'Set LuxRender texture type'
+    bl_label = 'Set PBRTv3 texture type'
 
     tex_name = bpy.props.StringProperty()
     tex_label = bpy.props.StringProperty()
@@ -807,7 +807,7 @@ class TEXTURE_MT_pbrtv3_type(bpy.types.Menu):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_texture(declarative_property_group):
     """
-    Storage class for LuxRender Texture settings.
+    Storage class for PBRTv3 Texture settings.
     """
 
     ef_attach_to = ['Texture']
@@ -826,14 +826,14 @@ class pbrtv3_texture(declarative_property_group):
         },  # The following two items are set by the preset menu and operator.
         {
             'attr': 'type_label',
-            'name': 'LuxRender Type',
+            'name': 'PBRTv3 Type',
             'type': 'string',
             'default': 'Use Blender Texture',
             'save_in_preset': True
         },
         {
             'attr': 'type',
-            'name': 'LuxRender Type',
+            'name': 'PBRTv3 Type',
             'type': 'string',
             'default': 'BLENDER',
             'update': refresh_preview,
@@ -858,7 +858,7 @@ class pbrtv3_texture(declarative_property_group):
 
     def get_paramset(self, scene, texture):
         """
-        Discover the type of this LuxRender texture, and return its
+        Discover the type of this PBRTv3 texture, and return its
         variant name and its ParamSet.
         We also add in the ParamSets of any panels shared by texture
         types, eg. 2D/3D mapping and transform params

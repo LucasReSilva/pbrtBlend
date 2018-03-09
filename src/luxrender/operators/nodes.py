@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -34,7 +34,7 @@ from bpy.types import OperatorFileListElement
 from bpy_extras.io_utils import ImportHelper
 from bpy_extras.image_utils import load_image
 
-# LuxRender Libs
+# PBRTv3 Libs
 from .. import PBRTv3Addon
 
 
@@ -104,7 +104,7 @@ class PBRTv3_OT_add_material_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_material_nodetree"
     bl_label = "Use Material Nodes"
-    bl_description = "Add a LuxRender node tree linked to this material"
+    bl_description = "Add a PBRTv3 node tree linked to this material"
 
     # idtype = StringProperty(name="ID Type", default="material")
 
@@ -299,7 +299,7 @@ class PBRTv3_OT_add_volume_nodetree(bpy.types.Operator):
     """"""
     bl_idname = "luxrender.add_volume_nodetree"
     bl_label = "Use Volume Nodes"
-    bl_description = "Add a LuxRender node tree linked to this volume"
+    bl_description = "Add a PBRTv3 node tree linked to this volume"
 
     def execute(self, context):
         current_vol_ind = context.scene.pbrtv3_volumes.volumes_index

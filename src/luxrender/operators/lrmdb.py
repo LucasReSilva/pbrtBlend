@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -202,7 +202,7 @@ class LrmdbActionButton(object):
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_OT_lrmdb_login(bpy.types.Operator):
-    """Log in to the LuxRender Materials Database"""
+    """Log in to the PBRTv3 Materials Database"""
 
     bl_idname = 'luxrender.lrmdb_login'
     bl_label = 'Log in to LRMDB'
@@ -238,7 +238,7 @@ class PBRTv3_OT_lrmdb_login(bpy.types.Operator):
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_OT_lrmdb_logout(bpy.types.Operator):
-    """Log out of the LuxRender Materials Database"""
+    """Log out of the PBRTv3 Materials Database"""
 
     bl_idname = 'luxrender.lrmdb_logout'
     bl_label = 'Log out of LRMDB'
@@ -258,7 +258,7 @@ class PBRTv3_OT_lrmdb_logout(bpy.types.Operator):
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_OT_lrmdb(bpy.types.Operator):
-    """Start the LuxRender Materials Database Interface"""
+    """Start the PBRTv3 Materials Database Interface"""
 
     bl_idname = 'luxrender.lrmdb'
     bl_label = 'Start LRMDB'

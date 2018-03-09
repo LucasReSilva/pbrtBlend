@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -125,7 +125,7 @@ class pbrtv3_testing(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_engine(declarative_property_group):
     """
-    Storage class for LuxRender Engine settings.
+    Storage class for PBRTv3 Engine settings.
     """
 
     ef_attach_to = ['Scene']
@@ -182,7 +182,7 @@ class pbrtv3_engine(declarative_property_group):
             'type': 'bool',
             'attr': 'threads_auto',
             'name': 'Auto Threads',
-            'description': 'Let LuxRender decide how many threads to use',
+            'description': 'Let PBRTv3 decide how many threads to use',
             'default': True
         },
         {
@@ -200,7 +200,7 @@ class pbrtv3_engine(declarative_property_group):
             'type': 'enum',
             'attr': 'export_type',
             'name': 'Export Type',
-            'description': 'Run LuxRender inside or outside of Blender',
+            'description': 'Run PBRTv3 inside or outside of Blender',
             'default': 'EXT',  # if not PYLUX_AVAILABLE else 'INT',
             'items': find_apis(),
             'save_in_preset': True
@@ -232,13 +232,13 @@ class pbrtv3_engine(declarative_property_group):
         {
             'type': 'enum',
             'attr': 'selected_pbrtv3_api',
-            'name': 'LuxRender API version',
-            'description': 'Choose between LuxRender v1.x and v2.x API',
+            'name': 'PBRTv3 API version',
+            'description': 'Choose between PBRTv3 v1.x and v2.x API',
             'default': 'classic',
             'items': [
-                         ('classic', 'Classic API', 'Use LuxRender v1.x API', 'NONE', 0),
+                         ('classic', 'Classic API', 'Use PBRTv3 v1.x API', 'NONE', 0),
                      ] + ([
-                         ('luxcore', 'LuxCore API (Experimental)', 'Use LuxRender v2.x API (experimental and unstable!)',
+                         ('luxcore', 'LuxCore API (Experimental)', 'Use PBRTv3 v2.x API (experimental and unstable!)',
                           'ERROR', 1)
                      ] if PYLUXCORE_AVAILABLE else []),
             'save_in_preset': True
@@ -258,7 +258,7 @@ class pbrtv3_engine(declarative_property_group):
             'description': 'Choose full GUI, console renderer or real-time rendering',
             'default': 'luxrender',
             'items': [
-                ('luxrender', 'LuxRender GUI', 'Render with the LuxRender GUI application'),
+                ('luxrender', 'PBRTv3 GUI', 'Render with the PBRTv3 GUI application'),
                 ('luxconsole', 'LuxConsole', 'Render with LuxConsole and feed the result to the UV/Image Editor'),
                 ('luxvr', 'LuxVR', 'Render with the LuxVR realtime preview tool'),
             ],
@@ -308,7 +308,7 @@ class pbrtv3_engine(declarative_property_group):
             'description': 'Sets whether to export scene geometry as PLY files or directly in the LXO file, PLY is \
             faster and recommended. This can be overridden per mesh from the mesh properties panel',
             'items': [
-                ('native', 'LuxRender mesh', 'native'),
+                ('native', 'PBRTv3 mesh', 'native'),
                 ('binary_ply', 'Binary PLY', 'binary_ply')
             ],
             'default': 'binary_ply',

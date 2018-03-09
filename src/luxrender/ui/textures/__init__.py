@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -33,7 +33,7 @@ from ... import PBRTv3Addon
 
 class pbrtv3_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property_group_renderer):
     """
-    This is the base class for all LuxRender texture sub-panels.
+    This is the base class for all PBRTv3 texture sub-panels.
     All subpanels should have their own property_groups, and define
     a string attribute in their property_group called 'variant'.
     It should be set to either 'float' or 'color' depending on the
@@ -49,7 +49,7 @@ class pbrtv3_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property
     @classmethod
     def poll(cls, context):
         """
-        Only show LuxRender panel if pbrtv3_texture.type in LUX_COMPAT
+        Only show PBRTv3 panel if pbrtv3_texture.type in LUX_COMPAT
         """
 
         tex = context.texture

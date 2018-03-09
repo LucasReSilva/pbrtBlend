@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -127,11 +127,11 @@ class Custom_Context(object):
         if not os.path.exists(subdir):
             os.makedirs(subdir)
 
-        self.file_names.append('%s/LuxRender-Materials.PBRTv3m' % subdir)
+        self.file_names.append('%s/PBRTv3-Materials.PBRTv3m' % subdir)
         self.files.append(open(self.file_names[Files.MATS], 'w'))
         self.wf(Files.MATS, '# Materials File')
 
-        self.file_names.append('%s/LuxRender-Geometry.PBRTv3o' % subdir)
+        self.file_names.append('%s/PBRTv3-Geometry.PBRTv3o' % subdir)
         self.files.append(open(self.file_names[Files.GEOM], 'w'))
         self.wf(Files.GEOM, '# Geometry File')
 
@@ -232,7 +232,7 @@ class Custom_Context(object):
 
     def lightGroup(self, *args):
         if args[0] != '':
-            self._api('LightGroup', args)
+            self._api('#LightGroup', args)
 
     def lightSource(self, *args):
         self._api('LightSource', args)
@@ -322,7 +322,7 @@ class Custom_Context(object):
 
     def volume(self, type, params):
         if not self.has_volumes_file:
-            self.file_names.append('%s/LuxRender-Volumes.lxv' % subdir)
+            self.file_names.append('%s/PBRTv3-Volumes.lxv' % subdir)
             self.files.insert(-1, open(self.file_names[Files.VOLM], 'w'))
             self.wf(Files.VOLM, '# Volume File')
             self.has_volumes_file = True

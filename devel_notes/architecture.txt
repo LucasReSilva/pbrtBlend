@@ -14,7 +14,7 @@ Custom properties
 
 When the addon is loaded, it creates a whole load of custom 'property groups'
 in various types within Blender as a way to store custom properties for
-LuxRender specific settings.
+PBRTv3 specific settings.
 
 The property groups and the properties they contain are defined in the files
 in the properties/ package. The property groups are defined by inheriting
@@ -51,7 +51,7 @@ are not attached to other types (eg. volume_data and light_group_data) since
 they are used as members of a CollectionProperty in other property groups.
 
 Most property groups also contain a method (usually named get_paramset()) which
-formats its own properties into a LuxRender ParamSet, which is then either
+formats its own properties into a PBRTv3 ParamSet, which is then either
 written to file or passed to the integrated rendering context. Some property
 groups (eg. for Materials and Textures) also have a load_paramset method which
 does the reverse.
@@ -94,7 +94,7 @@ Any operators in the operators/ package need to be imported into core/ in order
 to be registered when the addon is loaded.
 
 The core/ package is also responsible for telling Blender which other UI panels
-are compatible with LuxRender.
+are compatible with PBRTv3.
 
 RenderEngine
 ============
@@ -110,7 +110,7 @@ whether it is rendering a single frame, animation or a material preview. It is
 RENDERENGINE_luxrender that has to do the guesswork and act accordingly.
 
 The RENDERENGINE_luxrender class contains all the process-management needed to
-run LuxRender either as an external process, or fully integrated via the pylux
+run PBRTv3 either as an external process, or fully integrated via the pylux
 python module. It uses the same scene-export process as is used by the
 EXPORT_OT_luxrender operator.
 
@@ -118,7 +118,7 @@ EXPORT_OT_luxrender operator.
 How the Scene is exported
 =========================
 
-The output of data from Blender to LuxRender is abstracted through a lux_context
+The output of data from Blender to PBRTv3 is abstracted through a lux_context
 object. This object may be writing to file, or calling API methods on pylux.
 It should not be assumed at any time that either of these methods is being used,
 though occasionally checks need to be made in order to perform tasks specific
@@ -137,7 +137,7 @@ The export process
 
 The process of exporting a Blender Scene to a lux_context starts in the export/
 package. This package defines classes and functions which translate various
-Blender objects/types into the format needed by LuxRender. The entire process
+Blender objects/types into the format needed by PBRTv3. The entire process
 starts with export/scene. The SceneExporter class has an export() method,
 which does the following:
 * Check that the scene to be exported is valid
@@ -163,7 +163,7 @@ Geometry export
 
 The export/geometry module contains the majority of the useful code used in the
 export process. It is responsible for detecting exportable meshes in the scene,
-and translating them into LuxRender format Shapes. It also ensures that objects
+and translating them into PBRTv3 format Shapes. It also ensures that objects
 with 'duplis' or particle systems enabled have all their child objects exported
 as well.
 
@@ -176,7 +176,7 @@ GeometryExporter
 ................
 
 This class contains a set of methods which deal with converting certain Blender
-objects into meshes. LuxRender also requires that meshes with multiple materials
+objects into meshes. PBRTv3 also requires that meshes with multiple materials
 assigned are split into separate parts. This class also deals with deciding
 whether to export meshes as ObjectBegin..ObjectEnd/ObjectInstance definitions
 for geometry instancing, or whether each mesh instance should be exported in full.
@@ -194,11 +194,11 @@ Light source export
 ===================
 
 The export/lights module iterates over the objects in the Scene and translates
-all Lamp objects into light sources for LuxRender. The implementation is a
+all Lamp objects into light sources for PBRTv3. The implementation is a
 fairly simple loop in the lights() function.
 
 Note that the geometry export has to be performed first, because of the Portals
-system in LuxRender. Each light source exported needs to be told about Portal
+system in PBRTv3. Each light source exported needs to be told about Portal
 mesh instances.
 
 

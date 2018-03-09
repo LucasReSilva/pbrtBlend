@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -28,7 +28,7 @@
 import bpy, bl_operators
 import os, struct, mathutils
 
-# LuxRender Libs
+# PBRTv3 Libs
 from .. import PBRTv3Addon
 from ..outputs import LuxManager
 from ..export.scene import SceneExporter
@@ -88,8 +88,8 @@ class PBRTv3_OT_export_pbrtv3_proxy(bpy.types.Operator):
     """Export an object as ply file, replace the original mesh with a preview version and set path to the exported ply file."""
 
     bl_idname = 'export.export_pbrtv3_proxy'
-    bl_label = 'Export as LuxRender Proxy'
-    bl_description = 'Converts selected objects to LuxRender proxies (simple preview geometry, original mesh is loaded at rendertime)'
+    bl_label = 'Export as PBRTv3 Proxy'
+    bl_description = 'Converts selected objects to PBRTv3 proxies (simple preview geometry, original mesh is loaded at rendertime)'
 
     original_facecount = bpy.props.IntProperty(name = 'Original Facecount', default = 1)
     # hidden properties
@@ -424,7 +424,7 @@ class PBRTv3_OT_export_pbrtv3_proxy(bpy.types.Operator):
                         with open(ply_path, 'wb') as ply:
                             ply.write(b'ply\n')
                             ply.write(b'format binary_little_endian 1.0\n')
-                            ply.write(b'comment Created by LuxBlend 2.6 exporter for LuxRender - www.luxrender.net\n')
+                            ply.write(b'comment Created by LuxBlend 2.6 exporter for PBRTv3 - www.luxrender.net\n')
 
                             # vert_index == the number of actual verts needed
                             ply.write(('element vertex %d\n' % vert_index).encode())
@@ -500,5 +500,5 @@ class PBRTv3_OT_export_pbrtv3_proxy(bpy.types.Operator):
             return None, None
 
 # Register operator in Blender File -> Export menu
-#proxy_menu_func = lambda self, context: self.layout.operator("export.export_pbrtv3_proxy", text="Export LuxRender Proxy")
+#proxy_menu_func = lambda self, context: self.layout.operator("export.export_pbrtv3_proxy", text="Export PBRTv3 Proxy")
 #bpy.types.INFO_MT_file_export.append(proxy_menu_func)

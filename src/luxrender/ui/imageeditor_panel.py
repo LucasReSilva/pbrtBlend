@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -45,7 +45,7 @@ class imageeditor_panel(property_group_renderer):
 
 @PBRTv3Addon.addon_register_class
 class rendering_controls_panel(imageeditor_panel):
-    bl_label = 'LuxRender Controls'
+    bl_label = 'PBRTv3 Controls'
     COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):
@@ -62,7 +62,7 @@ class rendering_controls_panel(imageeditor_panel):
 
 @PBRTv3Addon.addon_register_class
 class tonemapping_panel(imageeditor_panel):
-    bl_label = 'LuxRender Imagepipeline'
+    bl_label = 'PBRTv3 Imagepipeline'
     COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):
@@ -173,7 +173,7 @@ class tonemapping_panel(imageeditor_panel):
 
 @PBRTv3Addon.addon_register_class
 class halt_conditions_panel(imageeditor_panel):
-    bl_label = 'LuxRender Halt Conditions'
+    bl_label = 'PBRTv3 Halt Conditions'
     COMPAT_ENGINES = 'PBRTv3_RENDER'
 
 
@@ -207,7 +207,7 @@ class halt_conditions_panel(imageeditor_panel):
 
 @PBRTv3Addon.addon_register_class
 class rendering_statistics_panel(imageeditor_panel):
-    bl_label = 'LuxRender Statistics'
+    bl_label = 'PBRTv3 Statistics'
     COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     def draw(self, context):

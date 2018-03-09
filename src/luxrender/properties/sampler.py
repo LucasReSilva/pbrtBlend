@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -34,7 +34,7 @@ from ..export import ParamSet
 @PBRTv3Addon.addon_register_class
 class pbrtv3_sampler(declarative_property_group):
     """
-    Storage class for LuxRender Sampler settings.
+    Storage class for PBRTv3 Sampler settings.
     """
 
     ef_attach_to = ['Scene']
@@ -190,7 +190,7 @@ class pbrtv3_sampler(declarative_property_group):
 
     def api_output(self):
         """
-        Format this class's members into a LuxRender ParamSet
+        Format this class's members into a PBRTv3 ParamSet
 
         Returns tuple
         """

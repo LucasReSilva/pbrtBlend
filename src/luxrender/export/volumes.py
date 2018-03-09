@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -33,7 +33,7 @@ import os, struct, sys, time
 import bpy
 from ..extensions_framework import util as efutil
 
-# LuxRender libs
+# PBRTv3 libs
 from . import ParamSet, matrix_to_list, LuxManager
 from ..outputs import LuxLog
 from ..outputs.file_api import Files

@@ -31,7 +31,7 @@ import sys
 
 bl_info = {
     "name": "PBRTv3",
-    "author": "Lucas Silva; LuxRender Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), "
+    "author": "Lucas Silva; PBRTv3 Project: Doug Hammond (dougal2), Asbjørn Heid (LordCrc), Daniel Genrich (Genscher), "
     "Jens Verwiebe, Jason Clarke (JtheNinja), Michael Klemm (neo2068), Simon Wendsche (B.Y.O.B.)",
     "version": (0, 0, 'dev'),
     "blender": (2, 79),
@@ -116,8 +116,8 @@ else:
         bl_idname = __name__
 
         install_path = StringProperty(
-            name="Path to LuxRender Installation",
-            description='Path to LuxRender install directory',
+            name="Path to PBRTv3 Installation",
+            description='Path to PBRTv3 install directory',
             subtype='DIR_PATH',
             default=find_pbrtv3_path(),
             get=get_pbrtv3_path,
@@ -135,7 +135,7 @@ else:
 
             split = layout.split(percentage=0.78)
             split.template_reports_banner()
-            split.label(text="Updating LuxBlend only updates the addon, not the LuxRender binaries. Use this instead:")
+            split.label(text="Updating LuxBlend only updates the addon, not the PBRTv3 binaries. Use this instead:")
             split.operator("luxrender.open_daily_builds_webpage", icon='URL')
 
             layout.prop(self, "install_path")

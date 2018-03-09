@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -41,7 +41,7 @@ class pbrtv3_material_sub(pbrtv3_material_base):
     @classmethod
     def poll(cls, context):
         """
-        Only show LuxRender panel if pbrtv3_material.material in LUX_COMPAT
+        Only show PBRTv3 panel if pbrtv3_material.material in LUX_COMPAT
         """
         return super().poll(context) and (context.material.pbrtv3_material.type in cls.LUX_COMPAT) and (
             not context.material.pbrtv3_material.nodetree)

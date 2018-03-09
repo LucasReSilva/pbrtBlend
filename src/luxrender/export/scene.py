@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -32,7 +32,7 @@ import bpy
 # Extensions_Framework Libs
 from ..extensions_framework import util as efutil
 
-# LuxRender libs
+# PBRTv3 libs
 from ..export import get_worldscale, object_anim_matrices
 from ..export import lights        as export_lights
 from ..export import materials    as export_materials
@@ -48,7 +48,7 @@ from ..properties import find_node
 
 class SceneExporterProperties(object):
     """
-    Mimics the properties member contained within EXPORT_OT_LuxRender operator
+    Mimics the properties member contained within EXPORT_OT_PBRTv3 operator
     """
     filename = ''
     directory = ''
@@ -150,7 +150,7 @@ class SceneExporter(object):
             scene.frame_set(scene.frame_current)
 
             # Set up the rendering context
-            self.report({'INFO'}, 'Creating LuxRender context')
+            self.report({'INFO'}, 'Creating PBRTv3 context')
             created_lux_manager = False
             if LuxManager.GetActive() is None:
                 LM = LuxManager(

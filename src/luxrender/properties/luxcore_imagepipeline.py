@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -87,7 +87,7 @@ crf_preset_names = [s.strip() for s in
 @PBRTv3Addon.addon_register_class
 class IMAGEPIPELINE_OT_set_pbrtv3_crf(bpy.types.Operator):
     bl_idname = 'imagepipeline.set_pbrtv3_crf'
-    bl_label = 'Set LuxRender Film Response Function'
+    bl_label = 'Set PBRTv3 Film Response Function'
 
     preset_name = bpy.props.StringProperty()
 

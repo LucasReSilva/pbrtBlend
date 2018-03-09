@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -89,7 +89,7 @@ def ArbitraryClippingPlane():
 @PBRTv3Addon.addon_register_class
 class pbrtv3_camera(declarative_property_group):
     """
-    Storage class for LuxRender Camera settings.
+    Storage class for PBRTv3 Camera settings.
     """
 
     ef_attach_to = ['Camera']
@@ -368,7 +368,7 @@ class pbrtv3_camera(declarative_property_group):
 
     def lookAt(self, camera, matrix=None):
         """
-        Derive a list describing 3 points for a LuxRender LookAt statement
+        Derive a list describing 3 points for a PBRTv3 LookAt statement
 
         Returns     tuple(9) (floats)
         """
@@ -400,7 +400,7 @@ class pbrtv3_camera(declarative_property_group):
         cam             bpy.types.camera
         luxcore_export  bool (leave crop handling to Blender)
 
-        Calculate LuxRender camera's screenwindow parameter
+        Calculate PBRTv3 camera's screenwindow parameter
 
         Returns list[4]
         """
@@ -476,7 +476,7 @@ class pbrtv3_camera(declarative_property_group):
         """
         scene           bpy.types.scene
 
-        Format this class's members into a LuxRender ParamSet
+        Format this class's members into a PBRTv3 ParamSet
 
         Returns tuple
         """
@@ -800,7 +800,7 @@ class pbrtv3_film(declarative_property_group):
 
     def api_output(self):
         """
-        Calculate type and parameters for LuxRender Film statement
+        Calculate type and parameters for PBRTv3 Film statement
 
         Returns     tuple(2) (string, list)
         """
@@ -851,7 +851,7 @@ class pbrtv3_film(declarative_property_group):
                     params.add_integer('yresolution', yr)
                 else:
                     # We are returning the image to blender which will pad for us,
-                    # so have LuxRender send back a cropped frame anyway
+                    # so have PBRTv3 send back a cropped frame anyway
                     width, height = calc_border_filmsize(scene, xr, yr)
                     params.add_integer('xresolution', width)
                     params.add_integer('yresolution', height)
@@ -1036,7 +1036,7 @@ crf_preset_names = [s.strip() for s in
 @PBRTv3Addon.addon_register_class
 class CAMERA_OT_set_pbrtv3_crf(bpy.types.Operator):
     bl_idname = 'camera.set_pbrtv3_crf'
-    bl_label = 'Set LuxRender Film Response Function'
+    bl_label = 'Set PBRTv3 Film Response Function'
 
     preset_name = bpy.props.StringProperty()
 
@@ -1070,7 +1070,7 @@ class CAMERA_MT_pbrtv3_crf(bpy.types.Menu):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_colorspace(declarative_property_group):
     """
-    Storage class for LuxRender Colour-Space settings.
+    Storage class for PBRTv3 Colour-Space settings.
     """
 
     ef_attach_to = ['pbrtv3_film']
@@ -1343,7 +1343,7 @@ class colorspace_presets(object):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_tonemapping(declarative_property_group):
     """
-    Storage class for LuxRender ToneMapping settings.
+    Storage class for PBRTv3 ToneMapping settings.
     """
 
     ef_attach_to = ['pbrtv3_film']

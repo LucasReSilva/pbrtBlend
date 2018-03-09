@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -104,7 +104,7 @@ TC_L = LampColorTextureParameter('L', 'Colour', default=(1.0, 1.0, 1.0))
 @PBRTv3Addon.addon_register_class
 class pbrtv3_lamp(declarative_property_group):
     """
-    Storage class for LuxRender Lamp settings.
+    Storage class for PBRTv3 Lamp settings.
     """
 
     ef_attach_to = ['Lamp']

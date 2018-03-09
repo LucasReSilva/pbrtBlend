@@ -14,14 +14,14 @@ http://www.luxrender.net/wiki/LuxBlend25_LuxCore#Updating_LuxBlend
 http://www.luxrender.net/wiki/LuxBlend25_Manual
 
 #### Classic API
-This is the old LuxRender API that is no longer under active development. The following pages are specific to this API.
+This is the old PBRTv3 API that is no longer under active development. The following pages are specific to this API.
 
 * [Render Settings](http://www.luxrender.net/wiki/LuxBlend25_Render_Panel)
 * [Old Material Editor](http://www.luxrender.net/wiki/LuxBlend25_Materials)
 * [Node Material Editor](http://www.luxrender.net/wiki/LuxBlend_Node_Editor)
 
 #### LuxCore API
-This is the new LuxRender API that is under active development. The following pages describe which features of the new API LuxBlend supports and how it differs from the old API.
+This is the new PBRTv3 API that is under active development. The following pages describe which features of the new API LuxBlend supports and how it differs from the old API.
 
 * [LuxCore API Mode - Overview](http://www.luxrender.net/wiki/LuxBlend25_LuxCore)
 * [LuxCore API Node Material Editor](http://www.luxrender.net/wiki/LuxBlend25_LuxCore_NodeEditor)

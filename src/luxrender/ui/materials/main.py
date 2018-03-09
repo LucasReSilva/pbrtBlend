@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -364,7 +364,7 @@ class ui_pbrtv3_material_utils(pbrtv3_material_base):
 
 # @PBRTv3Addon.addon_register_class
 # class ui_pbrtv3_material_db(pbrtv3_material_base):
-#     bl_label = 'LuxRender Materials Database'
+#     bl_label = 'PBRTv3 Materials Database'
 #     bl_options = {'DEFAULT_CLOSED'}
 #
 #     def draw(self, context):

@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -51,7 +51,7 @@ def make_cookie_filename():
         return cookie_file
     except:
         print(
-            'WARNING: Cannot write cookie file; LuxRender LRMDB sessions will not be saved between Blender executions.')
+            'WARNING: Cannot write cookie file; PBRTv3 LRMDB sessions will not be saved between Blender executions.')
         return None
 
 

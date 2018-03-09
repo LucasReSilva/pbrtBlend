@@ -1,7 +1,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -42,7 +42,7 @@ from ..outputs.luxcore_api import UseLuxCore
 @PBRTv3Addon.addon_register_class
 class pbrtv3_hair(declarative_property_group):
     """
-    Storage class for LuxRender Hair Rendering settings.
+    Storage class for PBRTv3 Hair Rendering settings.
     """
     ef_attach_to = ['ParticleSettings']
     controls = [

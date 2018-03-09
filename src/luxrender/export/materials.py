@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -498,7 +498,7 @@ def get_texture_from_scene(scene, tex_name):
 def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, value_transform_function=None):
     """
     lux_context				pylux.Context - like object
-    lux_prop_name			LuxRender material/texture parameter name
+    lux_prop_name			PBRTv3 material/texture parameter name
     variant					Required variant: 'float' or 'color' or 'fresnel'
     property_group			pbrtv3_material or pbrtv3_texture IDPropertyGroup FOR THE CONTAINING MATERIAL/TEXTURE
 

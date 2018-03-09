@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -229,7 +229,7 @@ class CameraExporter(object):
 
     def __convert_lookat(self, matrix):
         """
-        Derive a list describing 3 points for a LuxRender LookAt statement
+        Derive a list describing 3 points for a PBRTv3 LookAt statement
         Copied from properties/camera.py because realtime preview needs access to this without a camera object
 
         Returns     tuple(9) (floats)

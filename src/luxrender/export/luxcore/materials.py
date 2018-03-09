@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -682,7 +682,7 @@ class MaterialExporter(object):
                                          lc_mat.visibility_indirect_specular_enable))
 
             if not (translator_settings.override_materials and translator_settings.override_lights):
-                # LuxRender emission
+                # PBRTv3 emission
                 if material.pbrtv3_emission.use_emission:
                     emit_enabled = self.blender_scene.pbrtv3_lightgroups.is_enabled(material.pbrtv3_emission.lightgroup)
                     emit_enabled &= (material.pbrtv3_emission.L_color.v * material.pbrtv3_emission.gain) > 0.0

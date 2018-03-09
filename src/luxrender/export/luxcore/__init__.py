@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -180,7 +180,7 @@ class LuxCoreExporter(object):
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui':
             message = 'Starting LuxCoreUI...'
         elif self.config_exporter.get_engine().endswith('CPU'):
-            message = 'Starting LuxRender...'
+            message = 'Starting PBRTv3...'
         else:
             message = 'Compiling OpenCL Kernels...'
         self.renderengine.update_stats('Export Finished (%.1fs)' % export_time, message)

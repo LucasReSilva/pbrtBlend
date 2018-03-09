@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -28,7 +28,7 @@
 import bpy, bl_operators
 import os, re, mathutils, tempfile, shutil, urllib.request, urllib.error, zipfile
 
-# LuxRender Libs
+# PBRTv3 Libs
 from .. import PBRTv3Addon
 
 # Per-IDPropertyGroup preset handling
@@ -42,7 +42,7 @@ class PBRTv3_MT_base(bpy.types.Menu):
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_MT_presets_engine(PBRTv3_MT_base):
-    bl_label = "LuxRender Engine Presets"
+    bl_label = "PBRTv3 Engine Presets"
     preset_subdir = "luxrender/engine"
 
 
@@ -50,7 +50,7 @@ class PBRTv3_MT_presets_engine(PBRTv3_MT_base):
 class PBRTv3_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_engine_add'
-    bl_label = 'Add LuxRender Engine settings preset'
+    bl_label = 'Add PBRTv3 Engine settings preset'
     preset_menu = 'PBRTv3_MT_presets_engine'
     preset_values = []
     preset_subdir = 'luxrender/engine'
@@ -80,7 +80,7 @@ class PBRTv3_OT_preset_engine_add(bl_operators.presets.AddPresetBase, bpy.types.
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_MT_presets_networking(PBRTv3_MT_base):
-    bl_label = "LuxRender Networking Presets"
+    bl_label = "PBRTv3 Networking Presets"
     preset_subdir = "luxrender/networking"
 
 
@@ -88,7 +88,7 @@ class PBRTv3_MT_presets_networking(PBRTv3_MT_base):
 class PBRTv3_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     '''Save the current settings as a preset'''
     bl_idname = 'luxrender.preset_networking_add'
-    bl_label = 'Add LuxRender Networking settings preset'
+    bl_label = 'Add PBRTv3 Networking settings preset'
     preset_menu = 'PBRTv3_MT_presets_networking'
     preset_values = []
     preset_subdir = 'luxrender/networking'
@@ -105,7 +105,7 @@ class PBRTv3_OT_preset_networking_add(bl_operators.presets.AddPresetBase, bpy.ty
 
 @PBRTv3Addon.addon_register_class
 class PBRTv3_MT_presets_volume(PBRTv3_MT_base):
-    bl_label = "LuxRender Volume Presets"
+    bl_label = "PBRTv3 Volume Presets"
     preset_subdir = "luxrender/volume"
 
 
@@ -113,7 +113,7 @@ class PBRTv3_MT_presets_volume(PBRTv3_MT_base):
 class PBRTv3_OT_preset_volume_add(bl_operators.presets.AddPresetBase, bpy.types.Operator):
     """Save the current settings as a preset"""
     bl_idname = 'luxrender.preset_volume_add'
-    bl_label = 'Add LuxRender Volume settings preset'
+    bl_label = 'Add PBRTv3 Volume settings preset'
     preset_menu = 'PBRTv3_MT_presets_volume'
     preset_values = []
     preset_subdir = 'luxrender/volume'
@@ -133,7 +133,7 @@ class PBRTv3_OT_volume_add(bpy.types.Operator):
     """Add a new material volume definition to the scene"""
 
     bl_idname = "luxrender.volume_add"
-    bl_label = "Add LuxRender Volume"
+    bl_label = "Add PBRTv3 Volume"
 
     new_volume_name = bpy.props.StringProperty(default='New Volume 1')
 
@@ -178,7 +178,7 @@ class PBRTv3_OT_volume_remove(bpy.types.Operator):
     """Remove the selected material volume definition"""
 
     bl_idname = "luxrender.volume_remove"
-    bl_label = "Remove LuxRender Volume"
+    bl_label = "Remove PBRTv3 Volume"
 
     def invoke(self, context, event):
         w = context.scene.pbrtv3_volumes
@@ -194,7 +194,7 @@ class PBRTv3_OT_lightgroup_add(bpy.types.Operator):
     """Add a new light group definition to the scene"""
 
     bl_idname = "luxrender.lightgroup_add"
-    bl_label = "Add LuxRender Light Group"
+    bl_label = "Add PBRTv3 Light Group"
 
     lg_count = 0
     new_lightgroup_name = bpy.props.StringProperty(default='New Light Group ')
@@ -213,7 +213,7 @@ class PBRTv3_OT_lightgroup_remove(bpy.types.Operator):
     """Remove the selected lightgroup definition"""
 
     bl_idname = "luxrender.lightgroup_remove"
-    bl_label = "Remove LuxRender Light Group"
+    bl_label = "Remove PBRTv3 Light Group"
 
     lg_index = bpy.props.IntProperty(default=-1)
 
@@ -232,7 +232,7 @@ class PBRTv3_OT_materialgroup_add(bpy.types.Operator):
     """Add a new material group definition to the scene"""
 
     bl_idname = "luxrender.materialgroup_add"
-    bl_label = "Add LuxRender Material Group"
+    bl_label = "Add PBRTv3 Material Group"
 
     mg_count = 0
     new_materialgroup_name = bpy.props.StringProperty(default='New Material Group ')
@@ -251,7 +251,7 @@ class PBRTv3_OT_materialgroup_remove(bpy.types.Operator):
     """Remove the selected materialgroup definition"""
 
     bl_idname = "luxrender.materialgroup_remove"
-    bl_label = "Remove LuxRender Material Group"
+    bl_label = "Remove PBRTv3 Material Group"
 
     mg_index = bpy.props.IntProperty(default=-1)
 
@@ -398,7 +398,7 @@ class PBRTv3_OT_update_luxblend(bpy.types.Operator):
 class PBRTv3_OT_open_daily_builds_webpage(bpy.types.Operator):
     """Open the "daily builds" webpage"""
     bl_idname = 'luxrender.open_daily_builds_webpage'
-    bl_label = 'Update LuxRender'
+    bl_label = 'Update PBRTv3'
 
     def execute(self, context):
         import webbrowser

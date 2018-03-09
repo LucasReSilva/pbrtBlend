@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -38,7 +38,7 @@ from .. import PBRTv3Addon
 
 @PBRTv3Addon.addon_register_class
 class pbrtv3_mat_node_editor(bpy.types.NodeTree):
-    '''LuxRender Material Nodes'''
+    '''PBRTv3 Material Nodes'''
 
     bl_idname = 'pbrtv3_material_nodes'
     bl_label = 'PBRTv3 Material Nodes'
@@ -84,7 +84,7 @@ class pbrtv3_mat_node_editor(bpy.types.NodeTree):
 
 @PBRTv3Addon.addon_register_class
 class pbrtv3_vol_node_editor(bpy.types.NodeTree):
-    '''LuxRender Volume Nodes'''
+    '''PBRTv3 Volume Nodes'''
 
     # The bl_idname is named this way so the volume editor entry comes after the material editor entry in the enum
     bl_idname = 'pbrtv3_volume_nodes_a'

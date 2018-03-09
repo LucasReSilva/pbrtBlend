@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -154,7 +154,7 @@ class pbrtv3_rendermode(declarative_property_group):
             'type': 'int',
             'attr': 'opencl_platform_index',
             'name': 'OpenCL Platform Index',
-            'description': 'OpenCL Platform to target. Try increasing this value 1 at a time if LuxRender fails \
+            'description': 'OpenCL Platform to target. Try increasing this value 1 at a time if PBRTv3 fails \
             to use your GPU. -1=all platforms',
             'default': 0,
             'min': -1,
@@ -321,7 +321,7 @@ class pbrtv3_rendermode(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_halt(declarative_property_group):
     """
-    Storage class for LuxRender Halt settings.
+    Storage class for PBRTv3 Halt settings.
     """
 
     ef_attach_to = ['Scene']

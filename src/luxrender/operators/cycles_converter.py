@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -32,7 +32,7 @@ from .. import PBRTv3Addon
 class PBRTv3_OT_convert_cycles_scene(bpy.types.Operator):
     bl_idname = 'luxrender.convert_cycles_scene'
     bl_label = 'Convert Cycles Scene'
-    bl_description = 'Convert Cycles materials, lamps and world background to LuxRender materials and lamps'
+    bl_description = 'Convert Cycles materials, lamps and world background to PBRTv3 materials and lamps'
 
     def invoke(self, context, event):
         # Show a popup asking for confirmation so the user does not accidentally overwrite materials etc.

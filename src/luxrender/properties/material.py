@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -360,7 +360,7 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
 @PBRTv3Addon.addon_register_class
 class pbrtv3_material(declarative_property_group):
     """
-    Storage class for LuxRender Material settings.
+    Storage class for PBRTv3 Material settings.
     """
 
     ef_attach_to = ['Material']
@@ -409,7 +409,7 @@ class pbrtv3_material(declarative_property_group):
     properties = [  # The following two items are set by the preset menu and operator.
                     {
                         'attr': 'type_label',
-                        'name': 'LuxRender Type',
+                        'name': 'PBRTv3 Type',
                         'type': 'string',
                         'default': 'Matte',
                         'save_in_preset': True
@@ -799,7 +799,7 @@ class pbrtv3_material(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_mat_compositing(declarative_property_group):
     """
-    Storage class for LuxRender Material compositing settings
+    Storage class for PBRTv3 Material compositing settings
     for DistributedPath integrator.
     """
 
@@ -1069,7 +1069,7 @@ TF_alpha = TransparencyFloatTextureParameter('alpha', 'Alpha', add_float_value=F
 @PBRTv3Addon.addon_register_class
 class pbrtv3_transparency(declarative_property_group):
     """
-    Storage class for LuxRender Material alpha transparency settings.
+    Storage class for PBRTv3 Material alpha transparency settings.
     """
     ef_attach_to = ['Material']
     alert = {}
@@ -1310,7 +1310,7 @@ TC_c_Ks = CoatingColorTextureParameter('Ks', 'Specular color', default=(0.04, 0.
 @PBRTv3Addon.addon_register_class
 class pbrtv3_coating(declarative_property_group):
     """
-    Storage class for LuxRender Material glossy coating settings.
+    Storage class for PBRTv3 Material glossy coating settings.
     """
 
     ef_attach_to = ['Material']
@@ -3464,7 +3464,7 @@ TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0, 1.0, 1
 @PBRTv3Addon.addon_register_class
 class pbrtv3_emission(declarative_property_group):
     """
-    Storage class for LuxRender Material emission settings.
+    Storage class for PBRTv3 Material emission settings.
     """
 
     ef_attach_to = ['Material']

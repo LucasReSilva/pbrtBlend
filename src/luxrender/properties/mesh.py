@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -54,7 +54,7 @@ TF_displacementmap = MeshFloatTextureParameter(
 @PBRTv3Addon.addon_register_class
 class pbrtv3_mesh(declarative_property_group):
     """
-    Storage class for LuxRender Mesh settings.
+    Storage class for PBRTv3 Mesh settings.
     """
 
     ef_attach_to = ['Mesh', 'SurfaceCurve', 'TextCurve', 'Curve', 'MetaBall']
@@ -96,7 +96,7 @@ class pbrtv3_mesh(declarative_property_group):
                          'name': 'Export as',
                          'items': [
                              ('global', 'Use Default Setting', 'global'),
-                             ('native', 'LuxRender Mesh', 'native'),
+                             ('native', 'PBRTv3 Mesh', 'native'),
                              ('binary_ply', 'Binary PLY', 'binary_ply')
                          ],
                          'default': 'global'

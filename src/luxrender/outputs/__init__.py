@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -34,7 +34,7 @@ from ..extensions_framework.util import TimerThread, format_elapsed_time
 # This def ia above the following import statements for a reason!
 def LuxLog(*args, popup=False):
     """
-    Send string to AF log, marked as belonging to LuxRender module.
+    Send string to AF log, marked as belonging to PBRTv3 module.
     Accepts variable args (can be used as pylux.errorHandler)
     """
     if len(args) > 0:

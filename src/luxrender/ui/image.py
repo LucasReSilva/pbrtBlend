@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -35,7 +35,7 @@ from ..outputs.pure_api import PYLUX_AVAILABLE
 class pbrtv3_ui_rendering_controls(property_group_renderer):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
-    bl_label = "LuxRender Rendering Controls"
+    bl_label = "PBRTv3 Rendering Controls"
     COMPAT_ENGINES = 'PBRTv3_RENDER'
 
     ctx = None

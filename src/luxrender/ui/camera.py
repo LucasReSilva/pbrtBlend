@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -40,7 +40,7 @@ class camera_panel(bl_ui.properties_data_camera.CameraButtonsPanel, property_gro
 
 @PBRTv3Addon.addon_register_class
 class camera(camera_panel):
-    bl_label = 'LuxRender Camera'
+    bl_label = 'PBRTv3 Camera'
 
     display_property_groups = [
         ( ('camera',), 'pbrtv3_camera' ),
@@ -103,7 +103,7 @@ class camera(camera_panel):
 
 @PBRTv3Addon.addon_register_class
 class film(camera_panel):
-    bl_label = 'LuxRender Film'
+    bl_label = 'PBRTv3 Film'
 
     display_property_groups = [
         ( ('camera', 'pbrtv3_camera'), 'pbrtv3_film', lambda: not UseLuxCore() ),

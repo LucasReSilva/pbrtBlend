@@ -3,7 +3,7 @@
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # --------------------------------------------------------------------------
-# Blender 2.5 LuxRender Add-On
+# Blender 2.5 PBRTv3 Add-On
 # --------------------------------------------------------------------------
 #
 # Authors:
@@ -45,7 +45,7 @@ class ui_texture_main(pbrtv3_texture_base):
     @classmethod
     def poll(cls, context):
         '''
-        Only show LuxRender panel with 'Plugin' texture type
+        Only show PBRTv3 panel with 'Plugin' texture type
         '''
 
         tex = context.texture
