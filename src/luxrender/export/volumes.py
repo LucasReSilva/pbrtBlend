@@ -34,7 +34,7 @@ import bpy
 from ..extensions_framework import util as efutil
 
 # PBRTv3 libs
-from . import ParamSet, matrix_to_list, LuxManager
+from . import ParamSet, matrix_to_list, PBRTv3Manager
 from ..outputs import PBRTv3Log
 from ..outputs.file_api import Files
 
@@ -143,7 +143,7 @@ class library_loader():
 
 
 def read_cache(smokecache, is_high_res, amplifier, flowtype):
-    scene = LuxManager.CurrentScene
+    scene = PBRTv3Manager.CurrentScene
 
     # NOTE - dynamic libraries are not loaded until needed, further down
     # the script...
@@ -671,7 +671,7 @@ def export_smoke(smoke_obj_name, channel):
     print('[%s] Beginning smoke export (channel: %s)' % (smoke_obj_name, channel))
     start_time = time.time()
 
-    if LuxManager.CurrentScene.name == 'preview':
+    if PBRTv3Manager.CurrentScene.name == 'preview':
         return 1, 1, 1, 1.0
     else:
         flowtype = -1

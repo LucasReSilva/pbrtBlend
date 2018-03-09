@@ -41,7 +41,7 @@ from ..export.volumes import export_smoke, SmokeCache
 
 from ..extensions_framework import util as efutil
 
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
 from ..properties import (pbrtv3_texture_node, get_linked_node, check_node_get_paramset)
@@ -669,7 +669,7 @@ class pbrtv3_texture_type_node_image_map(pbrtv3_texture_node):
 
     def export_texture(self, make_texture):
         imagemap_params = ParamSet()
-        process_filepath_data(LuxManager.CurrentScene, self, self.filename, imagemap_params, 'filename')
+        process_filepath_data(PBRTv3Manager.CurrentScene, self, self.filename, imagemap_params, 'filename')
 
         if self.variant == 'float':
             imagemap_params.add_string('channel', self.channel)
@@ -922,7 +922,7 @@ class pbrtv3_texture_type_node_blender_image_map(pbrtv3_texture_node):
             file_path = efutil.filesystem_path(self.manual_filepath)
 
         imagemap_params = ParamSet()
-        process_filepath_data(LuxManager.CurrentScene, self, file_path, imagemap_params, 'filename')
+        process_filepath_data(PBRTv3Manager.CurrentScene, self, file_path, imagemap_params, 'filename')
 
         if self.channel == 'rgb':
             variant = 'color'
@@ -1258,7 +1258,7 @@ class pbrtv3_texture_type_node_normal_map(pbrtv3_texture_node):
 
     def export_texture(self, make_texture):
         normalmap_params = ParamSet()
-        process_filepath_data(LuxManager.CurrentScene, self, self.filename, normalmap_params, 'filename')
+        process_filepath_data(PBRTv3Manager.CurrentScene, self, self.filename, normalmap_params, 'filename')
         normalmap_params.add_string('filtertype', self.filtertype)
         normalmap_params.add_string('wrap', self.wrap)
 
@@ -1860,8 +1860,8 @@ class pbrtv3_texture_type_node_vol_smoke_data(pbrtv3_texture_node):
         set_prop_tex(properties, luxcore_name, 'type', 'densitygrid')
         set_prop_tex(properties, luxcore_name, 'wrap', self.wrap)
 
-        if SmokeCache.needs_update(LuxManager.CurrentScene, self.domain, self.source):
-            grid = SmokeCache.convert(LuxManager.CurrentScene, self.domain, self.source)
+        if SmokeCache.needs_update(PBRTv3Manager.CurrentScene, self.domain, self.source):
+            grid = SmokeCache.convert(PBRTv3Manager.CurrentScene, self.domain, self.source)
             set_prop_tex(properties, luxcore_name, 'data', grid[3])
             set_prop_tex(properties, luxcore_name, 'nx', int(grid[0]))
             set_prop_tex(properties, luxcore_name, 'ny', int(grid[1]))

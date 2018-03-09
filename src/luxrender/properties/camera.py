@@ -35,7 +35,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A
 
 from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
-from ..export import ParamSet, LuxManager
+from ..export import ParamSet, PBRTv3Manager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import UseLuxCore
@@ -458,7 +458,7 @@ class pbrtv3_camera(declarative_property_group):
         """
         Calculate the camera exposure time in seconds
         """
-        fps = LuxManager.CurrentScene.render.fps / LuxManager.CurrentScene.render.fps_base
+        fps = PBRTv3Manager.CurrentScene.render.fps / PBRTv3Manager.CurrentScene.render.fps_base
         time = 1.0
 
         if self.exposure_mode == 'normalised':
@@ -804,7 +804,7 @@ class pbrtv3_film(declarative_property_group):
 
         Returns     tuple(2) (string, list)
         """
-        scene = LuxManager.CurrentScene
+        scene = PBRTv3Manager.CurrentScene
         xr, yr = self.resolution(scene)
         params = ParamSet()
 
@@ -1611,7 +1611,7 @@ class pbrtv3_tonemapping(declarative_property_group):
     ]
 
     def get_paramset(self):
-        cam = LuxManager.CurrentScene.camera.data
+        cam = PBRTv3Manager.CurrentScene.camera.data
         params = ParamSet()
         params.add_string('tonemapkernel', self.type)
 

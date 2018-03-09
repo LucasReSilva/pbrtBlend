@@ -30,7 +30,7 @@ from ..export import ParamSet
 from ..export.geometry import GeometryExporter
 from ..export.materials import ExportedTextures, convert_texture, get_material_volume_defs, get_preview_flip, \
     get_preview_zoom
-from ..outputs import PBRTv3Log, LuxManager
+from ..outputs import PBRTv3Log, PBRTv3Manager
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
 from ..properties.node_material import pbrtv3_texture_maker
@@ -40,10 +40,10 @@ def export_preview_texture(lux_context, texture):
     texture_name = texture.name
     if texture.pbrtv3_texture.type != 'BLENDER':
         tex_pbrtv3_texture = texture.pbrtv3_texture
-        lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(LuxManager.CurrentScene, texture)
+        lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(PBRTv3Manager.CurrentScene, texture)
         lux_tex_name = tex_pbrtv3_texture.type
     else:
-        lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture,
+        lux_tex_variant, lux_tex_name, paramset = convert_texture(PBRTv3Manager.CurrentScene, texture,
                                                                   variant_hint='color')
         if texture.type in ('OCEAN', 'IMAGE'):
             texture_name = texture_name + "_" + lux_tex_variant
@@ -154,11 +154,11 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
     # Accelerator
     lux_context.accelerator('bvh', ParamSet())
     lux_context.worldBegin()
-    bl_scene = LuxManager.CurrentScene  # actual blender scene keeping default volumes
+    bl_scene = PBRTv3Manager.CurrentScene  # actual blender scene keeping default volumes
 
     # Collect volumes from all scenes *sigh*
     for scn in bpy.data.scenes:
-        LuxManager.SetCurrentScene(scn)
+        PBRTv3Manager.SetCurrentScene(scn)
 
         for volume in scn.pbrtv3_volumes.volumes:
             if volume.type == 'heterogeneous':
@@ -167,7 +167,7 @@ def preview_scene(scene, lux_context, obj=None, mat=None, tex=None):
             else:
                 lux_context.makeNamedVolume(volume.name, *volume.api_output(lux_context))
 
-    LuxManager.SetCurrentScene(scene)  # for preview context
+    PBRTv3Manager.SetCurrentScene(scene)  # for preview context
 
     # Light
     # For usability, previev_scale is not an own property but calculated from the object dimensions

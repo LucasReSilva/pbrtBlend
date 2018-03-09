@@ -37,7 +37,7 @@ from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
 from ..outputs.luxcore_api import UseLuxCore
 from ..export.volumes import export_smoke
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..util import dict_merge, bdecode_string2file
 
 # ------------------------------------------------------------------------------
@@ -333,10 +333,10 @@ class ColorTextureParameter(TextureParameterBase):
     def get_paramset(self, property_group, value_transform_function=None):
         TC_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             TC_params.update(
                 add_texture_parameter(
-                    LuxManager.GetActive().lux_context,
+                    PBRTv3Manager.GetActive().lux_context,
                     self.attr,
                     'color',
                     property_group,
@@ -503,10 +503,10 @@ class FloatTextureParameter(TextureParameterBase):
     def get_paramset(self, property_group):
         TC_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             TC_params.update(
                 add_texture_parameter(
-                    LuxManager.GetActive().lux_context,
+                    PBRTv3Manager.GetActive().lux_context,
                     self.attr,
                     'float',
                     property_group
@@ -660,10 +660,10 @@ class FresnelTextureParameter(TextureParameterBase):
     def get_paramset(self, property_group):
         TC_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             TC_params.update(
                 add_texture_parameter(
-                    LuxManager.GetActive().lux_context,
+                    PBRTv3Manager.GetActive().lux_context,
                     self.attr,
                     'fresnel',
                     property_group
@@ -1013,13 +1013,13 @@ class pbrtv3_tex_add(declarative_property_group):
     def get_paramset(self, scene, texture):
         add_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             add_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex1', self.variant, self)
             )
 
             add_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex2', self.variant, self)
             )
 
         return set(), add_params
@@ -1162,9 +1162,9 @@ class pbrtv3_tex_band(declarative_property_group):
     def get_paramset(self, scene, texture):
         band_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             band_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'amount', 'float', self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'amount', 'float', self)
             )
 
             offsets = []
@@ -1172,11 +1172,11 @@ class pbrtv3_tex_band(declarative_property_group):
                 offsets.append(getattr(self, 'offset%s%d' % (self.variant, i)))
 
                 band_params.update(
-                    add_texture_parameter(LuxManager.GetActive().lux_context, 'tex%d' % i, self.variant, self)
+                    add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex%d' % i, self.variant, self)
                 )
 
             # In API mode need to tell Lux how many slots explicity
-            if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
+            if PBRTv3Manager.GetActive().lux_context.API_TYPE == 'PURE':
                 band_params.add_integer('noffsets', self.noffsets)
 
             band_params.add_float('offsets', offsets)
@@ -1621,17 +1621,17 @@ class pbrtv3_tex_brick(declarative_property_group):
             .add_float('brickrun', self.brickrun / 100) \
             .add_float('mortarsize', self.mortarsize)
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             brick_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'brickmodtex', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'brickmodtex', self.variant, self)
             )
 
             brick_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'bricktex', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'bricktex', self.variant, self)
             )
 
             brick_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'mortartex', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'mortartex', self.variant, self)
             )
 
         return {'3DMAPPING'}, brick_params
@@ -2064,12 +2064,12 @@ class pbrtv3_tex_checkerboard(declarative_property_group):
             .add_string('aamode', self.aamode) \
             .add_integer('dimension', self.dimension)
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             checkerboard_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex1', self.variant, self)
             )
             checkerboard_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex2', self.variant, self)
             )
 
         if self.dimension == 2:
@@ -2422,9 +2422,9 @@ class pbrtv3_tex_colordepth(declarative_property_group):
     def get_paramset(self, scene, texture):
         colordepth_params = ParamSet().add_float('depth', self.depth)
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             colordepth_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'Kt', 'color', self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'Kt', 'color', self)
             )
 
         return set(), colordepth_params
@@ -2559,12 +2559,12 @@ class pbrtv3_tex_dots(declarative_property_group):
     def get_paramset(self, scene, texture):
         dots_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             dots_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'inside', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'inside', self.variant, self)
             )
             dots_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'outside', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'outside', self.variant, self)
             )
 
         return {'2DMAPPING'}, dots_params
@@ -2773,9 +2773,9 @@ class pbrtv3_tex_fresnelcolor(declarative_property_group):
     def get_paramset(self, scene, texture):
         fresnelcolor_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             fresnelcolor_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'Kr', 'color', self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'Kr', 'color', self)
             )
 
         return set(), fresnelcolor_params
@@ -3854,15 +3854,15 @@ class pbrtv3_tex_mix(declarative_property_group):
     def get_paramset(self, scene, texture):
         mix_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             mix_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'amount', 'float', self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'amount', 'float', self)
             )
             mix_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex1', self.variant, self)
             )
             mix_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex2', self.variant, self)
             )
 
         return set(), mix_params
@@ -4001,17 +4001,17 @@ class pbrtv3_tex_multimix(declarative_property_group):
     def get_paramset(self, scene, texture):
         mm_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             weights = []
 
             for i in range(1, self.nslots + 1):
                 weights.append(getattr(self, 'weight%s%d' % (self.variant, i)))
                 mm_params.update(
-                    add_texture_parameter(LuxManager.GetActive().lux_context, 'tex%d' % i, self.variant, self)
+                    add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex%d' % i, self.variant, self)
                 )
 
             # In API mode need to tell Lux how many slots explicity
-            if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
+            if PBRTv3Manager.GetActive().lux_context.API_TYPE == 'PURE':
                 mm_params.add_integer('nweights', self.nslots)
 
             mm_params.add_float('weights', weights)
@@ -4206,12 +4206,12 @@ class pbrtv3_tex_scale(declarative_property_group):
     def get_paramset(self, scene, texture):
         scale_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             scale_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex1', self.variant, self)
             )
             scale_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex2', self.variant, self)
             )
 
         return set(), scale_params
@@ -4302,13 +4302,13 @@ class pbrtv3_tex_subtract(declarative_property_group):
     def get_paramset(self, scene, texture):
         subtract_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             subtract_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex1', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex1', self.variant, self)
             )
 
             subtract_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'tex2', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'tex2', self.variant, self)
             )
 
         return set(), subtract_params
@@ -4563,12 +4563,12 @@ class pbrtv3_tex_uvmask(declarative_property_group):
     def get_paramset(self, scene, texture):
         uvmask_params = ParamSet()
 
-        if LuxManager.GetActive() is not None:
+        if PBRTv3Manager.GetActive() is not None:
             uvmask_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'innertex', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'innertex', self.variant, self)
             )
             uvmask_params.update(
-                add_texture_parameter(LuxManager.GetActive().lux_context, 'outertex', self.variant, self)
+                add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'outertex', self.variant, self)
             )
 
         return {'2DMAPPING'}, uvmask_params

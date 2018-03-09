@@ -33,7 +33,7 @@ from ..extensions_framework.validate import Logic_OR as O
 
 from .. import PBRTv3Addon
 from ..export import get_worldscale, get_output_filename
-from ..export import ParamSet, LuxManager
+from ..export import ParamSet, PBRTv3Manager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import UseLuxCore

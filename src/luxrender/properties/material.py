@@ -40,7 +40,7 @@ from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
     MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
-from ..outputs import LuxManager, PBRTv3Log
+from ..outputs import PBRTv3Manager, PBRTv3Log
 from ..outputs.luxcore_api import UseLuxCore
 from ..util import dict_merge
 
@@ -245,7 +245,7 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
         texture_name = getattr(material.pbrtv3_material, 'normalmap_floattexturename')
 
         if texture_name and self.normalmap_usefloattexture:
-            texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+            texture = get_texture_from_scene(PBRTv3Manager.CurrentScene, texture_name)
             lux_texture = texture.pbrtv3_texture
             params = ParamSet()
 
@@ -255,21 +255,21 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
                 else:
                     src_texture = lux_texture.pbrtv3_tex_imagemap
 
-                process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+                process_filepath_data(PBRTv3Manager.CurrentScene, texture, src_texture.filename, params, 'filename')
                 params.add_integer('discardmipmaps', src_texture.discardmipmaps)
                 params.add_string('filtertype', src_texture.filtertype)
                 params.add_float('maxanisotropy', src_texture.maxanisotropy)
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
                 params.add_string('wrap', src_texture.wrap)
-                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(PBRTv3Manager.CurrentScene))
             elif lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
                 src_texture = texture.image
 
                 params = ParamSet()
-                process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
+                process_filepath_data(PBRTv3Manager.CurrentScene, texture, src_texture.filepath, params, 'filename')
                 params.add_string('filtertype', 'bilinear')
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
-                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(PBRTv3Manager.CurrentScene))
             else:
                 PBRTv3Log('Texture %s is not a normal map! Greyscale height maps should be applied to \
                  the bump channel.' % texture_name)
@@ -313,7 +313,7 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
         # Get the bump map
         texture_name = getattr(material.pbrtv3_material, 'bumpmap_floattexturename')
         if texture_name:
-            texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+            texture = get_texture_from_scene(PBRTv3Manager.CurrentScene, texture_name)
             lux_texture = texture.pbrtv3_texture
 
             if lux_texture.type == 'BLENDER' and texture.type == 'IMAGE':
@@ -334,7 +334,7 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
             weights = [1.0, 1.0]
 
         # In API mode need to tell Lux how many slots explicitly
-        if LuxManager.GetActive().lux_context.API_TYPE == 'PURE':
+        if PBRTv3Manager.GetActive().lux_context.API_TYPE == 'PURE':
             mm_params.add_integer('nweights', 2)
 
         # Now add the actual weights
@@ -1200,7 +1200,7 @@ class pbrtv3_transparency(declarative_property_group):
             texture_name = getattr(lux_material,
                                    '%s_colortexturename' % self.sourceMap[material.pbrtv3_material.type])
             if texture_name:
-                texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+                texture = get_texture_from_scene(PBRTv3Manager.CurrentScene, texture_name)
                 lux_texture = texture.pbrtv3_texture
 
                 if lux_texture.type == 'imagemap':
@@ -1213,14 +1213,14 @@ class pbrtv3_transparency(declarative_property_group):
                     }
 
                     params = ParamSet()
-                    process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filename, params, 'filename')
+                    process_filepath_data(PBRTv3Manager.CurrentScene, texture, src_texture.filename, params, 'filename')
                     params.add_string('channel', channelMap[self.alpha_source])
                     params.add_integer('discardmipmaps', src_texture.discardmipmaps)
                     params.add_string('filtertype', src_texture.filtertype)
                     params.add_float('maxanisotropy', src_texture.maxanisotropy)
                     params.add_float('gamma', 1.0)  # Don't gamma correct alpha maps
                     params.add_string('wrap', src_texture.wrap)
-                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(PBRTv3Manager.CurrentScene))
 
                     alpha_type = 'texture'
                     alpha_amount = texture_name + '_alpha'
@@ -1244,12 +1244,12 @@ class pbrtv3_transparency(declarative_property_group):
                     }
 
                     params = ParamSet()
-                    process_filepath_data(LuxManager.CurrentScene, texture, src_texture.filepath, params, 'filename')
+                    process_filepath_data(PBRTv3Manager.CurrentScene, texture, src_texture.filepath, params, 'filename')
                     params.add_string('channel', channelMap[self.alpha_source])
                     params.add_string('filtertype', 'bilinear')
                     params.add_float('gamma', 1.0)  # Don't gamma correct alpha maps
                     params.add_string('wrap', 'repeat')
-                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
+                    params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(PBRTv3Manager.CurrentScene))
 
                     alpha_type = 'texture'
                     alpha_amount = texture_name + '_alpha'
@@ -2693,7 +2693,7 @@ class pbrtv3_mat_metal(declarative_property_group):
         if self.name == 'nk':  # use an NK data file
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, material, self.filename, metal_params, 'filename')
+            process_filepath_data(PBRTv3Manager.CurrentScene, material, self.filename, metal_params, 'filename')
         else:  # use a preset name
             metal_params.add_string('name', self.name)
 
@@ -2842,9 +2842,9 @@ class pbrtv3_mat_metal2(declarative_property_group):
         if self.metaltype == 'fresnelcolor':
             fresnelcolor_params = ParamSet()
 
-            if LuxManager.GetActive() is not None:
+            if PBRTv3Manager.GetActive() is not None:
                 fresnelcolor_params.update(
-                    add_texture_parameter(LuxManager.GetActive().lux_context, 'Kr', 'color', self)
+                    add_texture_parameter(PBRTv3Manager.GetActive().lux_context, 'Kr', 'color', self)
                 )
 
             ExportedTextures.texture(
@@ -2873,7 +2873,7 @@ class pbrtv3_mat_metal2(declarative_property_group):
             fresnelname_params = ParamSet()
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, material, self.filename, fresnelname_params, 'filename')
+            process_filepath_data(PBRTv3Manager.CurrentScene, material, self.filename, fresnelname_params, 'filename')
 
             ExportedTextures.texture(
                 lux_context,
@@ -3600,8 +3600,8 @@ class pbrtv3_emission(declarative_property_group):
     def api_output(self, obj):
         lg_gain = 1.0
 
-        if self.lightgroup in LuxManager.CurrentScene.pbrtv3_lightgroups.lightgroups:
-            lg_gain = LuxManager.CurrentScene.pbrtv3_lightgroups.lightgroups[self.lightgroup].gain
+        if self.lightgroup in PBRTv3Manager.CurrentScene.pbrtv3_lightgroups.lightgroups:
+            lg_gain = PBRTv3Manager.CurrentScene.pbrtv3_lightgroups.lightgroups[self.lightgroup].gain
 
         arealightsource_params = ParamSet() \
             .add_float('importance', self.importance) \
@@ -3614,6 +3614,6 @@ class pbrtv3_emission(declarative_property_group):
         if self.iesname:
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, obj, self.iesname, arealightsource_params, 'iesname')
+            process_filepath_data(PBRTv3Manager.CurrentScene, obj, self.iesname, arealightsource_params, 'iesname')
 
         return 'area', arealightsource_params

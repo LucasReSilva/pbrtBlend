@@ -34,7 +34,7 @@ from .. import PBRTv3Addon
 
 from ..export import ParamSet, process_filepath_data, get_worldscale
 
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
 
 from ..properties import pbrtv3_texture_node
@@ -390,7 +390,7 @@ class pbrtv3_texture_type_node_tabulateddata(pbrtv3_texture_node):
     def export_texture(self, make_texture):
         tabulateddata_params = ParamSet()
 
-        process_filepath_data(LuxManager.CurrentScene, self, self.data_file, tabulateddata_params, 'filename')
+        process_filepath_data(PBRTv3Manager.CurrentScene, self, self.data_file, tabulateddata_params, 'filename')
 
         return make_texture('color', 'tabulateddata', self.name, tabulateddata_params)
 

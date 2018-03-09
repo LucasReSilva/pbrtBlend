@@ -30,7 +30,7 @@ import os, struct, mathutils
 
 # PBRTv3 Libs
 from .. import PBRTv3Addon
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..export.scene import SceneExporter
 
 from ..extensions_framework import util as efutil
@@ -64,7 +64,7 @@ class EXPORT_OT_luxrender(bpy.types.Operator):
         else:
             scene = bpy.data.scenes[self.properties.scene]
 
-        LuxManager.SetActive(None)
+        PBRTv3Manager.SetActive(None)
 
         return SceneExporter() \
             .set_report(self.report) \

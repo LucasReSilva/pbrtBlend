@@ -40,7 +40,7 @@ from ..export import geometry        as export_geometry
 from ..export import volumes        as export_volumes
 from ..export import fix_matrix_order
 from ..export import is_obj_visible
-from ..outputs import LuxManager, PBRTv3Log
+from ..outputs import PBRTv3Manager, PBRTv3Log
 from ..outputs.file_api import Files
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
@@ -152,16 +152,16 @@ class SceneExporter(object):
             # Set up the rendering context
             self.report({'INFO'}, 'Creating PBRTv3 context')
             created_lux_manager = False
-            if LuxManager.GetActive() is None:
-                LM = LuxManager(
+            if PBRTv3Manager.GetActive() is None:
+                LM = PBRTv3Manager(
                     scene.name,
                     api_type=self.properties.api_type,
                 )
-                LuxManager.SetActive(LM)
+                PBRTv3Manager.SetActive(LM)
                 created_lux_manager = True
 
-            LuxManager.SetCurrentScene(scene)
-            lux_context = LuxManager.GetActive().lux_context
+            PBRTv3Manager.SetCurrentScene(scene)
+            lux_context = PBRTv3Manager.GetActive().lux_context
 
             GE = export_geometry.GeometryExporter(lux_context, scene)
 

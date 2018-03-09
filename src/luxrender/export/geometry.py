@@ -37,7 +37,7 @@ from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_ma
 from ..export import matrix_to_list
 from ..export import fix_matrix_order
 from ..export.materials import get_material_volume_defs
-from ..export import LuxManager
+from ..export import PBRTv3Manager
 from ..export import is_obj_visible
 from ..properties import find_node
 from ..properties.node_material import pbrtv3_texture_maker

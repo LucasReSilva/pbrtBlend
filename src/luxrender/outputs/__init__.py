@@ -160,7 +160,7 @@ class LuxFilmDisplay(TimerThread):
             return
 
 
-class LuxManager(object):
+class PBRTv3Manager(object):
     """
     Manage a pylux.Context object for rendering.
 
@@ -168,7 +168,7 @@ class LuxManager(object):
     a pylux.Context object, ensuring proper initialisation, usage
     and termination.
 
-    Additionally, LuxManager objects will also spawn timer threads
+    Additionally, PBRTv3Manager objects will also spawn timer threads
     in order to update the rendering statistics and image framebuffer.
     """
 
@@ -176,25 +176,25 @@ class LuxManager(object):
 
     @staticmethod
     def SetActive(LM):
-        LuxManager.ActiveManager = LM
+        PBRTv3Manager.ActiveManager = LM
 
     @staticmethod
     def GetActive():
-        return LuxManager.ActiveManager
+        return PBRTv3Manager.ActiveManager
 
     @staticmethod
     def ClearActive():
-        LuxManager.ActiveManager = None
+        PBRTv3Manager.ActiveManager = None
 
     CurrentScene = None
 
     @staticmethod
     def SetCurrentScene(scene):
-        LuxManager.CurrentScene = scene
+        PBRTv3Manager.CurrentScene = scene
 
     @staticmethod
     def ClearCurrentScene():
-        LuxManager.CurrentScene = None
+        PBRTv3Manager.CurrentScene = None
 
     context_count = 0
 
@@ -202,11 +202,11 @@ class LuxManager(object):
     def get_context_number():
         """
         Give each context a unique serial number by keeping
-        count in a static member of LuxManager
+        count in a static member of PBRTv3Manager
         """
 
-        LuxManager.context_count += 1
-        return LuxManager.context_count
+        PBRTv3Manager.context_count += 1
+        return PBRTv3Manager.context_count
 
     lux_context = None
     stats_thread = None
@@ -215,9 +215,9 @@ class LuxManager(object):
 
     def __init__(self, manager_name='', api_type='FILE'):
         """
-        Initialise the LuxManager by setting its name, the pylux API type.
+        Initialise the PBRTv3Manager by setting its name, the pylux API type.
 
-        Returns LuxManager object
+        Returns PBRTv3Manager object
         """
 
         # NB: Should not be refactored into a dict switch as it will
@@ -237,7 +237,7 @@ class LuxManager(object):
             manager_name = ' (%s)' % manager_name
 
         self.lux_context = Context('LuxContext %04i%s' %
-                                   (LuxManager.get_context_number(),
+                                   (PBRTv3Manager.get_context_number(),
                                     manager_name))
         self.reset()
 

@@ -31,7 +31,7 @@ from .. import PBRTv3Addon
 
 from ..export import ParamSet, process_filepath_data,  get_expanded_file_name
 
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..outputs.luxcore_api import set_prop_tex
 
 from ..properties import pbrtv3_texture_node
@@ -101,7 +101,7 @@ class pbrtv3_texture_type_node_fresnelname(pbrtv3_texture_node):
         if self.frname_preset == 'nk':  # use an NK data file
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
+            process_filepath_data(PBRTv3Manager.CurrentScene, self, self.frname_nkfile, fresnelname_params, 'filename')
 
             return make_texture('fresnel', 'fresnelname', self.name, fresnelname_params)
         else:

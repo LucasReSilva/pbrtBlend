@@ -30,7 +30,7 @@ import json, math, os, mathutils
 
 # PBRTv3 Libs
 from .. import PBRTv3Addon
-from ..outputs import PBRTv3Log, LuxManager
+from ..outputs import PBRTv3Log, PBRTv3Manager
 from ..export import materials as export_materials
 
 from .cycles_converter import cycles_material_converter
@@ -101,8 +101,8 @@ class PBRTv3_OT_save_material(bpy.types.Operator):
             blender_mat = context.material
             pbrtv3_mat = context.material.pbrtv3_material
 
-            LM = LuxManager("material_save", self.properties.material_file_type)
-            LuxManager.SetActive(LM)
+            LM = PBRTv3Manager("material_save", self.properties.material_file_type)
+            PBRTv3Manager.SetActive(LM)
             LM.SetCurrentScene(context.scene)
 
             material_context = LM.lux_context
@@ -144,7 +144,7 @@ class PBRTv3_OT_save_material(bpy.types.Operator):
             context.scene.pbrtv3_engine.is_saving_lbm2 = False
 
             LM.reset()
-            LuxManager.SetActive(None)
+            PBRTv3Manager.SetActive(None)
 
             self.report({'INFO'}, 'Material "%s" saved to %s' % (blender_mat.name, fullpath))
             return {'FINISHED'}

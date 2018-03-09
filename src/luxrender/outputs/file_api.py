@@ -392,7 +392,7 @@ class Custom_Context(object):
     def parse(self, filename, async):
         """
         In a deviation from the API, this function returns a new context,
-        which must be passed back to LuxManager so that it can control the
+        which must be passed back to PBRTv3Manager so that it can control the
         rendering process.
         """
         from ..outputs.pure_api import PYLUX_AVAILABLE

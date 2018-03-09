@@ -30,7 +30,7 @@ import bpy, mathutils
 
 from ..extensions_framework import util as efutil
 
-from ..outputs import LuxManager, PBRTv3Log
+from ..outputs import PBRTv3Manager, PBRTv3Log
 from ..util import bencode_file2string_with_size
 
 
@@ -268,9 +268,9 @@ def get_worldscale(as_scalematrix=True):
     preview_scale = bpy.context.scene.pbrtv3_world.preview_object_size / 2
 
     # This is a safety net to prevent previewscale affecting render
-    ws = 1 / preview_scale if LuxManager.CurrentScene.name == "preview" else 1
+    ws = 1 / preview_scale if PBRTv3Manager.CurrentScene.name == "preview" else 1
 
-    scn_us = LuxManager.CurrentScene.unit_settings
+    scn_us = PBRTv3Manager.CurrentScene.unit_settings
 
     if scn_us.system in ['METRIC', 'IMPERIAL']:
         # The units used in modelling are for display only. behind

@@ -31,7 +31,7 @@ import bpy
 from ..extensions_framework import util as efutil
 
 from ..export import ParamSet
-from ..outputs import PBRTv3Log, LuxManager
+from ..outputs import PBRTv3Log, PBRTv3Manager
 from ..properties import find_node
 
 
@@ -308,7 +308,7 @@ def convert_texture(scene, texture, variant_hint=None):
             '%05d' % scene.frame_current
         )
 
-        if texture.image.packed_file and not LuxManager.CurrentScene.name == "preview":
+        if texture.image.packed_file and not PBRTv3Manager.CurrentScene.name == "preview":
             # Store the render output setting
             orig_render_format = scene.render.image_settings.file_format
             # Read the fileformat
@@ -403,7 +403,7 @@ def convert_texture(scene, texture, variant_hint=None):
 
                 tex_image = efutil.filesystem_path(f_path)
 
-        if texture.image.packed_file and not LuxManager.CurrentScene.name == "preview":
+        if texture.image.packed_file and not PBRTv3Manager.CurrentScene.name == "preview":
             # Restore the render output setting
             scene.render.image_settings.file_format = orig_render_format
 
@@ -518,12 +518,12 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
             texture_name = getattr(property_group, '%s_%stexturename' % (lux_prop_name, variant))
             if texture_name:
                 with TextureCounter(texture_name):
-                    texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+                    texture = get_texture_from_scene(PBRTv3Manager.CurrentScene, texture_name)
 
                     if texture != False:
                         if texture.pbrtv3_texture.type != 'BLENDER':
                             tex_pbrtv3_texture = texture.pbrtv3_texture
-                            lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(LuxManager.CurrentScene,
+                            lux_tex_variant, paramset = tex_pbrtv3_texture.get_paramset(PBRTv3Manager.CurrentScene,
                                                                                            texture)
                             if lux_tex_variant == variant:
                                 ExportedTextures.texture(lux_context, texture_name, variant, tex_pbrtv3_texture.type,
@@ -532,7 +532,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                                 PBRTv3Log('WARNING: Texture %s is wrong variant; needed %s, got %s' % (
                                     lux_prop_name, variant, lux_tex_variant))
                         else:
-                            lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture,
+                            lux_tex_variant, lux_tex_name, paramset = convert_texture(PBRTv3Manager.CurrentScene, texture,
                                                                                       variant_hint=variant)
                             if texture.type in ('OCEAN', 'IMAGE'):
                                 texture_name = texture_name + "_" + lux_tex_variant

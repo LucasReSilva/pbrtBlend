@@ -27,7 +27,7 @@
 
 import bpy, time, os
 
-from ...outputs import LuxManager
+from ...outputs import PBRTv3Manager
 from ...outputs.luxcore_api import pyluxcore
 from ...extensions_framework import util as efutil
 from ...export.volumes import SmokeCache
@@ -51,7 +51,7 @@ class LuxCoreExporter(object):
         To update the rendering on the fly, convert the needed objects/materials etc., then get all updated properties
         with pop_updated_scene_properties() and parse them into the luxcore scene
         """
-        LuxManager.SetCurrentScene(blender_scene)
+        PBRTv3Manager.SetCurrentScene(blender_scene)
 
         self.blender_scene = blender_scene
         self.renderengine = renderengine

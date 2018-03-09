@@ -49,7 +49,7 @@ from .. import PBRTv3Addon
 from ..export import get_output_filename, get_worldscale
 from ..export.scene import SceneExporter
 from ..export.volumes import SmokeCache
-from ..outputs import LuxManager, LuxFilmDisplay
+from ..outputs import PBRTv3Manager, LuxFilmDisplay
 from ..outputs import PBRTv3Log
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
@@ -500,7 +500,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def pbrtv3_render(self, scene):
         prev_cwd = os.getcwd()
         try:
-            self.LuxManager = None
+            self.PBRTv3Manager = None
             self.render_update_timer = None
             self.output_dir = efutil.temp_directory()
             self.output_file = 'default.png'
@@ -538,8 +538,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 return  # Export frame failed, abort rendering
 
             if is_animation and make_queue:
-                self.LuxManager = LuxManager.GetActive()
-                self.LuxManager.lux_context.worldEnd()
+                self.PBRTv3Manager = PBRTv3Manager.GetActive()
+                self.PBRTv3Manager.lux_context.worldEnd()
                 with open(queue_file, 'a') as qf:
                     qf.write("%s\n" % exported_file)
 
@@ -610,12 +610,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if preview_type == 'TEXTURE':
             pt = pm.active_texture
 
-        LM = LuxManager(
+        LM = PBRTv3Manager(
             scene.name,
             api_type='API',
         )
-        LuxManager.SetCurrentScene(scene)
-        LuxManager.SetActive(LM)
+        PBRTv3Manager.SetCurrentScene(scene)
+        PBRTv3Manager.SetActive(LM)
 
         file_based_preview = False
 
@@ -753,12 +753,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def export_scene(self, scene):
         api_type, write_files = self.set_export_path(scene)
 
-        # Pre-allocate the LuxManager so that we can set up the network servers before export
-        LM = LuxManager(
+        # Pre-allocate the PBRTv3Manager so that we can set up the network servers before export
+        LM = PBRTv3Manager(
             scene.name,
             api_type=api_type,
         )
-        LuxManager.SetActive(LM)
+        PBRTv3Manager.SetActive(LM)
 
         if scene.pbrtv3_engine.export_type == 'INT':
             # Set up networking before export so that we get better server usage
@@ -934,7 +934,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return cmd_args
 
     def render_start(self, scene):
-        self.LuxManager = LuxManager.GetActive()
+        self.PBRTv3Manager = PBRTv3Manager.GetActive()
 
         # Remove previous rendering, to prevent loading old data
         # if the update timer fires before the image is written
@@ -943,38 +943,38 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         internal, start_rendering, parse, worldEnd = self.rendering_behaviour(scene)
 
-        if self.LuxManager.lux_context.API_TYPE == 'FILE':
-            fn = self.LuxManager.lux_context.file_names[0]
-            self.LuxManager.lux_context.worldEnd()
+        if self.PBRTv3Manager.lux_context.API_TYPE == 'FILE':
+            fn = self.PBRTv3Manager.lux_context.file_names[0]
+            self.PBRTv3Manager.lux_context.worldEnd()
             if parse:
                 # file_api.parse() creates a real pylux context. we must replace
-                # LuxManager's context with that one so that the running renderer
+                # PBRTv3Manager's context with that one so that the running renderer
                 # can be controlled.
-                ctx = self.LuxManager.lux_context.parse(fn, True)
-                self.LuxManager.lux_context = ctx
-                self.LuxManager.stats_thread.LocalStorage['lux_context'] = ctx
-                self.LuxManager.fb_thread.LocalStorage['lux_context'] = ctx
+                ctx = self.PBRTv3Manager.lux_context.parse(fn, True)
+                self.PBRTv3Manager.lux_context = ctx
+                self.PBRTv3Manager.stats_thread.LocalStorage['lux_context'] = ctx
+                self.PBRTv3Manager.fb_thread.LocalStorage['lux_context'] = ctx
         elif worldEnd:
-            self.LuxManager.lux_context.worldEnd()
+            self.PBRTv3Manager.lux_context.worldEnd()
 
         # Begin rendering
         if start_rendering:
             PBRTv3Log('Starting PBRTv3')
             if internal:
 
-                self.LuxManager.lux_context.logVerbosity(scene.pbrtv3_engine.log_verbosity)
+                self.PBRTv3Manager.lux_context.logVerbosity(scene.pbrtv3_engine.log_verbosity)
 
                 self.update_stats('', 'PBRTv3: Building %s' % scene.pbrtv3_accelerator.accelerator)
-                self.LuxManager.start()
+                self.PBRTv3Manager.start()
 
-                self.LuxManager.fb_thread.LocalStorage['integratedimaging'] = scene.pbrtv3_engine.integratedimaging
+                self.PBRTv3Manager.fb_thread.LocalStorage['integratedimaging'] = scene.pbrtv3_engine.integratedimaging
 
                 # Update the image from disk only as often as it is written
-                self.LuxManager.fb_thread.set_kick_period(
+                self.PBRTv3Manager.fb_thread.set_kick_period(
                     scene.camera.data.pbrtv3_camera.pbrtv3_film.internal_updateinterval)
 
                 # Start the stats and framebuffer threads and add additional threads to Lux renderer
-                self.LuxManager.start_worker_threads(self)
+                self.PBRTv3Manager.start_worker_threads(self)
 
                 if scene.pbrtv3_engine.threads_auto:
                     try:
@@ -986,9 +986,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 # Run rendering with specified number of threads
                 for i in range(thread_count - 1):
-                    self.LuxManager.lux_context.addThread()
+                    self.PBRTv3Manager.lux_context.addThread()
 
-                while self.LuxManager.started:
+                while self.PBRTv3Manager.started:
                     self.render_update_timer = threading.Timer(1, self.stats_timer)
                     self.render_update_timer.start()
                     if self.render_update_timer.isAlive():
@@ -1038,9 +1038,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         Returns None
         """
 
-        LC = self.LuxManager.lux_context
+        LC = self.PBRTv3Manager.lux_context
 
-        self.update_stats('', 'PBRTv3: Rendering %s' % self.LuxManager.stats_thread.stats_string)
+        self.update_stats('', 'PBRTv3: Rendering %s' % self.PBRTv3Manager.stats_thread.stats_string)
 
         if hasattr(self, 'update_progress') and LC.getAttribute('renderer_statistics', 'percentComplete') > 0:
             prg = LC.getAttribute('renderer_statistics', 'percentComplete') / 100.0
@@ -1050,7 +1050,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         LC.statistics('filmIsReady') == 1.0 or \
                         LC.statistics('terminated') == 1.0 or \
                         LC.getAttribute('film', 'enoughSamples'):
-            self.LuxManager.reset()
+            self.PBRTv3Manager.reset()
             self.update_stats('', '')
 
     ############################################################################
@@ -2371,7 +2371,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastVisibilitySettings = None
                 self.update_counter = 0
 
-                LuxManager.SetCurrentScene(context.scene)
+                PBRTv3Manager.SetCurrentScene(context.scene)
 
                 self.viewFilmWidth = context.region.width
                 self.viewFilmHeight = context.region.height

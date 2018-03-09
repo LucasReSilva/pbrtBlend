@@ -27,7 +27,7 @@
 from ..extensions_framework.ui import property_group_renderer
 
 from .. import PBRTv3Addon
-from ..outputs import LuxManager as LM
+from ..outputs import PBRTv3Manager as LM
 from ..outputs.pure_api import PYLUX_AVAILABLE
 
 

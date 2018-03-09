@@ -1187,7 +1187,7 @@ class pbrtv3_material_type_node_metal(pbrtv3_material_node):
         if self.metal_preset == 'nk':  # use an NK data file
             # This function resolves relative paths (even in linked library blends)
             # and optionally encodes/embeds the data if the setting is enabled
-            process_filepath_data(LuxManager.CurrentScene, self, self.metal_nkfile, metal_params, 'filename')
+            process_filepath_data(PBRTv3Manager.CurrentScene, self, self.metal_nkfile, metal_params, 'filename')
         else:
             # use a preset name
             metal_params.add_string('name', self.metal_preset)
@@ -1707,7 +1707,7 @@ class pbrtv3_light_area_node(pbrtv3_material_node):
         arealight_params.add_float('efficacy', self.efficacy)
 
         if self.iesname:
-            process_filepath_data(LuxManager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
+            process_filepath_data(PBRTv3Manager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
 
         arealight_params.add_float('importance', self.importance)
         arealight_params.add_integer('nsamples', self.nsamples)

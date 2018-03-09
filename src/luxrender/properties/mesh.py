@@ -33,7 +33,7 @@ from ..export.materials import get_texture_from_scene
 from ..properties.material import texture_append_visibility
 from ..properties.texture import FloatTextureParameter
 from ..util import dict_merge
-from ..outputs import LuxManager
+from ..outputs import PBRTv3Manager
 from ..outputs.luxcore_api import UseLuxCore
 
 
@@ -227,7 +227,7 @@ class pbrtv3_mesh(declarative_property_group):
 
         if self.dm_floattexturename and len(export_dm) > 0:
             texture_name = getattr(self, 'dm_floattexturename')
-            texture = get_texture_from_scene(LuxManager.CurrentScene, texture_name)
+            texture = get_texture_from_scene(PBRTv3Manager.CurrentScene, texture_name)
 
             if texture.type in ('IMAGE', 'OCEAN') and texture.pbrtv3_texture.type == 'BLENDER':
                 params.add_texture('displacementmap', '%s_float' % self.dm_floattexturename)

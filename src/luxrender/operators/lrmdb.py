@@ -27,7 +27,7 @@
 import bpy
 
 from .. import PBRTv3Addon
-from ..outputs import PBRTv3Log, LuxManager
+from ..outputs import PBRTv3Log, PBRTv3Manager
 from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
@@ -304,8 +304,8 @@ class PBRTv3_OT_upload_material(bpy.types.Operator):
             blender_mat = context.material
             pbrtv3_mat = context.material.pbrtv3_material
 
-            LM = LuxManager("material_save", 'LBM2')
-            LuxManager.SetActive(LM)
+            LM = PBRTv3Manager("material_save", 'LBM2')
+            PBRTv3Manager.SetActive(LM)
             LM.SetCurrentScene(context.scene)
 
             material_context = LM.lux_context
@@ -342,7 +342,7 @@ class PBRTv3_OT_upload_material(bpy.types.Operator):
             context.scene.pbrtv3_engine.is_saving_lbm2 = False
 
             LM.reset()
-            LuxManager.SetActive(None)
+            PBRTv3Manager.SetActive(None)
 
             return {'FINISHED'}
 
