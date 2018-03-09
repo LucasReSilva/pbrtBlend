@@ -30,7 +30,7 @@ import json, math, os, mathutils
 
 # PBRTv3 Libs
 from .. import PBRTv3Addon
-from ..outputs import LuxLog, LuxManager
+from ..outputs import PBRTv3Log, LuxManager
 from ..export import materials as export_materials
 
 from .cycles_converter import cycles_material_converter
@@ -480,7 +480,7 @@ class PBRTv3_OT_convert_all_materials(bpy.types.Operator):
     bl_label = 'Convert all Blender Internal materials'
 
     def report_log(self, level, msg):
-        LuxLog('Material conversion %s: %s' % (level, msg))
+        PBRTv3Log('Material conversion %s: %s' % (level, msg))
 
     def execute(self, context):
         for blender_mat in bpy.data.materials:

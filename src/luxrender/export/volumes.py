@@ -35,7 +35,7 @@ from ..extensions_framework import util as efutil
 
 # PBRTv3 libs
 from . import ParamSet, matrix_to_list, LuxManager
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from ..outputs.file_api import Files
 
 
@@ -111,9 +111,9 @@ class library_loader():
                     continue
 
             if cls.has_lzo:
-                LuxLog('Volumes: LZO Library found')
+                PBRTv3Log('Volumes: LZO Library found')
             else:
-                LuxLog('Volumes: LZO Library not found')
+                PBRTv3Log('Volumes: LZO Library not found')
 
             cls.load_lzo_attempted = True
 
@@ -133,9 +133,9 @@ class library_loader():
                     continue
 
             if cls.has_lzma:
-                LuxLog('Volumes: LZMA Library found')
+                PBRTv3Log('Volumes: LZMA Library found')
             else:
-                LuxLog('Volumes: LZMA Library not found')
+                PBRTv3Log('Volumes: LZMA Library not found')
 
             cls.load_lzma_attempted = True
 
@@ -195,7 +195,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
     cachefilename = []
 
     if not smokecache.is_baked:
-        LuxLog('Volumes: Smoke data has to be baked for export')
+        PBRTv3Log('Volumes: Smoke data has to be baked for export')
     else:
         cachefilepath = os.path.join(
             os.path.splitext(os.path.dirname(bpy.data.filepath))[0],
@@ -205,7 +205,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
         fullpath = os.path.join(cachefilepath, cachefilename)
 
         if not os.path.exists(fullpath):
-            LuxLog('Volumes: Cachefile doesn''t exist: %s' % fullpath)
+            PBRTv3Log('Volumes: Cachefile doesn''t exist: %s' % fullpath)
         else:
             cachefile = open(fullpath, "rb")
             buffer = cachefile.read(8)
@@ -555,7 +555,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
                     if density_compressed == 1:
                         has_lzo, lzodll = library_loader.load_lzo()
                         if has_lzo:
-                            LuxLog('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(
+                            PBRTv3Log('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(
                                 density_stream_size))
                             #print("Cell count: %d"%cell_count)
                             uncomp_stream = (c_float * cell_count * SZ_FLOAT)()
@@ -567,13 +567,13 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
                             for i in range(cell_count):
                                 density.append(p_dens[i])
                         else:
-                            LuxLog('Volumes: Cannot read compressed LZO stream; no library loaded')
+                            PBRTv3Log('Volumes: Cannot read compressed LZO stream; no library loaded')
 
                     elif density_compressed == 2:
                         has_lzma, lzmadll = library_loader.load_lzma()
 
                         if has_lzma:
-                            LuxLog('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(
+                            PBRTv3Log('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(
                                 density_stream_size))
                             #print("Cell count: %d"%cell_count)
                             uncomp_stream = (c_float * cell_count * SZ_FLOAT)()
@@ -587,7 +587,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
                             for i in range(cell_count):
                                 density.append(p_dens[i])
                         else:
-                            LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
+                            PBRTv3Log('Volumes: Cannot read compressed LZMA stream; no library loaded')
 
                     if new_cache and flowtype >= 1:
                         if fire_compressed == 1:
@@ -595,7 +595,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 
                             if has_lzo:
                                 fire_stream_size = len(fire_stream)
-                                LuxLog('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(
+                                PBRTv3Log('Volumes: De-compressing LZO stream of length {0:0d} bytes...'.format(
                                     fire_stream_size))
                                 uncomp_stream = (c_float * cell_count * SZ_FLOAT)()
                                 p_fire = cast(uncomp_stream, POINTER(c_float))
@@ -606,14 +606,14 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
                                 for i in range(cell_count):
                                     fire.append(p_fire[i])
                             else:
-                                LuxLog('Volumes: Cannot read compressed LZO stream; no library loaded')
+                                PBRTv3Log('Volumes: Cannot read compressed LZO stream; no library loaded')
 
                         elif fire_compressed == 2:
                             has_lzma, lzmadll = library_loader.load_lzma()
 
                             if has_lzma:
                                 fire_stream_size = len(stream)
-                                LuxLog('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(
+                                PBRTv3Log('Volumes: De-compressing LZMA stream of length {0:0d} bytes...'.format(
                                     fire_stream_size))
                                 uncomp_stream = (c_float * cell_count * SZ_FLOAT)()
                                 p_fire = cast(uncomp_stream, POINTER(c_float))
@@ -626,7 +626,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
                                 for i in range(cell_count):
                                     fire.append(p_fire[i])
                             else:
-                                LuxLog('Volumes: Cannot read compressed LZMA stream; no library loaded')
+                                PBRTv3Log('Volumes: Cannot read compressed LZMA stream; no library loaded')
 
             cachefile.close()
             #endif cachefile exists
@@ -772,7 +772,7 @@ def export_smoke(smoke_obj_name, channel):
                     # Density data
                     #       			smoke_file.write(struct.pack('<%df'%len(channeldata), *channeldata))
                     #
-                    #	        	LuxLog('Binary SMOKE file written: %s' % (smoke_path))
+                    #	        	PBRTv3Log('Binary SMOKE file written: %s' % (smoke_path))
 
     elapsed_time = time.time() - start_time
     print('[%s] Smoke export of channel %s took %.3fs' % (smoke_obj_name, channel, elapsed_time))

@@ -40,7 +40,7 @@ from ..export import ParamSet, process_filepath_data
 from ..export.materials import (
     MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
-from ..outputs import LuxManager, LuxLog
+from ..outputs import LuxManager, PBRTv3Log
 from ..outputs.luxcore_api import UseLuxCore
 from ..util import dict_merge
 
@@ -271,7 +271,7 @@ def pbrtv3_bumpmap_export(self, lux_context, material, bumpmap_material_name, TF
                 params.add_float('gamma', 1.0)  # Don't gamma correct normal maps
                 params.update(lux_texture.pbrtv3_tex_mapping.get_paramset(LuxManager.CurrentScene))
             else:
-                LuxLog('Texture %s is not a normal map! Greyscale height maps should be applied to \
+                PBRTv3Log('Texture %s is not a normal map! Greyscale height maps should be applied to \
                  the bump channel.' % texture_name)
 
             ExportedTextures.texture(
@@ -1263,9 +1263,9 @@ class pbrtv3_transparency(declarative_property_group):
                     )
                     ExportedTextures.export_new(lux_context)
                 else:
-                    LuxLog('Texture %s is not an alpha map!' % texture_name)
+                    PBRTv3Log('Texture %s is not an alpha map!' % texture_name)
         if alpha_type is None:
-            LuxLog('WARNING: Invalid alpha texture for material ''%s'', disabling transparency' % material.name)
+            PBRTv3Log('WARNING: Invalid alpha texture for material ''%s'', disabling transparency' % material.name)
             return None, None
 
         return alpha_type, alpha_amount

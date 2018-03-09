@@ -32,7 +32,7 @@ from ..extensions_framework import log
 from ..extensions_framework.util import TimerThread, format_elapsed_time
 
 # This def ia above the following import statements for a reason!
-def LuxLog(*args, popup=False):
+def PBRTv3Log(*args, popup=False):
     """
     Send string to AF log, marked as belonging to PBRTv3 module.
     Accepts variable args (can be used as pylux.errorHandler)
@@ -99,21 +99,21 @@ class LuxFilmDisplay(TimerThread):
 
                 if xres == -1 or yres == -1:
                     err_msg = 'ERROR: Cannot not load render result: resolution unknown. LuxFilmThread will terminate'
-                    LuxLog(err_msg)
+                    PBRTv3Log(err_msg)
                     self.stop()
                     return
 
                 if render_end:
-                    LuxLog('Final render result (%ix%i%s)' % (xres, yres, p_stats))
+                    PBRTv3Log('Final render result (%ix%i%s)' % (xres, yres, p_stats))
                 else:
-                    LuxLog('Updating render result (%ix%i%s)' % (xres, yres, p_stats))
+                    PBRTv3Log('Updating render result (%ix%i%s)' % (xres, yres, p_stats))
 
                 result = self.LocalStorage['RE'].begin_result(0, 0, xres, yres)
 
                 if result is None:
                     err_msg = 'ERROR: Cannot not load render result: begin_result() returned None.\
                      LuxFilmThread will terminate'
-                    LuxLog(err_msg)
+                    PBRTv3Log(err_msg)
                     self.stop()
                     return
 
@@ -150,12 +150,12 @@ class LuxFilmDisplay(TimerThread):
                     lay.load_from_file(self.LocalStorage['RE'].output_file)
                 else:
                     err_msg = 'ERROR: Could not load render result from %s' % self.LocalStorage['RE'].output_file
-                    LuxLog(err_msg)
+                    PBRTv3Log(err_msg)
                 self.LocalStorage['RE'].end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.LocalStorage[
                     'RE'].end_result(result)  # cycles tiles adaption
         else:
             err_msg = 'ERROR: LuxFilmThread started with insufficient parameters. LuxFilmThread will terminate'
-            LuxLog(err_msg)
+            PBRTv3Log(err_msg)
             self.stop()
             return
 
@@ -250,7 +250,7 @@ class LuxManager(object):
         """
 
         if self.started:
-            LuxLog('Already rendering!')
+            PBRTv3Log('Already rendering!')
             return
 
         self.started = True

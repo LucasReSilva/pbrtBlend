@@ -31,7 +31,7 @@ import bpy
 from ..extensions_framework import util as efutil
 
 from ..export import ParamSet
-from ..outputs import LuxLog, LuxManager
+from ..outputs import PBRTv3Log, LuxManager
 from ..properties import find_node
 
 
@@ -491,7 +491,7 @@ def get_texture_from_scene(scene, tex_name):
     if tex_name in bpy.data.textures:
         return bpy.data.textures[tex_name]
 
-    LuxLog('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
+    PBRTv3Log('Failed to find Texture "%s" in Scene "%s"' % (tex_name, scene.name))
     return False
 
 
@@ -529,7 +529,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                                 ExportedTextures.texture(lux_context, texture_name, variant, tex_pbrtv3_texture.type,
                                                          paramset)
                             else:
-                                LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (
+                                PBRTv3Log('WARNING: Texture %s is wrong variant; needed %s, got %s' % (
                                     lux_prop_name, variant, lux_tex_variant))
                         else:
                             lux_tex_variant, lux_tex_name, paramset = convert_texture(LuxManager.CurrentScene, texture,
@@ -541,7 +541,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                                 ExportedTextures.texture(lux_context, texture_name, lux_tex_variant, lux_tex_name,
                                                          paramset)
                             else:
-                                LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (
+                                PBRTv3Log('WARNING: Texture %s is wrong variant; needed %s, got %s' % (
                                     lux_prop_name, variant, lux_tex_variant))
 
                         if hasattr(property_group, '%s_multiplyfloat' % lux_prop_name) and \
@@ -599,7 +599,7 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                         )
 
             elif export_param_name not in ['bumpmap', 'displacementmap']:
-                LuxLog('WARNING: Unassigned %s texture slot %s' % (variant, export_param_name))
+                PBRTv3Log('WARNING: Unassigned %s texture slot %s' % (variant, export_param_name))
         else:
             if variant == 'float':
                 fval = float(getattr(property_group, '%s_floatvalue' % lux_prop_name))
@@ -620,6 +620,6 @@ def add_texture_parameter(lux_context, lux_prop_name, variant, property_group, v
                     fval
                 )
     else:
-        LuxLog('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
+        PBRTv3Log('WARNING: Texture %s is unsupported variant; needed %s' % (lux_prop_name, variant))
 
     return params

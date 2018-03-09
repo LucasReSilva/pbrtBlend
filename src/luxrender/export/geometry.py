@@ -31,7 +31,7 @@ from bpy.app.handlers import persistent
 
 from ..extensions_framework import util as efutil
 
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from ..outputs.file_api import Files
 from ..export import ParamSet, ExportProgressThread, ExportCache, object_anim_matrices
 from ..export import matrix_to_list
@@ -422,9 +422,9 @@ class GeometryExporter(object):
                             del co_no_uv_vc_cache
                             del face_vert_indices
 
-                        LuxLog('Binary PLY file written: %s' % ply_path)
+                        PBRTv3Log('Binary PLY file written: %s' % ply_path)
                     else:
-                        LuxLog('Skipping already exported PLY: %s' % mesh_name)
+                        PBRTv3Log('Skipping already exported PLY: %s' % mesh_name)
 
                     # Export the shape definition to LXO
                     shape_params = ParamSet().add_string('filename', efutil.path_relative_to_export(ply_path))
@@ -441,13 +441,13 @@ class GeometryExporter(object):
                         self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
 
                 except InvalidGeometryException as err:
-                    LuxLog('Mesh export failed, skipping this mesh: %s' % err)
+                    PBRTv3Log('Mesh export failed, skipping this mesh: %s' % err)
 
             del ffaces_mats
             bpy.data.meshes.remove(mesh, do_unlink=False)
 
         except UnexportableObjectException as err:
-            LuxLog('Object export failed, skipping this object: %s' % err)
+            PBRTv3Log('Object export failed, skipping this object: %s' % err)
 
         return mesh_definitions
 
@@ -601,13 +601,13 @@ class GeometryExporter(object):
                         self.ExportedMeshes.add(mesh_cache_key, mesh_definition)
 
                 except InvalidGeometryException as err:
-                    LuxLog('Mesh export failed, skipping this mesh: %s' % err)
+                    PBRTv3Log('Mesh export failed, skipping this mesh: %s' % err)
 
             del ffaces_mats
             bpy.data.meshes.remove(mesh, do_unlink=False)
 
         except UnexportableObjectException as err:
-            LuxLog('Object export failed, skipping this object: %s' % err)
+            PBRTv3Log('Object export failed, skipping this object: %s' % err)
 
         return mesh_definitions
 
@@ -678,7 +678,7 @@ class GeometryExporter(object):
             ob_mat = mat_object.material_slots[me_mat_index].material
         except IndexError:
             ob_mat = None
-            LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
+            PBRTv3Log('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
 
         # Emission check
         if ob_mat is not None:
@@ -712,7 +712,7 @@ class GeometryExporter(object):
         self.lux_context.shape(me_shape_type, me_shape_params)
         self.lux_context.objectEnd()
 
-        LuxLog('Mesh definition exported: %s' % me_name)
+        PBRTv3Log('Mesh definition exported: %s' % me_name)
 
     def is_object_animated(self, obj, matrix=None):
 
@@ -801,7 +801,7 @@ class GeometryExporter(object):
                 ob_mat = mat_object.material_slots[me_mat_index].material
             except IndexError:
                 ob_mat = None
-                LuxLog('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
+                PBRTv3Log('WARNING: material slot %d on object "%s" is unassigned!' % (me_mat_index + 1, mat_object.name))
 
             if ob_mat is not None:
                 # Export material definition
@@ -923,13 +923,13 @@ class GeometryExporter(object):
 
     def handler_Duplis_PATH(self, obj, *args, **kwargs):
         if not 'particle_system' in kwargs.keys():
-            LuxLog('ERROR: handler_Duplis_PATH called without particle_system')
+            PBRTv3Log('ERROR: handler_Duplis_PATH called without particle_system')
             return
 
         psys = kwargs['particle_system']
 
         if not psys.settings.type == 'HAIR':
-            LuxLog('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
+            PBRTv3Log('ERROR: handler_Duplis_PATH can only handle Hair particle systems ("%s")' % psys.name)
             return
 
         if not bpy.context.scene.pbrtv3_engine.export_hair:
@@ -945,7 +945,7 @@ class GeometryExporter(object):
         elif not mod.particle_system.name == psys.name or not mod.show_render:
             return
 
-        LuxLog('Exporting Hair system "%s"...' % psys.name)
+        PBRTv3Log('Exporting Hair system "%s"...' % psys.name)
 
         hair_size = psys.settings.pbrtv3_hair.hair_size
         root_width = psys.settings.pbrtv3_hair.root_width
@@ -1138,7 +1138,7 @@ class GeometryExporter(object):
                     for uv in uv_coords:
                         hair_file.write(struct.pack('<2f', *uv))
 
-            LuxLog('Binary hair file written: %s' % (hair_file_path))
+            PBRTv3Log('Binary hair file written: %s' % (hair_file_path))
 
             hair_mat = obj.material_slots[psys.settings.material - 1].material
 
@@ -1295,15 +1295,15 @@ class GeometryExporter(object):
         det.stop()
         det.join()
 
-        LuxLog('... done, exported %s hairs' % det.exported_objects)
+        PBRTv3Log('... done, exported %s hairs' % det.exported_objects)
 
 
     def handler_Duplis_GENERIC(self, obj, *args, **kwargs):
         try:
-            LuxLog('Exporting Duplis...')
+            PBRTv3Log('Exporting Duplis...')
 
             if self.ExportedObjectsDuplis.have(obj):
-                LuxLog('... duplis already exported for object %s' % obj)
+                PBRTv3Log('... duplis already exported for object %s' % obj)
                 return
 
             self.ExportedObjectsDuplis.add(obj, True)
@@ -1368,10 +1368,10 @@ class GeometryExporter(object):
             det.stop()
             det.join()
 
-            LuxLog('... done, exported %s duplis' % det.exported_objects)
+            PBRTv3Log('... done, exported %s duplis' % det.exported_objects)
 
         except Exception as err:
-            LuxLog('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
+            PBRTv3Log('Error with handler_Duplis_GENERIC and object %s: %s' % (obj, err))
 
     def handler_MESH(self, obj, *args, **kwargs):
         if self.visibility_scene.pbrtv3_testing.object_analysis:
@@ -1503,4 +1503,4 @@ def lux_scene_load(context):
 if hasattr(bpy.app, 'handlers') and hasattr(bpy.app.handlers, 'scene_update_post'):
     bpy.app.handlers.scene_update_post.append(lux_scene_update)
     bpy.app.handlers.load_post.append(lux_scene_load)
-    LuxLog('Installed scene post-update handler')
+    PBRTv3Log('Installed scene post-update handler')

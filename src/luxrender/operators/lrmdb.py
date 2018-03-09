@@ -27,7 +27,7 @@
 import bpy
 
 from .. import PBRTv3Addon
-from ..outputs import LuxLog, LuxManager
+from ..outputs import PBRTv3Log, LuxManager
 from ..export import materials as export_materials
 
 from .lrmdb_lib import lrmdb_client
@@ -68,10 +68,10 @@ class _lrmdb_state(lrmdb_client):
 
     def select_material(self, context, mat_id):
         if not context.active_object:
-            LuxLog('WARNING: Select an object!')
+            PBRTv3Log('WARNING: Select an object!')
             return
         if not context.active_object.active_material:
-            LuxLog('WARNING: Selected object does not have active material')
+            PBRTv3Log('WARNING: Selected object does not have active material')
             return
 
         try:
@@ -79,7 +79,7 @@ class _lrmdb_state(lrmdb_client):
             s = self.server_instance()
             md = s.material.get.data(mat_id)
         except Exception as err:
-            LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+            PBRTv3Log('LRMDB ERROR: Cannot get data: %s' % err)
             self._active = False
             return
 
@@ -94,7 +94,7 @@ class _lrmdb_state(lrmdb_client):
             for a in context.screen.areas:
                 a.tag_redraw()
         except KeyError as err:
-            LuxLog('LRMDB ERROR: Bad material data')
+            PBRTv3Log('LRMDB ERROR: Bad material data')
 
     def show_category_items(self, context, cat_id, cat_name):
         try:
@@ -102,7 +102,7 @@ class _lrmdb_state(lrmdb_client):
             s = self.server_instance()
             ci = s.category.item(cat_id)
         except Exception as err:
-            LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+            PBRTv3Log('LRMDB ERROR: Cannot get data: %s' % err)
             self._active = False
             return
 
@@ -143,7 +143,7 @@ class _lrmdb_state(lrmdb_client):
             ct = s.category.tree()
             self.check_login()
         except Exception as err:
-            LuxLog('LRMDB ERROR: Cannot get data: %s' % err)
+            PBRTv3Log('LRMDB ERROR: Cannot get data: %s' % err)
             self._active = False
             return
 
@@ -225,7 +225,7 @@ class PBRTv3_OT_lrmdb_login(bpy.types.Operator):
                     lrmdb_state.show_category_list(context)
                 return {'FINISHED'}
             except Exception as err:
-                LuxLog('LRMDB ERROR: %s' % err)
+                PBRTv3Log('LRMDB ERROR: %s' % err)
                 return {'CANCELLED'}
         else:
             self.report({'ERROR'}, 'Must supply both username and password')
@@ -252,7 +252,7 @@ class PBRTv3_OT_lrmdb_logout(bpy.types.Operator):
             lrmdb_state.reset()
             return {'FINISHED'}
         except Exception as err:
-            LuxLog('LRMDB ERROR: %s' % err)
+            PBRTv3Log('LRMDB ERROR: %s' % err)
             return {'CANCELLED'}
 
 
@@ -286,7 +286,7 @@ class PBRTv3_OT_lrmdb(bpy.types.Operator):
 
         except Exception as err:
             self.report({'ERROR'}, '%s' % err)
-            LuxLog('LRMDB ERROR: %s' % err)
+            PBRTv3Log('LRMDB ERROR: %s' % err)
             return {'CANCELLED'}
 
     @classmethod

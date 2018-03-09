@@ -24,7 +24,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 #
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from .. import import_bindings_module
 
 if not 'PYLUX_AVAILABLE' in locals():
@@ -139,16 +139,16 @@ if not 'PYLUX_AVAILABLE' in locals():
             Custom_Context.saveEXR = saveEXR
 
             def portalInstance(self, name):
-                LuxLog('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
+                PBRTv3Log('WARNING: Exporting PortalInstance as ObjectInstance; Portal will not be effective')
                 self.objectInstance(name)
 
             Custom_Context.portalInstace = portalInstance
 
         PYLUX_AVAILABLE = True
-        LuxLog('Using pylux version %s' % PBRTv3_VERSION)
+        PBRTv3Log('Using pylux version %s' % PBRTv3_VERSION)
 
     except ImportError as err:
-        LuxLog('WARNING: Binary pylux module not available! Visit '
+        PBRTv3Log('WARNING: Binary pylux module not available! Visit '
                'http://www.luxrender.net/ to obtain one for your system.')
-        LuxLog('(ImportError was: %s)' % err)
+        PBRTv3Log('(ImportError was: %s)' % err)
         PYLUX_AVAILABLE = False

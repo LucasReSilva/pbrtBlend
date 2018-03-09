@@ -29,7 +29,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO
 
 from .. import PBRTv3Addon
 from ..export import ParamSet
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from ..outputs.pure_api import PBRTv3_VERSION
 # from .engine import check_renderer_settings
 
@@ -1039,7 +1039,7 @@ class pbrtv3_integrator(declarative_property_group):
             #Check each integrator seperately so they don't mess with each other!
             if self.surfaceintegrator == 'bidirectional':
                 if self.lightstrategy != ('one'):
-                    LuxLog('Incompatible light strategy for Hybrid Bidir (switching to "one uniform").')
+                    PBRTv3Log('Incompatible light strategy for Hybrid Bidir (switching to "one uniform").')
                     #					raise Exception('Incompatible render settings')
 
         hybrid_compat = scene.pbrtv3_rendermode.renderer == 'hybrid' and self.surfaceintegrator == 'bidirectional'
@@ -1047,7 +1047,7 @@ class pbrtv3_integrator(declarative_property_group):
         # Exphotonmap is not compatible with light groups, warn here instead of light export code so
         # this warning only shows once instead of per lamp
         if not scene.pbrtv3_lightgroups.ignore and self.surfaceintegrator == 'exphotonmap':
-            LuxLog('WARNING: Ex. Photon Map does not support light groups, exporting all lights in the default group.')
+            PBRTv3Log('WARNING: Ex. Photon Map does not support light groups, exporting all lights in the default group.')
 
         # Warn about multi volume integrator and homogeneous exterior
         if scene.pbrtv3_world.default_exterior_volume:
@@ -1056,7 +1056,7 @@ class pbrtv3_integrator(declarative_property_group):
             for volume in scene.pbrtv3_volumes.volumes:
                 if volume.name == ext_v and volume.type == 'homogeneous' and \
                                 scene.pbrtv3_volumeintegrator.volumeintegrator == 'multi':
-                    LuxLog('Warning: Default exterior volume is homogeneous, and the "multi" volume integrator is \
+                    PBRTv3Log('Warning: Default exterior volume is homogeneous, and the "multi" volume integrator is \
                     selected! Performance may be poor, consider using the "single" volume integrator instead')
 
         # Safety checks for settings end here

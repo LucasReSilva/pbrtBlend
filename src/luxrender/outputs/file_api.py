@@ -30,7 +30,7 @@ import bpy
 
 from ..extensions_framework import util as efutil
 
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import ExportedVolumes
 
@@ -349,11 +349,11 @@ class Custom_Context(object):
             self.wf(Files.MAIN, 'WorldEnd')
 
         # Close files
-        LuxLog('Wrote scene files')
+        PBRTv3Log('Wrote scene files')
         for f in self.files:
             if f is not None:
                 f.close()
-                LuxLog(' %s' % f.name)
+                PBRTv3Log(' %s' % f.name)
 
         # Reset the volume redundancy check
         ExportedVolumes.reset_vol_list()

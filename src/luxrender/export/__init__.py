@@ -30,7 +30,7 @@ import bpy, mathutils
 
 from ..extensions_framework import util as efutil
 
-from ..outputs import LuxManager, LuxLog
+from ..outputs import LuxManager, PBRTv3Log
 from ..util import bencode_file2string_with_size
 
 
@@ -51,7 +51,7 @@ class ExportProgressThread(efutil.TimerThread):
         if self.exported_objects != self.last_update:
             self.last_update = self.exported_objects
             pc = int(100 * self.exported_objects / self.total_objects)
-            LuxLog(self.message % pc)
+            PBRTv3Log(self.message % pc)
 
 
 class ExportCache(object):

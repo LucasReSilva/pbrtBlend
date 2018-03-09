@@ -40,7 +40,7 @@ from ..export import geometry        as export_geometry
 from ..export import volumes        as export_volumes
 from ..export import fix_matrix_order
 from ..export import is_obj_visible
-from ..outputs import LuxManager, LuxLog
+from ..outputs import LuxManager, PBRTv3Log
 from ..outputs.file_api import Files
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
@@ -73,7 +73,7 @@ class SceneExporter(object):
         return self
 
     def report(self, type, message):
-        LuxLog('%s: %s' % ('|'.join([('%s' % i).upper() for i in type]), message))
+        PBRTv3Log('%s: %s' % ('|'.join([('%s' % i).upper() for i in type]), message))
 
     def object_is_lit(self, GE, obj):
 

@@ -28,7 +28,7 @@ import re
 import bpy
 
 from collections import Iterable
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from .. import import_bindings_module
 
 PREFIX_MATERIALS = 'scene.materials'
@@ -97,11 +97,11 @@ if not 'PYLUXCORE_AVAILABLE' in locals():
         LUXCORE_VERSION = pyluxcore.Version()
 
         PYLUXCORE_AVAILABLE = True
-        LuxLog('Using pyluxcore version %s' % LUXCORE_VERSION)
+        PBRTv3Log('Using pyluxcore version %s' % LUXCORE_VERSION)
 
     except ImportError as err:
-        LuxLog('WARNING: Binary pyluxcore module not available! Visit '
+        PBRTv3Log('WARNING: Binary pyluxcore module not available! Visit '
                'http://www.luxrender.net/ to obtain one for your system.')
-        LuxLog('(ImportError was: %s)' % err)
+        PBRTv3Log('(ImportError was: %s)' % err)
         pyluxcore = None
         PYLUXCORE_AVAILABLE = False

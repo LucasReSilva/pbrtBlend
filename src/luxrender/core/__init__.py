@@ -50,7 +50,7 @@ from ..export import get_output_filename, get_worldscale
 from ..export.scene import SceneExporter
 from ..export.volumes import SmokeCache
 from ..outputs import LuxManager, LuxFilmDisplay
-from ..outputs import LuxLog
+from ..outputs import PBRTv3Log
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..outputs.luxcore_api import ToValidLuxCoreName
 from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
@@ -97,7 +97,7 @@ def _register_elm(elm, required=False):
         elm.COMPAT_ENGINES.add('PBRTv3_RENDER')
     except:
         if required:
-            LuxLog('Failed to add PBRTv3 to ' + elm.__name__)
+            PBRTv3Log('Failed to add PBRTv3 to ' + elm.__name__)
 
 # Add standard Blender Interface elements
 _register_elm(bl_ui.properties_render.RENDER_PT_render, required=True)
@@ -473,7 +473,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         with RENDERENGINE_luxrender.render_lock:  # just render one thing at a time
             if scene is None:
-                LuxLog('ERROR: Scene to render is not valid')
+                PBRTv3Log('ERROR: Scene to render is not valid')
                 return
 
             if UseLuxCore():
@@ -510,7 +510,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 return
 
             if scene.display_settings.display_device != "sRGB":
-                LuxLog('WARNING: Colour Management not set to sRGB, render results may look too dark.')
+                PBRTv3Log('WARNING: Colour Management not set to sRGB, render results may look too dark.')
 
             api_type, write_files = self.set_export_path(scene)
 
@@ -550,7 +550,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.render_start(scene)
 
         except Exception as err:
-            LuxLog('%s' % err)
+            PBRTv3Log('%s' % err)
             self.report({'ERROR'}, '%s' % err)
 
         os.chdir(prev_cwd)
@@ -569,7 +569,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         from ..outputs.pure_api import PYLUX_AVAILABLE
 
         if not PYLUX_AVAILABLE:
-            LuxLog('ERROR: Material previews require pylux')
+            PBRTv3Log('ERROR: Material previews require pylux')
             return
 
         from ..export import materials as export_materials
@@ -605,7 +605,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         pm = likely_materials[0]
         pt = None
-        LuxLog('Rendering material preview: %s' % pm.name)
+        PBRTv3Log('Rendering material preview: %s' % pm.name)
 
         if preview_type == 'TEXTURE':
             pt = pm.active_texture
@@ -683,7 +683,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                         interruptible_sleep(1.8)  # reduce update to every 2.0 sec until haltthreshold kills the render
 
                 preview_context.updateStatisticsWindow()
-                LuxLog('Updating preview (%ix%i - %s)' % (xres, yres,
+                PBRTv3Log('Updating preview (%ix%i - %s)' % (xres, yres,
                         preview_context.getAttribute('renderer_statistics_formatted_short', '_recommended_string')))
 
                 result = self.begin_result(0, 0, xres, yres)
@@ -700,7 +700,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Cycles tiles adaption
                 self.end_result(result, 0) if bpy.app.version > (2, 63, 17 ) else self.end_result(result)
         except Exception as exc:
-            LuxLog('Preview aborted: %s' % exc)
+            PBRTv3Log('Preview aborted: %s' % exc)
             import traceback
             traceback.print_exc()
 
@@ -840,8 +840,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             cmd_args.extend(['-L', queue_file])
 
-            LuxLog('Launching Queue: %s' % cmd_args)
-            # LuxLog(' in %s' % self.outout_dir)
+            PBRTv3Log('Launching Queue: %s' % cmd_args)
+            # PBRTv3Log(' in %s' % self.outout_dir)
             pbrtv3_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
     def append_lux_binary_name(self, scene, pbrtv3_path, binary_name):
@@ -849,7 +849,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             # Get binary from OSX bundle
             pbrtv3_path += 'PBRTv3.app/Contents/MacOS/%s' % binary_name
             if not os.path.exists(pbrtv3_path):
-                LuxLog('PBRTv3 not found at path: %s' % pbrtv3_path, ', trying default PBRTv3 location')
+                PBRTv3Log('PBRTv3 not found at path: %s' % pbrtv3_path, ', trying default PBRTv3 location')
                 pbrtv3_path = '/Applications/PBRTv3/PBRTv3.app/Contents/MacOS/%s' % \
                                  binary_name  # try fallback to default installation path
         elif sys.platform == 'win32':
@@ -929,7 +929,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             for k, v in config_updates.items():
                 efutil.write_config_value('luxrender', 'defaults', k, v)
         except Exception as err:
-            LuxLog('WARNING: Saving PBRTv3 config failed, please set your user scripts dir: %s' % err)
+            PBRTv3Log('WARNING: Saving PBRTv3 config failed, please set your user scripts dir: %s' % err)
 
         return cmd_args
 
@@ -959,7 +959,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # Begin rendering
         if start_rendering:
-            LuxLog('Starting PBRTv3')
+            PBRTv3Log('Starting PBRTv3')
             if internal:
 
                 self.LuxManager.lux_context.logVerbosity(scene.pbrtv3_engine.log_verbosity)
@@ -998,8 +998,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 cmd_args.append(fn.replace('//', '/'))
 
-                LuxLog('Launching: %s' % cmd_args)
-                # LuxLog(' in %s' % self.outout_dir)
+                PBRTv3Log('Launching: %s' % cmd_args)
+                # PBRTv3Log(' in %s' % self.outout_dir)
                 pbrtv3_process = subprocess.Popen(cmd_args, cwd=self.output_dir)
 
                 if not (
@@ -1342,7 +1342,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if buffer_id != -1:
             message += ' ID: ' + str(buffer_id)
         self.update_stats('Importing AOV passes into Blender...', message)
-        LuxLog('Importing AOV ' + message)
+        PBRTv3Log('Importing AOV ' + message)
 
         # raw channel buffer
         channel_buffer = array.array(arrayType, [arrayInitValue] * (filmWidth * filmHeight * arrayDepth))
@@ -1543,7 +1543,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
-            LuxLog('ERROR: LuxCore rendering requires pyluxcore')
+            PBRTv3Log('ERROR: LuxCore rendering requires pyluxcore')
             self.report({'ERROR'}, 'LuxCore rendering requires pyluxcore')
             return
         from ..outputs.luxcore_api import pyluxcore
@@ -1581,7 +1581,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             luxcore_session = pyluxcore.RenderSession(luxcore_config)
             # Start the rendering
-            LuxLog('Starting the rendering process...')
+            PBRTv3Log('Starting the rendering process...')
             luxcore_session.Start()
 
             # Print a summary of errors that happened during export, if there are any
@@ -1624,7 +1624,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             else:
                 # Magic formula to compute optimal display interval (found through testing)
                 display_interval = float(filmWidth * filmHeight) / 852272.0 * 1.1
-                LuxLog('Set initial display interval to %.1fs' % display_interval)
+                PBRTv3Log('Set initial display interval to %.1fs' % display_interval)
 
             # Cache imagepipeline settings to detect changes
             session_props = luxcore_exporter.convert_imagepipeline()
@@ -1673,7 +1673,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Use user-defined display interval after the first 15 seconds
                 if time_since_start > 15.0 and display_interval != imagepipeline_settings.displayinterval:
                     display_interval = imagepipeline_settings.displayinterval
-                    LuxLog('Set display interval to %.1fs' % display_interval)
+                    PBRTv3Log('Set display interval to %.1fs' % display_interval)
 
                 # Update statistics
                 if not luxcore_session.IsInPause():
@@ -1693,7 +1693,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     self.end_result(result)
                     last_image_display = now
 
-            LuxLog('Ending the rendering process...')
+            PBRTv3Log('Ending the rendering process...')
             luxcore_session.Stop()
 
             # Get the final result
@@ -1704,16 +1704,16 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 if scene.pbrtv3_channels.saveToDisk:
                     output_path = efutil.filesystem_path(scene.render.filepath)
                     self.update_stats('Saving AOV passes to disk', 'Output path: ' + str(output_path))
-                    LuxLog('Saving AOV passes to disk, output path: ' + str(output_path))
+                    PBRTv3Log('Saving AOV passes to disk, output path: ' + str(output_path))
                     luxcore_session.GetFilm().Save()
 
                 if scene.pbrtv3_channels.import_into_blender:
                     self.import_aov_channels(scene, luxcore_session, filmWidth, filmHeight, result.layers[0].passes)
 
             self.end_result(result)
-            LuxLog('Done.\n')
+            PBRTv3Log('Done.\n')
         except Exception as exc:
-            LuxLog('Rendering aborted: %s' % exc)
+            PBRTv3Log('Rendering aborted: %s' % exc)
             self.report({'ERROR'}, str(exc))
             import traceback
 
@@ -1882,7 +1882,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         channelCalcTime = time.time() - channelCalcStartTime
         if channelCalcTime > 0.1:
-            LuxLog('AOV import took %.1f seconds' % channelCalcTime)
+            PBRTv3Log('AOV import took %.1f seconds' % channelCalcTime)
 
     cached_preview_properties = ''
 
@@ -1930,7 +1930,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def luxcore_render_preview(self, scene):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
-            LuxLog('ERROR: LuxCore preview rendering requires pyluxcore')
+            PBRTv3Log('ERROR: LuxCore preview rendering requires pyluxcore')
             return
         from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore.materialpreview import MaterialPreviewExporter
@@ -1975,7 +1975,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             # Start the rendering
             thumbnail_info = '(thumbnail)' if is_thumbnail else ''
-            LuxLog('Starting', preview_type, 'preview render', thumbnail_info)
+            PBRTv3Log('Starting', preview_type, 'preview render', thumbnail_info)
             startTime = time.time()
             luxcore_session.Start()
 
@@ -2003,9 +2003,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             update_result(luxcore_session, imageBufferFloat, filmWidth, filmHeight)
 
             luxcore_session.Stop()
-            LuxLog('Preview render done (%.2fs)' % (time.time() - startTime))
+            PBRTv3Log('Preview render done (%.2fs)' % (time.time() - startTime))
         except Exception as exc:
-            LuxLog('Rendering aborted: %s' % exc)
+            PBRTv3Log('Rendering aborted: %s' % exc)
             import traceback
 
             traceback.print_exc()
@@ -2078,7 +2078,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
-            LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
+            PBRTv3Log('ERROR: LuxCore real-time rendering requires pyluxcore')
             return
 
         stop_redraw = False
@@ -2301,7 +2301,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 self.lastSessionSettings = newSessionSettings
 
         except Exception as exc:
-            LuxLog('Update check failed: %s' % exc)
+            PBRTv3Log('Update check failed: %s' % exc)
             self.report({'ERROR'}, str(exc))
             import traceback
             traceback.print_exc()
@@ -2311,7 +2311,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
     def luxcore_view_update(self, context, update_changes=None):
         # LuxCore libs
         if not PYLUXCORE_AVAILABLE:
-            LuxLog('ERROR: LuxCore real-time rendering requires pyluxcore')
+            PBRTv3Log('ERROR: LuxCore real-time rendering requires pyluxcore')
             return
 
         if self.test_break() or context.scene.luxcore_rendering_controls.pause_viewport_render:
@@ -2380,7 +2380,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # Export the Blender scene
                 luxcore_config = self.luxcore_exporter.convert(self.viewFilmWidth, self.viewFilmHeight)
                 if luxcore_config is None:
-                    LuxLog('ERROR: not a valid luxcore config')
+                    PBRTv3Log('ERROR: not a valid luxcore config')
                     return
 
                 LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
@@ -2391,7 +2391,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # This flag is used to prevent the luxcore_draw() function from crashing Blender
                 self.critical_errors = True
 
-                LuxLog('View update aborted: %s' % exc)
+                PBRTv3Log('View update aborted: %s' % exc)
                 # Show error message to user in the viewport UI
                 self.update_stats('Error: ', str(exc))
 
@@ -2401,7 +2401,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         else:
             # config update
             if update_changes.cause_config:
-                LuxLog('Configuration update')
+                PBRTv3Log('Configuration update')
 
                 if context.scene.camera:
                     self.transparent_film = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film
@@ -2421,7 +2421,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # change config
                 luxcore_config.Parse(self.luxcore_exporter.config_properties)
                 if luxcore_config is None:
-                    LuxLog('ERROR: not a valid luxcore config')
+                    PBRTv3Log('ERROR: not a valid luxcore config')
                     return
 
                 LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
@@ -2433,22 +2433,22 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 LuxCoreSessionManager.begin_scene_edit(self.space)
 
                 if update_changes.cause_camera:
-                    LuxLog('Camera update')
+                    PBRTv3Log('Camera update')
                     self.luxcore_exporter.convert_camera()
 
                 if update_changes.cause_materials:
-                    LuxLog('Materials update')
+                    PBRTv3Log('Materials update')
                     for material in update_changes.changed_materials:
                         self.luxcore_exporter.convert_material(material)
 
                 if update_changes.cause_mesh:
                     for ob in update_changes.changed_objects_mesh:
-                        LuxLog('Mesh update: ' + ob.name)
+                        PBRTv3Log('Mesh update: ' + ob.name)
                         self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=True, update_material=False)
 
                 if update_changes.cause_light or update_changes.cause_objectTransform:
                     for ob in update_changes.changed_objects_transform:
-                        LuxLog('Transformation update: ' + ob.name)
+                        PBRTv3Log('Transformation update: ' + ob.name)
 
                         self.luxcore_exporter.convert_object(ob, luxcore_scene, update_mesh=False, update_material=False)
 
@@ -2508,7 +2508,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
-        LuxLog('Dynamic updates: update took %dms' % view_update_time)
+        PBRTv3Log('Dynamic updates: update took %dms' % view_update_time)
 
         self.last_update_time = time.time()
 

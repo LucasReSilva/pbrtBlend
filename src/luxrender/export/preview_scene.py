@@ -30,7 +30,7 @@ from ..export import ParamSet
 from ..export.geometry import GeometryExporter
 from ..export.materials import ExportedTextures, convert_texture, get_material_volume_defs, get_preview_flip, \
     get_preview_zoom
-from ..outputs import LuxLog, LuxManager
+from ..outputs import PBRTv3Log, LuxManager
 from ..outputs.pure_api import PBRTv3_VERSION
 from ..properties import find_node
 from ..properties.node_material import pbrtv3_texture_maker
@@ -66,7 +66,7 @@ def export_preview_texture(lux_context, texture):
         ExportedTextures.texture(lux_context, texture_name, 'color', 'mix', mix_params)
 
     elif lux_tex_variant != 'color':
-        LuxLog('WARNING: Texture %s is wrong variant; needed %s, got %s' % (texture_name, 'color', lux_tex_variant))
+        PBRTv3Log('WARNING: Texture %s is wrong variant; needed %s, got %s' % (texture_name, 'color', lux_tex_variant))
 
     return texture_name
 
