@@ -77,7 +77,7 @@ def add_common_sockets(node):
     Add sockets shared by all material nodes
     """
     node.inputs.new('pbrtv3_TF_bump_socket', 'Bump')
-    # LuxCore only transparency property
+    # PBRTv3Core only transparency property
     node.inputs.new('pbrtv3_transparency_socket', 'Opacity')
 
     node.outputs.new('NodeSocketShader', 'Surface')
@@ -341,7 +341,7 @@ class pbrtv3_material_type_node_doubleside(pbrtv3_material_node):
 
         return make_material(mat_type, self.name, doubleside_params)
 
-    # TODO: add LuxCore support once supported by LuxCore
+    # TODO: add PBRTv3Core support once supported by PBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class
@@ -438,8 +438,8 @@ class pbrtv3_material_type_node_glass(pbrtv3_material_node):
         row.enabled = has_interior_volume(self)
         row.prop(self, 'use_volume_ior')
 
-        # None of the advanced options work in LuxCore
-        if not UseLuxCore():
+        # None of the advanced options work in PBRTv3Core
+        if not UsePBRTv3Core():
             layout.prop(self, 'advanced', toggle=True)
 
             if self.advanced:
@@ -593,8 +593,8 @@ class pbrtv3_material_type_node_glossy(pbrtv3_material_node):
     def init(self, context):
         self.inputs.new('pbrtv3_TC_Kd_socket', 'Diffuse Color')
         self.inputs.new('pbrtv3_TF_sigma_socket', 'Sigma')
-        if UseLuxCore():
-            self.inputs['Sigma'].enabled = False # not supported by LuxCore
+        if UsePBRTv3Core():
+            self.inputs['Sigma'].enabled = False # not supported by PBRTv3Core
         self.inputs.new('pbrtv3_TC_Ks_socket', 'Specular Color')
         self.inputs.new('pbrtv3_TF_ior_socket', 'IOR')
         self.inputs['IOR'].enabled = False  # initial state is disabled
@@ -720,7 +720,7 @@ class pbrtv3_material_type_node_glossycoating(pbrtv3_material_node):
             layout.prop(self, 'use_ior')
 
         if not self.inputs['Base Material'].is_linked:
-            icon = 'INFO' if UseLuxCore() else 'ERROR' # In classic API, glossycoating will not export without base
+            icon = 'INFO' if UsePBRTv3Core() else 'ERROR' # In classic API, glossycoating will not export without base
             layout.label('Select a base material!', icon=icon)
 
     def export_material(self, make_material, make_texture):
@@ -1243,7 +1243,7 @@ class pbrtv3_material_type_node_metal2(pbrtv3_material_node):
         layout.prop(self, 'use_anisotropy')
         layout.prop(self, 'input_type', expand=True)
 
-        if not UseLuxCore() and self.input_type == 'color':
+        if not UsePBRTv3Core() and self.input_type == 'color':
             layout.label('Classic only supports fresnel!', icon='ERROR')
 
     def export_material(self, make_material, make_texture):
@@ -1269,7 +1269,7 @@ class pbrtv3_material_type_node_metal2(pbrtv3_material_node):
                 fresnel_texture = self.inputs['Fresnel'].export_luxcore(properties)
             else:
                 print('Warning: Metal2 node "%s" is in fresnel mode, but no fresnel texture is connected' % self.name)
-                # Use a black color to signal that nothing is connected, but LuxCore is still able to render
+                # Use a black color to signal that nothing is connected, but PBRTv3Core is still able to render
                 fresnel_texture = create_luxcore_name(self, suffix='fresnelcolor')
                 set_prop_tex(properties, fresnel_texture, 'type', 'fresnelcolor')
                 set_prop_tex(properties, fresnel_texture, 'kr', [0, 0, 0])
@@ -1345,7 +1345,7 @@ class pbrtv3_material_type_node_mix(pbrtv3_material_node):
         # OpenCL or CPU?
         enginesettings = context.scene.luxcore_enginesettings
 
-        if UseLuxCore() and (enginesettings.device == 'OCL' or enginesettings.device_preview == 'OCL'):
+        if UsePBRTv3Core() and (enginesettings.device == 'OCL' or enginesettings.device_preview == 'OCL'):
             mix_mats = [get_linked_node(self.inputs[1]), get_linked_node(self.inputs[2])]
             submats_have_bump = False
             for mat in mix_mats:
@@ -1412,7 +1412,7 @@ class pbrtv3_material_type_node_null(pbrtv3_material_node):
         self.outputs.new('NodeSocketShader', 'Surface')
 
     def draw_buttons(self, context, layout):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.label('Color not supported in Classic API', icon='ERROR')
 
     def export_material(self, make_material, make_texture):
@@ -1678,7 +1678,7 @@ class pbrtv3_light_area_node(pbrtv3_material_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'gain')
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop_search(self, 'lightgroup', context.scene.pbrtv3_lightgroups, 'lightgroups',
                                'Lightgroup', icon='OUTLINER_OB_LAMP')
 
@@ -1688,12 +1688,12 @@ class pbrtv3_light_area_node(pbrtv3_material_node):
             layout.prop(self, 'power')
             layout.prop(self, 'efficacy')
 
-            if UseLuxCore():
+            if UsePBRTv3Core():
                 layout.prop(self, 'theta')
 
             layout.prop(self, 'iesname')
 
-            if UseLuxCore():
+            if UsePBRTv3Core():
                 layout.prop(self, 'luxcore_samples')
             else:
                 layout.prop(self, 'importance')
@@ -1820,7 +1820,7 @@ class pbrtv3_material_output_node(pbrtv3_node):
         if not self.exterior_volume and default_exterior:
             layout.label('Using default: "%s"' % default_exterior, icon='INFO')
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop(self, 'is_shadow_catcher')
             if self.is_shadow_catcher:
                 layout.prop(self, 'sc_onlyinfinitelights')
@@ -1865,7 +1865,7 @@ class pbrtv3_material_output_node(pbrtv3_node):
             if group.create_BY_MATERIAL_ID and blender_scene.pbrtv3_channels.enable_aovs:
                 luxcore_exporter.config_exporter.convert_channel('BY_MATERIAL_ID', group.id)
 
-        # Export advanced LuxCore material settings
+        # Export advanced PBRTv3Core material settings
         set_prop_mat(properties, luxcore_name, 'samples', self.samples)
         set_prop_mat(properties, luxcore_name, 'visibility.indirect.diffuse.enable',
                      self.visibility_indirect_diffuse_enable)

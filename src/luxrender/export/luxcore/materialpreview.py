@@ -30,7 +30,7 @@ from mathutils import Matrix
 from ...outputs.luxcore_api import pyluxcore
 from ...export import matrix_to_list
 
-from . import LuxCoreExporter
+from . import PBRTv3CoreExporter
 from .utils import get_elem_key
 
 
@@ -57,7 +57,7 @@ class MaterialPreviewExporter(object):
         strands_settings.hair_size = 0.05
         strands_settings.tesseltype = 'solid'
 
-        luxcore_exporter = LuxCoreExporter(self.blender_scene, self.renderengine, is_material_preview=True)
+        luxcore_exporter = PBRTv3CoreExporter(self.blender_scene, self.renderengine, is_material_preview=True)
 
         # Create scene
         image_scale = self.blender_scene.luxcore_scenesettings.imageScale / 100.0

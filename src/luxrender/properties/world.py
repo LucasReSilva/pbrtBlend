@@ -35,7 +35,7 @@ from .. import PBRTv3Addon
 from ..export import ParamSet
 from ..export.materials import ExportedTextures
 from ..outputs.pure_api import PBRTv3_VERSION
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from ..outputs.luxcore_api import ScenePrefix
 from ..properties.material import texture_append_visibility
 from ..properties.texture import (
@@ -209,9 +209,9 @@ class pbrtv3_volume_data(declarative_property_group):
             'stepsize': {'type': 'heterogeneous'},
             'depth': O([A([{'type': 'clear'}, {'absorption_usecolortexture': False}]),
                         A([{'type': O(['homogeneous', 'heterogeneous'])}, {'sigma_a_usecolortexture': False}])]),
-            'priority': lambda: UseLuxCore(),
-            'multiscattering': A([{'type': O(['homogeneous', 'heterogeneous'])}, lambda: UseLuxCore()]),
-            'gain': A([{'use_emission': True}, lambda: UseLuxCore()])
+            'priority': lambda: UsePBRTv3Core(),
+            'multiscattering': A([{'type': O(['homogeneous', 'heterogeneous'])}, lambda: UsePBRTv3Core()]),
+            'gain': A([{'use_emission': True}, lambda: UsePBRTv3Core()])
         },
         TFR_IOR.visibility,
         TC_absorption.visibility,
@@ -334,7 +334,7 @@ class pbrtv3_volume_data(declarative_property_group):
                          'type': 'int',
                          'attr': 'priority',
                          'name': 'Volume priority',
-                         'description': '[LuxCore only] Volume priority, volumes with higher values get priority if '
+                         'description': '[PBRTv3Core only] Volume priority, volumes with higher values get priority if '
                                         'there is overlap',
                          'default': 0,
                          'min': 0,
@@ -345,7 +345,7 @@ class pbrtv3_volume_data(declarative_property_group):
                          'type': 'bool',
                          'attr': 'multiscattering',
                          'name': 'Multiscattering',
-                         'description': '[LuxCore only] Compute multiple scattering events in this volume (recommended '
+                         'description': '[PBRTv3Core only] Compute multiple scattering events in this volume (recommended '
                                         'for volumes with high scattering scale)',
                          'default': False,
                          'save_in_preset': True
@@ -354,7 +354,7 @@ class pbrtv3_volume_data(declarative_property_group):
                          'type': 'bool',
                          'attr': 'use_emission',
                          'name': 'Light Emitter',
-                         'description': '[LuxCore only] Volume light emission (e.g. for fire)',
+                         'description': '[PBRTv3Core only] Volume light emission (e.g. for fire)',
                          'default': False,
                          'save_in_preset': True
                      },
@@ -365,7 +365,7 @@ class pbrtv3_volume_data(declarative_property_group):
                          'type': 'float',
                          'attr': 'gain',
                          'name': 'Gain',
-                         'description': '[LuxCore only] Multiplier for the emission color',
+                         'description': '[PBRTv3Core only] Multiplier for the emission color',
                          'default': 1.0,
                          'min': 0.00001,
                          'soft_min': 0.00001,
@@ -758,7 +758,7 @@ class pbrtv3_lightgroup_data(declarative_property_group):
             'soft_max': 10 ** 6,
             'step': 1000,
         },
-        # Additional LuxCore properties of lightgroups
+        # Additional PBRTv3Core properties of lightgroups
         {
             'type': 'bool',
             'attr': 'use_temperature',
@@ -834,7 +834,7 @@ class pbrtv3_lightgroups(declarative_property_group):
             'description': 'Combine all light groups into one. Enable this for final renders, or to decrease RAM usage',
             'default': False
         },
-        # Properties of the default lightgroup (LuxCore only)
+        # Properties of the default lightgroup (PBRTv3Core only)
         {
             'type': 'bool',
             'attr': 'lg_enabled',
@@ -1023,7 +1023,7 @@ class pbrtv3_materialgroups(declarative_property_group):
 @PBRTv3Addon.addon_register_class
 class pbrtv3_channels(declarative_property_group):
     """
-    Storage class for LuxCore AOVs
+    Storage class for PBRTv3Core AOVs
     """
 
     ef_attach_to = ['Scene']

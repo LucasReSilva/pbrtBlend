@@ -70,7 +70,7 @@ class ConfigExporter(object):
 
     def convert_channel(self, channelName, id=-1, lightgroup_name=''):
         """
-        Sets configuration properties for LuxCore AOV output
+        Sets configuration properties for PBRTv3Core AOV output
         """
         if channelName in self.luxcore_exporter.passes_cache:
             return
@@ -139,7 +139,7 @@ class ConfigExporter(object):
     def get_engine(self):
         """
         Create the final renderengine string from the general type setting ('PATH', 'TILEPATH' etc.) and the device type
-        :return: LuxCore renderengine string ('PATHOCL', 'PATHCPU' etc.)
+        :return: PBRTv3Core renderengine string ('PATHOCL', 'PATHCPU' etc.)
         """
         engine_settings = self.blender_scene.luxcore_enginesettings
         engine = engine_settings.renderengine_type
@@ -170,7 +170,7 @@ class ConfigExporter(object):
         engine_settings = self.blender_scene.luxcore_enginesettings
 
         if engine_settings.use_animated_seed:
-            # frame_current can be 0, but not negative, while LuxCore seed can only be > 1
+            # frame_current can be 0, but not negative, while PBRTv3Core seed can only be > 1
             seed = self.blender_scene.frame_current + 1
         else:
             seed = engine_settings.seed
@@ -215,7 +215,7 @@ class ConfigExporter(object):
     
     
     def __convert_accelerator(self):
-        # The optimal accelerator settings are chosen by LuxCore automatically, so we let the user decide only
+        # The optimal accelerator settings are chosen by PBRTv3Core automatically, so we let the user decide only
         # if instancing should be allowed or not
         engine_settings = self.blender_scene.luxcore_enginesettings
         self.properties.Set(pyluxcore.Property('accelerator.instances.enable', engine_settings.instancing))

@@ -34,7 +34,7 @@ from ..outputs.luxcore_api import ScenePrefix
 @PBRTv3Addon.addon_register_class
 class luxcore_lamp(declarative_property_group):
     """
-    Storage class for LuxCore lamp settings.
+    Storage class for PBRTv3Core lamp settings.
     """
 
     ef_attach_to = ['pbrtv3_lamp']

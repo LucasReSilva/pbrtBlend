@@ -109,12 +109,12 @@ class pbrtv3_rendermode(declarative_property_group):
                 ('sppm', 'SPPM (Experimental)', 'Stochastic progressive photon mapping integrator'),
                 # ('hybridbidir', 'Hybrid Bidirectional', 'Experimental OpenCL-acclerated bidirectional path tracer'),
                 ('hybridpath', 'Hybrid Path', 'OpenCL-accelerated simple (eye-only) path tracer'),
-                ('luxcorepath', 'LuxCore Path', 'Experimental path tracer'),
-                ('luxcorepathocl', 'LuxCore Path OpenCL', 'Experimental pure OpenCL path tracer'),
-                ('luxcorebiaspath', 'LuxCore Biased Path', 'Experimental biased path tracer'),
-                ('luxcorebiaspathocl', 'LuxCore Biased Path OpenCL', 'Experimental pure OpenCL biased path tracer'),
-                ('luxcorebidir', 'LuxCore Bidir', 'Experimental bidirectional integrator'),
-                ('luxcorebidirvcm', 'LuxCore BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
+                ('luxcorepath', 'PBRTv3Core Path', 'Experimental path tracer'),
+                ('luxcorepathocl', 'PBRTv3Core Path OpenCL', 'Experimental pure OpenCL path tracer'),
+                ('luxcorebiaspath', 'PBRTv3Core Biased Path', 'Experimental biased path tracer'),
+                ('luxcorebiaspathocl', 'PBRTv3Core Biased Path OpenCL', 'Experimental pure OpenCL biased path tracer'),
+                ('luxcorebidir', 'PBRTv3Core Bidir', 'Experimental bidirectional integrator'),
+                ('luxcorebidirvcm', 'PBRTv3Core BidirVCM', 'Experimental bidirectional/vertex merging integrator'),
             ],
             'update': update_rendering_mode,
             'save_in_preset': True
@@ -123,7 +123,7 @@ class pbrtv3_rendermode(declarative_property_group):
             'type': 'string',
             'attr': 'luxcore_custom_properties',
             'name': 'Custom properties',
-            'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
+            'description': 'PBRTv3Core custom properties (separated by \'|\', suggested only for advanced users)',
             'default': '',
             'save_in_preset': True
         },  # This parameter is fed to the "renderer' context, and holds the actual
@@ -138,7 +138,7 @@ class pbrtv3_rendermode(declarative_property_group):
                 ('sampler', 'Sampler (traditional CPU)', 'sampler'),
                 ('hybrid', 'Hybrid (CPU+GPU)', 'hybrid'),
                 ('sppm', 'SPPM (CPU)', 'sppm'),
-                ('luxcore', 'LuxCore Renderer (GPU)', 'luxcore'),
+                ('luxcore', 'PBRTv3Core Renderer (GPU)', 'luxcore'),
             ],  # 'update': lambda s,c: check_renderer_settings(c),
             'save_in_preset': True
         },
@@ -273,7 +273,7 @@ class pbrtv3_rendermode(declarative_property_group):
                 renderer_params.add_string('opencl.devices.select', dev_string if '1' in dev_string else "") # blank
 
         if self.renderer in ['luxcore']:
-            # LuxCoreRenderer specific parameters
+            # PBRTv3CoreRenderer specific parameters
             luxcore_use_gpu = "opencl.gpu.use = 1" if self.usegpus else "opencl.gpu.use = 0"
             luxcore_use_cpu = "opencl.cpu.use = 1" if self.usecpus else "opencl.cpu.use = 0"
             luxcore_params = '" "'.join((luxcore_use_gpu, luxcore_use_cpu))

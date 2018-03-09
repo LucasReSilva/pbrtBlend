@@ -30,7 +30,7 @@ from ... import PBRTv3Addon
 from ...properties import (find_node, find_node_input)
 from ...ui.materials import pbrtv3_material_base
 from ...operators.lrmdb import lrmdb_state
-from ...outputs.luxcore_api import UseLuxCore
+from ...outputs.luxcore_api import UsePBRTv3Core
 
 
 def cycles_panel_node_draw(layout, id_data, output_type, input_name):
@@ -307,19 +307,19 @@ class ui_pbrtv3_material_node_emit(pbrtv3_material_base):
 @PBRTv3Addon.addon_register_class
 class ui_luxcore_material(pbrtv3_material_base):
     """
-    LuxCore only settings
+    PBRTv3Core only settings
     """
 
-    bl_label = 'LuxCore Specific Settings'
+    bl_label = 'PBRTv3Core Specific Settings'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('material',), 'luxcore_material', lambda: UseLuxCore() ),
+        ( ('material',), 'luxcore_material', lambda: UsePBRTv3Core() ),
     ]
 
     @classmethod
     def poll(cls, context):
-        if context.scene.render.engine != 'PBRTv3_RENDER' or not UseLuxCore():
+        if context.scene.render.engine != 'PBRTv3_RENDER' or not UsePBRTv3Core():
             return False
         try:
             return not context.material.pbrtv3_material.nodetree

@@ -38,7 +38,7 @@ from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, PBRTv3Manager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import PBRTv3_VERSION
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 
 def CameraVolumeParameter(attr, name):
@@ -64,7 +64,7 @@ def CameraVolumeParameter(attr, name):
 
 def ArbitraryClippingPlane():
     """
-    LuxCore arbitrary clipping plane
+    PBRTv3Core arbitrary clipping plane
     The user selects an object and its rotation and location are used as clipping plane parameters
     """
     return [
@@ -132,8 +132,8 @@ class pbrtv3_camera(declarative_property_group):
         'cammblur': {'usemblur': True},
         'objectmblur': {'usemblur': True},
         'separator_after_mblur': {'usemblur': True},
-        #'enable_clipping_plane': lambda: UseLuxCore(),
-        #'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UseLuxCore()])
+        #'enable_clipping_plane': lambda: UsePBRTv3Core(),
+        #'clipping_plane_selector': A([{'enable_clipping_plane': True}, lambda: UsePBRTv3Core()])
     }
 
     properties = CameraVolumeParameter('Exterior', 'Exterior') + ArbitraryClippingPlane() + [
@@ -361,7 +361,7 @@ class pbrtv3_camera(declarative_property_group):
             'type': 'bool',
             'attr': 'enable_clipping_plane',
             'name': 'Arbitrary Clipping Plane',
-            'description': 'LuxCore only',
+            'description': 'PBRTv3Core only',
             'default': False
         },
     ]

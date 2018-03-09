@@ -29,7 +29,7 @@ import bpy, math, mathutils, os, tempfile
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export import matrix_to_list
 from ...export import get_expanded_file_name
 from ...export.volumes import SmokeCache
@@ -160,7 +160,7 @@ class TextureExporter(object):
         if self.texture.library:
             name += '_' + self.texture.library.name
 
-        self.luxcore_name = ToValidLuxCoreName(name)
+        self.luxcore_name = ToValidPBRTv3CoreName(name)
 
 
     def __convert_texture(self, name=''):
@@ -398,7 +398,7 @@ class TextureExporter(object):
             # Parameters shared by all blender textures
             ####################################################################
             if bl_texType != 'IMAGE':
-                # bright/contrast are not supported by LuxCore imagemaps
+                # bright/contrast are not supported by PBRTv3Core imagemaps
                 self.properties.Set(pyluxcore.Property(prefix + '.bright', [float(texture.intensity)]))
                 self.properties.Set(pyluxcore.Property(prefix + '.contrast', [float(texture.contrast)]))
                 self.__convert_transform(prefix, texture)
@@ -438,8 +438,8 @@ class TextureExporter(object):
                         value = values[i]
 
                         if isinstance(value, str):
-                            # LuxCore currently does not support textured values, set color to black
-                            print('WARNING: LuxCore does not support textured values in the band texture, '
+                            # PBRTv3Core currently does not support textured values, set color to black
+                            print('WARNING: PBRTv3Core does not support textured values in the band texture, '
                                   'using black color instead (texture: "%s")' % texture.name)
                             value = [0] * 3
 

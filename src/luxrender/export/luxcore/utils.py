@@ -28,7 +28,7 @@
 from  math import pi
 
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_worldscale
 
@@ -44,7 +44,7 @@ def convert_texture_channel(luxcore_exporter, properties, element_name, textured
     """
     :param luxcore_exporter: the luxcore_exporter instance of the calling texture/volume/material exporter
     :param properties: pyluxcore.Properties
-    :param element_name: name of the luxrender material/volume/texture (LuxCore name)
+    :param element_name: name of the luxrender material/volume/texture (PBRTv3Core name)
     :param textured_element: luxrender material, volume, texture or anything else with attributes that can be textured
     :param channel: name of the textured attribute, e.g. "Kd", "Ks" etc.
     :param type: "color" or "float"
@@ -100,7 +100,7 @@ def convert_param_to_luxcore_property(param):
     """
     Convert Luxrender parameters of the form
     ['float gain', 1.0]
-    to LuxCore property format
+    to PBRTv3Core property format
 
     Returns list of parsed values without type specifier
     e.g. ['gain', 1.0]
@@ -131,7 +131,7 @@ def calc_shutter(blender_scene, lux_camera_settings):
 
 
 def generate_volume_name(name):
-    return ToValidLuxCoreName(name + '_vol')
+    return ToValidPBRTv3CoreName(name + '_vol')
 
 def is_lightgroup_opencl_compatible(luxcore_exporter, lightgroup_id):
     """
@@ -149,7 +149,7 @@ class ExportedLightgroup(object):
     def __init__(self, lightgroup, id, user):
         """
         :param id: unique lightgroup index
-        :param user: LuxCore material or light EXPORTER that uses this lightgroup
+        :param user: PBRTv3Core material or light EXPORTER that uses this lightgroup
         """
         self.lightgroup = lightgroup
         self.id = id
@@ -158,7 +158,7 @@ class ExportedLightgroup(object):
     def add_user(self, user):
         """
         Add an additional user to the lightgroup
-        :param user: LuxCore material or light EXPORTER that uses this lightgroup
+        :param user: PBRTv3Core material or light EXPORTER that uses this lightgroup
         """
         self.users.append(user)
 

@@ -41,7 +41,7 @@ from ..export.materials import (
     MaterialCounter, ExportedMaterials, ExportedTextures, add_texture_parameter, get_texture_from_scene
 )
 from ..outputs import PBRTv3Manager, PBRTv3Log
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from ..util import dict_merge
 
 
@@ -1692,7 +1692,7 @@ class pbrtv3_mat_glass2(declarative_property_group):
     ]
 
     visibility = {
-        'dispersion': lambda: not UseLuxCore(),
+        'dispersion': lambda: not UsePBRTv3Core(),
     }
 
     properties = [
@@ -1765,7 +1765,7 @@ class pbrtv3_mat_roughglass(declarative_property_group):
         TF_uexponent.visibility,
         TF_vroughness.visibility,
         TF_vexponent.visibility,
-        {'dispersion': lambda: not UseLuxCore()}
+        {'dispersion': lambda: not UsePBRTv3Core()}
     )
 
     enabled = {}
@@ -3496,7 +3496,7 @@ class pbrtv3_emission(declarative_property_group):
         'importance': {'use_emission': True},
         'lightgroup_chooser': {'use_emission': True},
         'iesname': {'use_emission': True},
-        'nsamples': A([{'use_emission': True}, lambda: not UseLuxCore()]),
+        'nsamples': A([{'use_emission': True}, lambda: not UsePBRTv3Core()]),
         'L_colorlabel': {'use_emission': True},
         'L_color': {'use_emission': True},
         'L_usecolortexture': {'use_emission': True},

@@ -25,7 +25,7 @@
 # ***** END GPL LICENCE BLOCK *****
 #
 from ..extensions_framework import declarative_property_group
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 import math
 
@@ -53,7 +53,7 @@ class pbrtv3_object(declarative_property_group):
         'proxy_type': {'append_proxy': True},
         'hide_proxy_mesh': {'append_proxy': True},
         'label_unsupported_proxy': A([{'proxy_type': O(['stlmesh', 'sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
-                                      lambda: UseLuxCore()]),
+                                      lambda: UsePBRTv3Core()]),
         'use_smoothing': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'external_mesh': {'append_proxy': True, 'proxy_type': O(['plymesh', 'stlmesh'])},
         'radius': {'append_proxy': True, 'proxy_type': O(['sphere', 'cylinder', 'cone', 'disk', 'paraboloid'])},
@@ -103,7 +103,7 @@ class pbrtv3_object(declarative_property_group):
         {
             'type': 'text',
             'attr': 'label_unsupported_proxy',
-            'name': 'Only PLY meshes are supported by LuxCore',
+            'name': 'Only PLY meshes are supported by PBRTv3Core',
             'icon': 'ERROR'
         },
         {

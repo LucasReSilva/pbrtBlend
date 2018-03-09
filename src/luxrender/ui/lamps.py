@@ -28,7 +28,7 @@ import bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from .. import PBRTv3Addon
 
 narrowui = 180
@@ -133,7 +133,7 @@ class ui_pbrtv3_lamp_sun(lamps_panel):
 
                 sun_props = context.lamp.pbrtv3_lamp.pbrtv3_lamp_sun
 
-                if UseLuxCore() and 'sky' in sun_props.sunsky_type:
+                if UsePBRTv3Core() and 'sky' in sun_props.sunsky_type:
                     row = layout.row(align=True)
                     row.label('Ground Albedo:')
 
@@ -172,7 +172,7 @@ class ui_pbrtv3_lamp_area(lamps_panel):
 
     display_property_groups = [
         ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_area' ),
-        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_laser', lambda: UseLuxCore() )
+        ( ('lamp', 'pbrtv3_lamp'), 'pbrtv3_lamp_laser', lambda: UsePBRTv3Core() )
     ]
 
     @classmethod
@@ -218,25 +218,25 @@ class ui_pbrtv3_lamp_area(lamps_panel):
 @PBRTv3Addon.addon_register_class
 class ui_luxcore_lamp(lamps_panel):
     """
-    LuxCore light settings
+    PBRTv3Core light settings
     """
 
-    bl_label = 'LuxCore specific settings'
+    bl_label = 'PBRTv3Core specific settings'
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('lamp', 'pbrtv3_lamp' ), 'luxcore_lamp', lambda: UseLuxCore() )
+        ( ('lamp', 'pbrtv3_lamp' ), 'luxcore_lamp', lambda: UsePBRTv3Core() )
     ]
 
     def draw(self, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             self.layout.label("Not available with API v1.x")
 
         super().draw(context)
 
     @classmethod
     def poll(cls, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             return False
 
         return super().poll(context)

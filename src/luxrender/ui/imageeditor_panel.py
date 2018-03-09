@@ -28,7 +28,7 @@ import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore
+from ..outputs.luxcore_api import UsePBRTv3Core, pyluxcore
 from .. import PBRTv3Addon
 
 
@@ -40,7 +40,7 @@ class imageeditor_panel(property_group_renderer):
     @classmethod
     def poll(cls, context):
         engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
-        return engine_is_lux and UseLuxCore()
+        return engine_is_lux and UsePBRTv3Core()
 
 
 @PBRTv3Addon.addon_register_class
@@ -69,7 +69,7 @@ class tonemapping_panel(imageeditor_panel):
         layout = self.layout
 
         if not hasattr(pyluxcore.RenderSession, 'Parse'):
-            layout.label('Outdated LuxCore version!', icon='INFO')
+            layout.label('Outdated PBRTv3Core version!', icon='INFO')
             return
 
         if context.scene.camera is None:
@@ -181,7 +181,7 @@ class halt_conditions_panel(imageeditor_panel):
     def poll(cls, context):
         engine_is_lux = context.scene.render.engine in cls.COMPAT_ENGINES
         # Custom poll because the halt conditions of TILEPATH cannot be adjusted during the rendering
-        return engine_is_lux and UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type != 'TILEPATH'
+        return engine_is_lux and UsePBRTv3Core() and context.scene.luxcore_enginesettings.renderengine_type != 'TILEPATH'
 
     def draw(self, context):
         layout = self.layout

@@ -637,7 +637,7 @@ def read_cache(smokecache, is_high_res, amplifier, flowtype):
 
 class SmokeCache(object):
     """
-    Only needed for LuxCore export.
+    Only needed for PBRTv3Core export.
     Only speeds up viewport updates that are not related to volume updates (e.g. when a material in the scene is edited,
     this cache prevents that smoke is re-exported and pyluxcore.Properties are set just to check for volume updates.
     The really expensive operation is *not* the smoke export, but the Property setting.)

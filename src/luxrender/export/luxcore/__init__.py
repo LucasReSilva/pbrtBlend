@@ -44,7 +44,7 @@ from .volumes import VolumeExporter
 from .utils import get_elem_key, LightgroupCache, is_lightgroup_opencl_compatible, ErrorCache
 
 
-class LuxCoreExporter(object):
+class PBRTv3CoreExporter(object):
     def __init__(self, blender_scene, renderengine, is_viewport_render=False, context=None, is_material_preview=False):
         """
         Main exporter class. Only one instance should be used per rendering session.
@@ -92,7 +92,7 @@ class LuxCoreExporter(object):
 
         # If errors happen during export they are added to this cache and printed after the export completes.
         # The summary is printed in core/__init__.py in luxcore_render(), because otherwise it is drowned in a flood
-        # of LuxCore-SDL related messages.
+        # of PBRTv3Core-SDL related messages.
         self.error_cache = ErrorCache()
 
 
@@ -178,7 +178,7 @@ class LuxCoreExporter(object):
         print('Export finished (%.1fs)' % export_time)
 
         if self.blender_scene.luxcore_translatorsettings.export_type == 'luxcoreui':
-            message = 'Starting LuxCoreUI...'
+            message = 'Starting PBRTv3CoreUI...'
         elif self.config_exporter.get_engine().endswith('CPU'):
             message = 'Starting PBRTv3...'
         else:
@@ -313,7 +313,7 @@ class LuxCoreExporter(object):
 
         # Bloom
         if imagepipeline_settings.use_bloom:
-            # radius and weight are in percent (0-100) in Blender, LuxCore needs range 0..1
+            # radius and weight are in percent (0-100) in Blender, PBRTv3Core needs range 0..1
             radius = imagepipeline_settings.bloom_radius / 100
             weight = imagepipeline_settings.bloom_weight / 100
             temp_properties.Set(pyluxcore.Property(prefix + str(index) + '.type', 'BLOOM'))

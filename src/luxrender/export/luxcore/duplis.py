@@ -27,7 +27,7 @@
 
 import math, mathutils, time
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export import matrix_to_list, is_obj_visible
 
 from .objects import ObjectExporter
@@ -119,7 +119,7 @@ class DupliExporter(object):
                 continue
 
             if dupli_ob.matrix.determinant() == 0:
-                # Objects with non-invertible matrices cannot be loaded by LuxCore (RuntimeError)
+                # Objects with non-invertible matrices cannot be loaded by PBRTv3Core (RuntimeError)
                 non_invertible_count += 1
                 continue
 
@@ -184,7 +184,7 @@ class DupliExporter(object):
                 name = do.name + dupli_name_suffix
                 if do.library:
                     name += do.library.name
-                name = ToValidLuxCoreName(name)
+                name = ToValidPBRTv3CoreName(name)
 
                 transform = matrix_to_list(dm, apply_worldscale=True)
 
@@ -366,7 +366,7 @@ class DupliExporter(object):
                 total_strand_count += 1
                 total_segments_count = total_segments_count + point_count - 1
 
-        # LuxCore needs tuples, not vectors
+        # PBRTv3Core needs tuples, not vectors
         points_as_tuples = [tuple(point) for point in points]
 
         if not thicknessflag:
@@ -378,10 +378,10 @@ class DupliExporter(object):
         if not uvflag:
             uvs_as_tuples = None
         else:
-            # LuxCore needs tuples, not vectors
+            # PBRTv3Core needs tuples, not vectors
             uvs_as_tuples = [tuple(uv) for uv in uv_coords]
 
-        luxcore_shape_name = ToValidLuxCoreName(obj.name + '_' + psys.name)
+        luxcore_shape_name = ToValidPBRTv3CoreName(obj.name + '_' + psys.name)
 
         self.luxcore_exporter.renderengine.update_stats('Exporting...', 'Refining Hair System %s' % psys.name)
         # Documentation: http://www.luxrender.net/forum/viewtopic.php?f=8&t=12116&sid=03a16c5c345db3ee0f8126f28f1063c8#p112819

@@ -50,7 +50,7 @@ class pbrtv3_volume_output_node(pbrtv3_node):
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             current_vol_index = context.scene.pbrtv3_volumes.volumes_index
             if current_vol_index >= 0 and context.scene.pbrtv3_volumes.volumes:
                 current_vol = context.scene.pbrtv3_volumes.volumes[current_vol_index]
@@ -140,7 +140,7 @@ class pbrtv3_volume_type_node_homogeneous(pbrtv3_material_node):
         self.outputs.new('NodeSocketShader', 'Volume')
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop(self, 'use_multiscattering')
 
     def export_volume(self, make_volume, make_texture):
@@ -206,7 +206,7 @@ class pbrtv3_volume_type_node_heterogeneous(pbrtv3_material_node):
         self.outputs.new('NodeSocketShader', 'Volume')
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             column = layout.column(align=True)
             column.prop(self, 'stepsize')
             column.prop(self, 'max_steps')

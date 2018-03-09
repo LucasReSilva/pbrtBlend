@@ -52,9 +52,9 @@ from ..export.volumes import SmokeCache
 from ..outputs import PBRTv3Manager, LuxFilmDisplay
 from ..outputs import PBRTv3Log
 from ..outputs.pure_api import PBRTv3_VERSION
-from ..outputs.luxcore_api import ToValidLuxCoreName
-from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore, pyluxcore
-from ..export.luxcore import LuxCoreExporter
+from ..outputs.luxcore_api import ToValidPBRTv3CoreName
+from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UsePBRTv3Core, pyluxcore
+from ..export.luxcore import PBRTv3CoreExporter
 from ..export.luxcore.utils import get_elem_key
 
 # Exporter Property Groups need to be imported to ensure initialisation
@@ -194,7 +194,7 @@ if bpy.app.version > (2, 77, 2):
 # Use this example for such overrides
 # Add output format flags to output panel
 def lux_output_hints(self, context):
-    if context.scene.render.engine == 'PBRTv3_RENDER' and not UseLuxCore():
+    if context.scene.render.engine == 'PBRTv3_RENDER' and not UsePBRTv3Core():
 
         # In this mode, we don't use use the regular interval write
         pipe_mode = (context.scene.pbrtv3_engine.export_type == 'INT' and
@@ -259,12 +259,12 @@ def lux_use_alternate_matview(self, context):
     if context.scene.render.engine == 'PBRTv3_RENDER':
         row = self.layout.row()
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             row.prop(context.scene.pbrtv3_world, "preview_object_size", text="Size")
 
         row.prop(context.material.pbrtv3_material, "preview_zoom", text="Zoom")
 
-        if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
+        if context.material.preview_render_type == 'FLAT' and not UsePBRTv3Core():
             row.prop(context.material.pbrtv3_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
@@ -275,13 +275,13 @@ def lux_use_alternate_texview(self, context):
     if context.scene.render.engine == 'PBRTv3_RENDER':
         row = self.layout.row()
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             row.prop(context.scene.pbrtv3_world, "preview_object_size", text="Size")
 
         if context.material:
             row.prop(context.material.pbrtv3_material, "preview_zoom", text="Zoom")
 
-            if context.material.preview_render_type == 'FLAT' and not UseLuxCore():
+            if context.material.preview_render_type == 'FLAT' and not UsePBRTv3Core():
                 row.prop(context.material.pbrtv3_material, "mat_preview_flip_xz", text="Flip XZ")
 
 
@@ -305,12 +305,12 @@ def render_start_options(self, context):
         col = self.layout.column()
         row = self.layout.row()
 
-        if UseLuxCore() and context.scene.render.display_mode == 'WINDOW':
+        if UsePBRTv3Core() and context.scene.render.display_mode == 'WINDOW':
             col.label("Window mode can cause crashes!", icon="ERROR")
 
         col.prop(context.scene.pbrtv3_engine, "selected_pbrtv3_api", text="PBRTv3 API")
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             col.prop(context.scene.luxcore_translatorsettings, "export_type")
             if context.scene.luxcore_translatorsettings.export_type == "luxcoreui":
                 sub = col.row()
@@ -393,7 +393,7 @@ def lux_texture_chooser(self, context):
             row.label('PBRTv3 type')
             row.menu('TEXTURE_MT_pbrtv3_type', text=context.texture.pbrtv3_texture.type_label)
 
-            if UseLuxCore():
+            if UsePBRTv3Core():
                 self.layout.separator()
                 self.layout.prop(context.texture, 'use_color_ramp', text='Use Color Ramp')
                 if context.texture.use_color_ramp:
@@ -428,7 +428,7 @@ compatible("properties_data_speaker")
 def DrawButtonPause(self, context):
     scene = context.scene
 
-    if scene.render.engine == "PBRTv3_RENDER" and UseLuxCore():
+    if scene.render.engine == "PBRTv3_RENDER" and UsePBRTv3Core():
         view = context.space_data
 
         if view.viewport_shade == "RENDERED":
@@ -438,7 +438,7 @@ _register_elm(bpy.types.VIEW3D_HT_header.append(DrawButtonPause))
 
 
 def draw_button_show_imagemap_previews(self, context):
-    if context.scene.render.engine == "PBRTv3_RENDER" and UseLuxCore():
+    if context.scene.render.engine == "PBRTv3_RENDER" and UsePBRTv3Core():
         self.layout.prop(context.scene.luxcore_global, 'nodeeditor_show_imagemap_previews',
                          toggle=True,
                          icon='IMAGE_COL')
@@ -476,19 +476,19 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 PBRTv3Log('ERROR: Scene to render is not valid')
                 return
 
-            if UseLuxCore():
+            if UsePBRTv3Core():
                 self.luxcore_render(scene)
             else:
                 self.pbrtv3_render(scene)
 
     def view_update(self, context):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             self.luxcore_view_update(context)
         else:
-            self.update_stats('ERROR: Viewport rendering is only available when LuxCore API is selected!', '')
+            self.update_stats('ERROR: Viewport rendering is only available when PBRTv3Core API is selected!', '')
 
     def view_draw(self, context):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             self.luxcore_view_draw(context)
 
     ############################################################################
@@ -1055,7 +1055,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
     ############################################################################
     #
-    # LuxCore code
+    # PBRTv3Core code
     #
     ############################################################################
 
@@ -1473,7 +1473,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         draws tile outlines directly into the imageBuffer
 
         scene: Blender scene object
-        stats: LuxCore stats (from LuxCore session)
+        stats: PBRTv3Core stats (from PBRTv3Core session)
         imageBuffer: list of tuples of floats, e.g. [(r, g, b, a), ...], must be sliceable!
         """
         tile_size = scene.luxcore_enginesettings.tile_size
@@ -1541,10 +1541,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.luxcore_render_preview(scene)
             return
 
-        # LuxCore libs
+        # PBRTv3Core libs
         if not PYLUXCORE_AVAILABLE:
-            PBRTv3Log('ERROR: LuxCore rendering requires pyluxcore')
-            self.report({'ERROR'}, 'LuxCore rendering requires pyluxcore')
+            PBRTv3Log('ERROR: PBRTv3Core rendering requires pyluxcore')
+            self.report({'ERROR'}, 'PBRTv3Core rendering requires pyluxcore')
             return
         from ..outputs.luxcore_api import pyluxcore
 
@@ -1572,7 +1572,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             filmWidth, filmHeight = self.get_film_size(scene)
 
-            luxcore_exporter = LuxCoreExporter(scene, self)
+            luxcore_exporter = PBRTv3CoreExporter(scene, self)
             luxcore_config = luxcore_exporter.convert(filmWidth, filmHeight)
 
             # Maybe export was cancelled by user, don't start the rendering with an incomplete scene then
@@ -1596,7 +1596,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     pbrtv3_path = self.get_lux_binary_path(scene, 'luxcoreui')
 
                     if not os.path.exists(pbrtv3_path):
-                        self.report({'ERROR'}, 'LuxCoreUI executable not found at path "%s"' % pbrtv3_path)
+                        self.report({'ERROR'}, 'PBRTv3CoreUI executable not found at path "%s"' % pbrtv3_path)
                         return
 
                     cmd_args = [pbrtv3_path, '-o', 'render.cfg']
@@ -1928,9 +1928,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return preview_type, preview_material, preview_texture, preview_objects[0]
 
     def luxcore_render_preview(self, scene):
-        # LuxCore libs
+        # PBRTv3Core libs
         if not PYLUXCORE_AVAILABLE:
-            PBRTv3Log('ERROR: LuxCore preview rendering requires pyluxcore')
+            PBRTv3Log('ERROR: PBRTv3Core preview rendering requires pyluxcore')
             return
         from ..outputs.luxcore_api import pyluxcore
         from ..export.luxcore.materialpreview import MaterialPreviewExporter
@@ -2076,9 +2076,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         if self.critical_errors:
             return
 
-        # LuxCore libs
+        # PBRTv3Core libs
         if not PYLUXCORE_AVAILABLE:
-            PBRTv3Log('ERROR: LuxCore real-time rendering requires pyluxcore')
+            PBRTv3Log('ERROR: PBRTv3Core real-time rendering requires pyluxcore')
             return
 
         stop_redraw = False
@@ -2102,10 +2102,10 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             self.lastCameraSettings = newCameraSettings
             self.luxcore_view_update(context, update_changes)
 
-        session = LuxCoreSessionManager.get_session(self.space)
+        session = PBRTv3CoreSessionManager.get_session(self.space)
 
         # Update statistics
-        if LuxCoreSessionManager.is_session_active(self.space):
+        if PBRTv3CoreSessionManager.is_session_active(self.space):
             session.luxcore_session.UpdateStats()
             stats = session.luxcore_session.GetStats()
 
@@ -2136,7 +2136,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
         if stop_redraw:
             # Pause rendering
-            LuxCoreSessionManager.pause(self.space)
+            PBRTv3CoreSessionManager.pause(self.space)
         else:
             # Trigger another update
             self.tag_redraw()
@@ -2165,12 +2165,12 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
             self.lastVisibilitySettings = set(context.visible_objects)
 
-            if (not LuxCoreSessionManager.is_session_active(self.space) or
+            if (not PBRTv3CoreSessionManager.is_session_active(self.space) or
                     self.luxcore_exporter is None):
                 update_changes.set_cause(startViewportRender = True)
 
-                # LuxCoreExporter instance for viewport rendering is only created here
-                self.luxcore_exporter = LuxCoreExporter(context.scene, self, True, context)
+                # PBRTv3CoreExporter instance for viewport rendering is only created here
+                self.luxcore_exporter = PBRTv3CoreExporter(context.scene, self, True, context)
 
             # check if filmsize has changed
             if (self.viewFilmWidth == -1) or (self.viewFilmHeight == -1) or (
@@ -2309,9 +2309,9 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
         return update_changes
 
     def luxcore_view_update(self, context, update_changes=None):
-        # LuxCore libs
+        # PBRTv3Core libs
         if not PYLUXCORE_AVAILABLE:
-            PBRTv3Log('ERROR: LuxCore real-time rendering requires pyluxcore')
+            PBRTv3Log('ERROR: PBRTv3Core real-time rendering requires pyluxcore')
             return
 
         if self.test_break() or context.scene.luxcore_rendering_controls.pause_viewport_render:
@@ -2339,7 +2339,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
             print('Update cause unknown, skipping update', self.update_counter)
 
         elif update_changes.cause_haltconditions:
-            LuxCoreSessionManager.resume(self.space)
+            PBRTv3CoreSessionManager.resume(self.space)
 
         elif update_changes.cause_startViewportRender:
             try:
@@ -2351,11 +2351,11 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     if area.type == 'VIEW_3D':
                         for space in area.spaces:
                             if (space.type == 'VIEW_3D' and space.viewport_shade == 'RENDERED' and
-                                        space not in LuxCoreSessionManager.sessions.keys()):
+                                        space not in PBRTv3CoreSessionManager.sessions.keys()):
                                 self.space = space
                                 break
 
-                LuxCoreSessionManager.stop_luxcore_session(self.space)
+                PBRTv3CoreSessionManager.stop_luxcore_session(self.space)
 
                 if context.scene.camera:
                     self.transparent_film = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline.transparent_film
@@ -2383,8 +2383,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     PBRTv3Log('ERROR: not a valid luxcore config')
                     return
 
-                LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
-                LuxCoreSessionManager.start_luxcore_session(self.space)
+                PBRTv3CoreSessionManager.create_luxcore_session(luxcore_config, self.space)
+                PBRTv3CoreSessionManager.start_luxcore_session(self.space)
 
                 self.critical_errors = False
             except Exception as exc:
@@ -2413,8 +2413,8 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
                 self.create_view_buffer(self.viewFilmWidth, self.viewFilmHeight)
 
-                luxcore_config = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig()
-                LuxCoreSessionManager.stop_luxcore_session(self.space)
+                luxcore_config = PBRTv3CoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig()
+                PBRTv3CoreSessionManager.stop_luxcore_session(self.space)
 
                 self.luxcore_exporter.convert_config(self.viewFilmWidth, self.viewFilmHeight)
 
@@ -2424,13 +2424,13 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                     PBRTv3Log('ERROR: not a valid luxcore config')
                     return
 
-                LuxCoreSessionManager.create_luxcore_session(luxcore_config, self.space)
-                LuxCoreSessionManager.start_luxcore_session(self.space)
+                PBRTv3CoreSessionManager.create_luxcore_session(luxcore_config, self.space)
+                PBRTv3CoreSessionManager.start_luxcore_session(self.space)
 
             if update_changes.scene_edit_necessary:
                 # begin sceneEdit
-                luxcore_scene = LuxCoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig().GetScene()
-                LuxCoreSessionManager.begin_scene_edit(self.space)
+                luxcore_scene = PBRTv3CoreSessionManager.get_session(self.space).luxcore_session.GetRenderConfig().GetScene()
+                PBRTv3CoreSessionManager.begin_scene_edit(self.space)
 
                 if update_changes.cause_camera:
                     PBRTv3Log('Camera update')
@@ -2494,17 +2494,17 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
                 # parse scene changes and end sceneEdit
                 luxcore_scene.Parse(updated_properties)
 
-                LuxCoreSessionManager.end_scene_edit(self.space)
+                PBRTv3CoreSessionManager.end_scene_edit(self.space)
 
             if update_changes.cause_session:
                 # Only update the session without restarting the rendering
                 props = self.luxcore_exporter.convert_imagepipeline()
                 props.Set(self.luxcore_exporter.convert_lightgroup_scales())
 
-                LuxCoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
+                PBRTv3CoreSessionManager.get_session(self.space).luxcore_session.Parse(props)
 
             # Resume in case the session was paused
-            LuxCoreSessionManager.resume(self.space)
+            PBRTv3CoreSessionManager.resume(self.space)
 
         # report time it took to update
         view_update_time = int(round(time.time() * 1000)) - view_update_startTime
@@ -2515,7 +2515,7 @@ class RENDERENGINE_luxrender(bpy.types.RenderEngine):
 
 class Session(object):
     """
-    Wrapper for LuxCore's rendersession class.
+    Wrapper for PBRTv3Core's rendersession class.
     """
     def __init__(self, luxcore_session):
         self.luxcore_session = luxcore_session
@@ -2528,10 +2528,10 @@ class Session(object):
         return self.luxcore_session.IsInPause()
 
 
-class LuxCoreSessionManager(object):
+class PBRTv3CoreSessionManager(object):
     """
     Session manager for viewport render sessions only.
-    Provides a mapping from Blender screen spaces to their respective LuxCore session.
+    Provides a mapping from Blender screen spaces to their respective PBRTv3Core session.
     """
 
     sessions = {}
@@ -2644,13 +2644,13 @@ class LuxCoreSessionManager(object):
 
 @persistent
 def stop_viewport_render(context):
-    LuxCoreSessionManager.stop_orphaned_sessions()
+    PBRTv3CoreSessionManager.stop_orphaned_sessions()
 
     # Check registered spaces with rendersessions if they are still in RENDERED mode
-    spaces = list(LuxCoreSessionManager.sessions.keys())  # get a copy of the keys because we will modify the dict
+    spaces = list(PBRTv3CoreSessionManager.sessions.keys())  # get a copy of the keys because we will modify the dict
     for space in spaces:
         if space is not None and space.viewport_shade != 'RENDERED':
-            LuxCoreSessionManager.stop_luxcore_session(space)
+            PBRTv3CoreSessionManager.stop_luxcore_session(space)
 
 bpy.app.handlers.scene_update_post.append(stop_viewport_render)
 

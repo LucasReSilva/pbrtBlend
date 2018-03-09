@@ -35,7 +35,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_Operator as LO,
 from .. import PBRTv3Addon
 from ..export import ParamSet, get_worldscale, process_filepath_data
 from ..export.materials import add_texture_parameter, convert_texture
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from ..export.volumes import export_smoke
 from ..outputs import PBRTv3Manager
 from ..util import dict_merge, bdecode_string2file
@@ -197,7 +197,7 @@ def check_texture_variant(self, context, attr, expected_variant):
     valid = False
 
     # Disable all alerts due luxcore can handle either variant
-    if UseLuxCore():
+    if UsePBRTv3Core():
         return
 
     if tn in bpy.data.textures:
@@ -3214,32 +3214,32 @@ class pbrtv3_tex_imagesampling(declarative_property_group):
 
     controls = [
         'channel',
-        'channel_luxcore',  # LuxCore needs special channel because it needs the extra "rgb" default option
+        'channel_luxcore',  # PBRTv3Core needs special channel because it needs the extra "rgb" default option
         'gain',
         'gamma',
         'filtertype',
         'discardmipmaps',
         'maxanisotropy',
         'wrap',
-        'wrap_info',  # LuxCore only
-        'is_normalmap',  # LuxCore only
+        'wrap_info',  # PBRTv3Core only
+        'is_normalmap',  # PBRTv3Core only
     ]
 
     # varient is auto-detected for blender image, and file path is supplied from blender tex
 
     visibility = {
-        'channel': lambda: not UseLuxCore(),
-        'channel_luxcore': lambda: UseLuxCore(),
-        'discardmipmaps': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
-        'maxanisotropy': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UseLuxCore()]),
-        'filtertype': lambda: not UseLuxCore(),
-        # Show an info message about unsupported wrapping modes in LuxCore API mode
-        'wrap_info': lambda: UseLuxCore(),
+        'channel': lambda: not UsePBRTv3Core(),
+        'channel_luxcore': lambda: UsePBRTv3Core(),
+        'discardmipmaps': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UsePBRTv3Core()]),
+        'maxanisotropy': A([{'filtertype': O(['mipmap_trilinear', 'mipmap_ewa'])}, lambda: not UsePBRTv3Core()]),
+        'filtertype': lambda: not UsePBRTv3Core(),
+        # Show an info message about unsupported wrapping modes in PBRTv3Core API mode
+        'wrap_info': lambda: UsePBRTv3Core(),
     }
 
     enabled = {
-        # wrap modes are not yet supported by LuxCore
-        'wrap': lambda: not UseLuxCore(),
+        # wrap modes are not yet supported by PBRTv3Core
+        'wrap': lambda: not UsePBRTv3Core(),
     }
 
     properties = [
@@ -3354,7 +3354,7 @@ class pbrtv3_tex_imagesampling(declarative_property_group):
         {
             'type': 'text',
             'attr': 'wrap_info',
-            'name': 'Only "Repeat" wrapping supported by LuxCore',
+            'name': 'Only "Repeat" wrapping supported by PBRTv3Core',
             'icon': 'INFO',
         },
     ]
@@ -4711,7 +4711,7 @@ class pbrtv3_tex_pointiness(declarative_property_group):
     ]
 
     visibility = {
-        'warning_luxcore_tex': lambda: not UseLuxCore(),
+        'warning_luxcore_tex': lambda: not UsePBRTv3Core(),
     }
 
     properties = [

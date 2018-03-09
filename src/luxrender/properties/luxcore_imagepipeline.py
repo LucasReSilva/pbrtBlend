@@ -124,7 +124,7 @@ class IMAGEPIPELINE_MT_pbrtv3_crf(bpy.types.Menu):
 @PBRTv3Addon.addon_register_class
 class luxcore_imagepipeline(declarative_property_group):
     """
-    Storage class for LuxCore imagepipeline settings.
+    Storage class for PBRTv3Core imagepipeline settings.
     """
     
     ef_attach_to = ['pbrtv3_camera']

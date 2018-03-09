@@ -29,7 +29,7 @@ import os
 
 from ...extensions_framework import util as efutil
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export import is_obj_visible
 from ...export import object_anim_matrices
 from ...export import matrix_to_list
@@ -199,7 +199,7 @@ class ObjectExporter(object):
     def __convert_proxy(self, update_material, anim_matrices, convert_object, transform):
         raw_path = self.blender_object.pbrtv3_object.external_mesh
         path = efutil.filesystem_path(raw_path)
-        name = ToValidLuxCoreName(self.blender_object.name + self.dupli_name_suffix)
+        name = ToValidPBRTv3CoreName(self.blender_object.name + self.dupli_name_suffix)
 
         if not os.path.exists(path) or len(raw_path) == 0:
             message = 'Invalid path set for proxy "%s"!' % self.blender_object.name
@@ -214,7 +214,7 @@ class ObjectExporter(object):
         luxcore_material_name = material_exporter.luxcore_name
 
         # Create shape definition (always instanciate proxies)
-        name_shape = ToValidLuxCoreName(os.path.basename(path) + '_luxblendproxy')
+        name_shape = ToValidPBRTv3CoreName(os.path.basename(path) + '_luxblendproxy')
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.type', 'mesh'))
         self.properties.Set(pyluxcore.Property('scene.shapes.' + name_shape + '.ply', path))
         self.__create_object_properties(name, name_shape, luxcore_material_name, transform, anim_matrices)
@@ -229,7 +229,7 @@ class ObjectExporter(object):
             if self.blender_object.library:
                 name += self.blender_object.library.name
 
-            name = ToValidLuxCoreName(name)
+            name = ToValidPBRTv3CoreName(name)
 
             try:
                 material = self.blender_object.material_slots[shape.material_index].material

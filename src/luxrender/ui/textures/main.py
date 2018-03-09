@@ -26,7 +26,7 @@
 #
 from ... import PBRTv3Addon
 from ...ui.textures import pbrtv3_texture_base
-from ...outputs.luxcore_api import UseLuxCore
+from ...outputs.luxcore_api import UsePBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class

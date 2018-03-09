@@ -28,7 +28,7 @@
 import bpy, os
 
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export.materials import get_texture_from_scene
 from ...export import get_expanded_file_name
 from ...properties import find_node
@@ -84,7 +84,7 @@ class MaterialExporter(object):
             prefix = 'scene.materials.' + self.luxcore_name
             self.__set_material_volumes(prefix, output_node.interior_volume, output_node.exterior_volume)
 
-            # LuxCore specific material settings
+            # PBRTv3Core specific material settings
             lc_mat = self.material.luxcore_material
 
             if lc_mat.id != -1 and not self.luxcore_exporter.is_viewport_render:
@@ -104,7 +104,7 @@ class MaterialExporter(object):
             name += '_' + self.material.library.name
 
         # materials and volumes must not have the same names
-        self.luxcore_name = ToValidLuxCoreName(name + '_mat')
+        self.luxcore_name = ToValidPBRTv3CoreName(name + '_mat')
 
 
     def __convert_default_matte(self):
@@ -579,7 +579,7 @@ class MaterialExporter(object):
                     normalmap_texture = convert_texture_channel(self.luxcore_exporter, self.properties, self.luxcore_name,
                                                         material.pbrtv3_material, 'normalmap', 'float')
 
-                    normalmap_luxcore_name = ToValidLuxCoreName(material.pbrtv3_material.normalmap_floattexturename)
+                    normalmap_luxcore_name = ToValidPBRTv3CoreName(material.pbrtv3_material.normalmap_floattexturename)
                     # We have to set normalmap gamma to 1
                     self.properties.Set(pyluxcore.Property('scene.textures.' + normalmap_luxcore_name + '.gamma', 1))
                     if getattr(material.pbrtv3_material, 'normalmap_multiplyfloat'):
@@ -652,7 +652,7 @@ class MaterialExporter(object):
 
                 self.luxcore_name = name_coating
 
-            # LuxCore specific material settings
+            # PBRTv3Core specific material settings
             lc_mat = material.luxcore_material
 
             self.properties.Set(pyluxcore.Property(prefix + '.shadowcatcher.enable', lc_mat.is_shadow_catcher))

@@ -102,7 +102,7 @@ class luxcore_rendering_controls(declarative_property_group):
             'type': 'bool',
             'attr': 'stats_memory',
             'name': 'VRAM Usage',
-            'description': 'Amount of GPU RAM used by LuxCore (only available when using an OpenCL engine)',
+            'description': 'Amount of GPU RAM used by PBRTv3Core (only available when using an OpenCL engine)',
             'default': True,
         },
         {

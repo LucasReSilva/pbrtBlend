@@ -42,7 +42,7 @@ from ..export.volumes import export_smoke, SmokeCache
 from ..extensions_framework import util as efutil
 
 from ..outputs import PBRTv3Manager
-from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
+from ..outputs.luxcore_api import UsePBRTv3Core, set_prop_tex
 
 from ..properties import (pbrtv3_texture_node, get_linked_node, check_node_get_paramset)
 from ..properties.node_material import get_socket_paramsets
@@ -126,7 +126,7 @@ class pbrtv3_texture_type_node_blender_blend(pbrtv3_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop(self, 'luxcore_direction', expand=True)
         else:
             layout.prop(self, 'flipxy')
@@ -194,8 +194,8 @@ class pbrtv3_texture_type_node_brick(pbrtv3_texture_node):
         self.inputs.new('pbrtv3_coordinate_socket', mapping_3d_socketname)
 
     def draw_buttons(self, context, layout):
-        if not UseLuxCore():
-            # Variant is irrelevant for LuxCore
+        if not UsePBRTv3Core():
+            # Variant is irrelevant for PBRTv3Core
             layout.prop(self, 'variant', expand=True)
 
         layout.prop(self, 'brickbond')
@@ -210,7 +210,7 @@ class pbrtv3_texture_type_node_brick(pbrtv3_texture_node):
         si = self.inputs.keys()
         so = self.outputs.keys()
 
-        if self.variant == 'color' or UseLuxCore():
+        if self.variant == 'color' or UsePBRTv3Core():
             if not 'Brick Color' in si:  # If there aren't color inputs, create them
                 self.inputs.new('pbrtv3_TC_brickmodtex_socket', 'Brick Modulation Color')
                 self.inputs.new('pbrtv3_TC_bricktex_socket', 'Brick Color')
@@ -445,7 +445,7 @@ class pbrtv3_texture_type_node_blender_distortednoise(pbrtv3_texture_node):
         layout.prop(self, 'type')
         layout.prop(self, 'noisesize')
         layout.prop(self, 'distamount')
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.prop(self, 'nabla') # Has no visible influence
         layout.separator()
         column = layout.column(align=True)
@@ -513,7 +513,7 @@ class pbrtv3_texture_type_node_fbm(pbrtv3_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop(self, 'sign_mode', expand=True)
 
         layout.prop(self, 'octaves')
@@ -630,12 +630,12 @@ class pbrtv3_texture_type_node_image_map(pbrtv3_texture_node):
         self.inputs.new('pbrtv3_transform_socket', mapping_2d_socketname)
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
-            layout.label('Not all parameters supported in LuxCore mode', icon='ERROR')
+        if UsePBRTv3Core():
+            layout.label('Not all parameters supported in PBRTv3Core mode', icon='ERROR')
 
         layout.prop(self, 'filename')
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.prop(self, 'variant')
 
             if self.variant == 'float':
@@ -644,7 +644,7 @@ class pbrtv3_texture_type_node_image_map(pbrtv3_texture_node):
         layout.prop(self, 'gamma')
         layout.prop(self, 'gain')
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.prop(self, 'filtertype')
 
             if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
@@ -887,23 +887,23 @@ class pbrtv3_texture_type_node_blender_image_map(pbrtv3_texture_node):
 
         if self.advanced:
             column = layout.column()
-            column.enabled = not self.is_normal_map or not UseLuxCore()
+            column.enabled = not self.is_normal_map or not UsePBRTv3Core()
             column.prop(self, 'channel')
             column.prop(self, 'gain')
 
             # Gamma needs to be 1 for normalmaps
-            if self.is_normal_map and UseLuxCore():
+            if self.is_normal_map and UsePBRTv3Core():
                 row = layout.row()
                 row.enabled = False
                 row.prop(self, 'normalmap_fake_gamma')
             else:
                 layout.prop(self, 'gamma')
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.label('Normalmap option not supported in Classic API mode', icon='ERROR')
 
         row = layout.row()
-        row.enabled = UseLuxCore()
+        row.enabled = UsePBRTv3Core()
         row.prop(self, 'is_normal_map')
         if self.is_normal_map:
             row.prop(self, 'normalmap_scale')
@@ -1247,7 +1247,7 @@ class pbrtv3_texture_type_node_normal_map(pbrtv3_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'filename')
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.prop(self, 'filtertype')
 
             if self.filtertype in ('mipmap_trilinear', 'mipmap_ewa'):
@@ -1454,7 +1454,7 @@ class pbrtv3_texture_type_node_blender_voronoi(pbrtv3_texture_node):
         layout.prop(self, 'distmetric')
         layout.prop(self, 'minkowsky_exp')
         layout.prop(self, 'noisesize')
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             layout.prop(self, 'nabla')
         column = layout.column(align=True)
         column.prop(self, 'w1')
@@ -1719,7 +1719,7 @@ class pbrtv3_texture_type_node_cloud(pbrtv3_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        warning_classic_node(layout) # TODO: remove when LuxCore support is implemented
+        warning_classic_node(layout) # TODO: remove when PBRTv3Core support is implemented
 
         layout.prop(self, 'radius')
         layout.prop(self, 'noisescale')
@@ -1754,7 +1754,7 @@ class pbrtv3_texture_type_node_cloud(pbrtv3_texture_node):
 
         return make_texture('float', 'cloud', self.name, cloud_vol_params)
 
-    # TODO: LuxCore export
+    # TODO: PBRTv3Core export
 
 
 @PBRTv3Addon.addon_register_class
@@ -1789,7 +1789,7 @@ class pbrtv3_texture_type_node_vol_exponential(pbrtv3_texture_node):
 
         return make_texture('float', 'exponential', self.name, exponential_params)
 
-    # TODO: LuxCore export once supported by LuxCore
+    # TODO: PBRTv3Core export once supported by PBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class

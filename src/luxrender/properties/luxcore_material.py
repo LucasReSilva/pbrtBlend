@@ -36,7 +36,7 @@ from ..outputs.luxcore_api import ScenePrefix
 @PBRTv3Addon.addon_register_class
 class luxcore_material(declarative_property_group):
     """
-    Storage class for LuxCore material settings.
+    Storage class for PBRTv3Core material settings.
     """
 
     ef_attach_to = ['Material']

@@ -46,7 +46,7 @@ def get_default(TextureParameter):
 
 def export_socket_luxcore(properties, socket, fallback=None):
     """
-    Export a socket. If the socket is linked, the linked node is exported and the name of the resulting LuxCore node
+    Export a socket. If the socket is linked, the linked node is exported and the name of the resulting PBRTv3Core node
     is returned.
     If the socket is not linked, the fallback value is returned.
     """
@@ -2942,7 +2942,7 @@ class pbrtv3_color_socket(bpy.types.NodeSocket):
 
 @PBRTv3Addon.addon_register_class
 class pbrtv3_float_socket(bpy.types.NodeSocket):
-    """LuxCore transparency socket"""
+    """PBRTv3Core transparency socket"""
     bl_idname = 'pbrtv3_transparency_socket'
     bl_label = 'Opacity'
 
@@ -3002,7 +3002,7 @@ class pbrtv3_transform_socket(bpy.types.NodeSocket):
 
     def export_luxcore(self, properties):
         default_mapping_type = 'uvmapping2d'
-        # These are not the LuxCore API default values because we have to compensate Blender stuff
+        # These are not the PBRTv3Core API default values because we have to compensate Blender stuff
         default_uvscale = [1, -1]
         default_uvdelta = [0, 1]
         return export_socket_luxcore(properties, self, [default_mapping_type, default_uvscale, default_uvdelta])

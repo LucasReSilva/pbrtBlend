@@ -283,7 +283,7 @@ pbrtv3_node_categories_material = [
         NodeItem("pbrtv3_texture_scale_node"),
         NodeItem("pbrtv3_texture_add_node"),
         NodeItem("pbrtv3_texture_subtract_node"),
-        NodeItem("pbrtv3_texture_glossyexponent_node"), # Works in LuxCore, but kind of deprecated
+        NodeItem("pbrtv3_texture_glossyexponent_node"), # Works in PBRTv3Core, but kind of deprecated
     ]),
 ]
 
@@ -368,8 +368,8 @@ pbrtv3_node_categories_volume = [
         #NodeItem("pbrtv3_light_area_node"), # Only emission color is supported, so this node can not be used
         #Separator(),
         NodeItem("pbrtv3_texture_blackbody_node"),
-        #NodeItem("pbrtv3_texture_gaussian_node"), # Not yet supported by LuxCore
-        #NodeItem("pbrtv3_texture_tabulateddata_node"), # Not yet supported by LuxCore
+        #NodeItem("pbrtv3_texture_gaussian_node"), # Not yet supported by PBRTv3Core
+        #NodeItem("pbrtv3_texture_tabulateddata_node"), # Not yet supported by PBRTv3Core
     ]),
 
     pbrtv3_node_category_volume("LUX_OUTPUT_VOLUME", "Output", items=[

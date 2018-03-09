@@ -32,7 +32,7 @@ from ..extensions_framework import declarative_property_group
 @PBRTv3Addon.addon_register_class
 class luxcore_global(declarative_property_group):
     """
-    Global settings only used in LuxCore API mode
+    Global settings only used in PBRTv3Core API mode
     """
 
     ef_attach_to = ['Scene']

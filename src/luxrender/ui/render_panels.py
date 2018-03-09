@@ -28,7 +28,7 @@ import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore
+from ..outputs.luxcore_api import UsePBRTv3Core, pyluxcore
 from .. import PBRTv3Addon
 
 from .lamps import lamps_panel
@@ -52,21 +52,21 @@ class render_settings(render_panel):
     bl_label = 'PBRTv3 Settings'
 
     display_property_groups = [
-        ( ('scene',), 'pbrtv3_rendermode', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_integrator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_sampler', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_volumeintegrator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_filter', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_accelerator', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_halt', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxcore_enginesettings', lambda: UseLuxCore() ),
+        ( ('scene',), 'pbrtv3_rendermode', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_integrator', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_sampler', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_volumeintegrator', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_filter', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_accelerator', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_halt', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'luxcore_enginesettings', lambda: UsePBRTv3Core() ),
     ]
 
     def draw(self, context):
         layout = self.layout
         engine_settings = context.scene.luxcore_enginesettings
 
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             row = layout.row(align=True)
             rd = context.scene.render
             split = layout.split()
@@ -74,9 +74,9 @@ class render_settings(render_panel):
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_engine_add", text="", icon="ZOOMOUT").remove_active = True
 
-        # Draw LuxCore stuff above settings defined via property group (device selection)
+        # Draw PBRTv3Core stuff above settings defined via property group (device selection)
         # This is done here so the device enums are expanded properly (horizontal, not vertical)
-        if UseLuxCore():
+        if UsePBRTv3Core():
             vs = context.scene.view_settings
             if vs.view_transform != 'Default' or vs.exposure != 0 or vs.gamma != 1 or vs.look != 'None' or vs.use_curve_mapping:
                 col = layout.column(align=True)
@@ -227,22 +227,22 @@ class device_settings(render_panel):
         engine_settings = context.scene.luxcore_enginesettings
         render_mode = context.scene.pbrtv3_rendermode.rendermode
     
-        if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UseLuxCore()) \
-                or ((UseLuxCore() and (engine_settings.renderengine_type in ['PATH', 'TILEPATH']
+        if (render_mode in ['hybridpath', 'luxcorepathocl', 'luxcorebiaspathocl'] and not UsePBRTv3Core()) \
+                or ((UsePBRTv3Core() and (engine_settings.renderengine_type in ['PATH', 'TILEPATH']
                                        and engine_settings.device == 'OCL')
                 or engine_settings.device_preview == 'OCL')):
             self.layout.label('OpenCL Settings:')
             
-            if UseLuxCore():
+            if UsePBRTv3Core():
                 self.layout.prop(engine_settings, 'opencl_settings_type', expand=True)
 
-            if UseLuxCore() and engine_settings.opencl_settings_type == 'SIMPLE':
+            if UsePBRTv3Core() and engine_settings.opencl_settings_type == 'SIMPLE':
                 row = self.layout.row()
                 row.prop(engine_settings, 'opencl_use_all_gpus')
                 row.prop(engine_settings, 'opencl_use_all_cpus')
 
-            elif not UseLuxCore() or engine_settings.opencl_settings_type == 'ADVANCED':
-                if UseLuxCore():
+            elif not UsePBRTv3Core() or engine_settings.opencl_settings_type == 'ADVANCED':
+                if UsePBRTv3Core():
                     self.layout.prop(context.scene.luxcore_enginesettings, 'use_opencl_always_enabled')
                     self.layout.prop(context.scene.luxcore_enginesettings, 'film_use_opencl')
                     self.layout.prop(context.scene.luxcore_enginesettings, 'kernelcache')
@@ -260,7 +260,7 @@ class device_settings(render_panel):
                 else:
                     self.layout.label('No OpenCL devices available', icon='ERROR')
 
-        if UseLuxCore() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
+        if UsePBRTv3Core() and (engine_settings.renderengine_type in ['BIDIR', 'BIDIRVM']
                 or engine_settings.device == 'CPU'
                 or engine_settings.device_preview == 'CPU'):
             self.layout.label('CPU Settings:')
@@ -273,7 +273,7 @@ class device_settings(render_panel):
                 sub.prop(engine_settings, 'auto_threads')
                 sub.prop(engine_settings, 'native_threads_count')
 
-        if not UseLuxCore() and not 'ocl' in render_mode:
+        if not UsePBRTv3Core() and not 'ocl' in render_mode:
             # Classic Threads
             threads = context.scene.pbrtv3_engine
             row = self.layout.row()
@@ -282,7 +282,7 @@ class device_settings(render_panel):
                 row.prop(threads, 'threads')
 
         # Tile settings
-        if UseLuxCore() and context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH':
+        if UsePBRTv3Core() and context.scene.luxcore_enginesettings.renderengine_type == 'TILEPATH':
             self.layout.prop(engine_settings, 'tile_size')
 			
 @PBRTv3Addon.addon_register_class
@@ -295,20 +295,20 @@ class translator(render_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('scene',), 'luxcore_scenesettings', lambda: UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_engine', lambda: not UseLuxCore() ),
-        ( ('scene',), 'pbrtv3_testing', lambda: not UseLuxCore() ),
-        ( ('scene',), 'luxcore_translatorsettings', lambda: UseLuxCore() ),
+        ( ('scene',), 'luxcore_scenesettings', lambda: UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_engine', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'pbrtv3_testing', lambda: not UsePBRTv3Core() ),
+        ( ('scene',), 'luxcore_translatorsettings', lambda: UsePBRTv3Core() ),
     ]
 
     def draw(self, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             super().draw(context)
             row = self.layout.row(align=True)
             rd = context.scene.render
         else:
             super().draw(context)
-            self.layout.label('Custom LuxCore config properties:')
+            self.layout.label('Custom PBRTv3Core config properties:')
             self.layout.prop(context.scene.luxcore_enginesettings, 'custom_properties')
 
 @PBRTv3Addon.addon_register_class
@@ -321,21 +321,21 @@ class networking(render_panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     display_property_groups = [
-        ( ('scene',), 'pbrtv3_networking', lambda: not UseLuxCore() )
+        ( ('scene',), 'pbrtv3_networking', lambda: not UsePBRTv3Core() )
     ]
 
     def draw_header(self, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             self.layout.prop(context.scene.pbrtv3_networking, "use_network_servers", text="")
 
     def draw(self, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             row = self.layout.row(align=True)
             row.menu("PBRTv3_MT_presets_networking", text=bpy.types.PBRTv3_MT_presets_networking.bl_label)
             row.operator("luxrender.preset_networking_add", text="", icon="ZOOMIN")
             row.operator("luxrender.preset_networking_add", text="", icon="ZOOMOUT").remove_active = True
         else:
-            self.layout.label("Note: not yet supported by LuxCore")
+            self.layout.label("Note: not yet supported by PBRTv3Core")
 
         super().draw(context)
 

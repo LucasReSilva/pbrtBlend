@@ -33,7 +33,7 @@ from .. import PBRTv3Addon
 @PBRTv3Addon.addon_register_class
 class luxcore_scenesettings(declarative_property_group):
     """
-    Storage class for LuxCore scene settings.
+    Storage class for PBRTv3Core scene settings.
     """
     
     ef_attach_to = ['Scene']

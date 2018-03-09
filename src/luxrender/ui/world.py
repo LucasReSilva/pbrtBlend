@@ -27,7 +27,7 @@
 import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 from .. import PBRTv3Addon
 from .lamps import lamps_panel
@@ -111,7 +111,7 @@ class volumes_base(object):
 
             # Here we draw the currently selected pbrtv3_volumes_data property group
             if current_vol.nodetree:
-                if not UseLuxCore():
+                if not UsePBRTv3Core():
                     self.layout.label('Volume nodes not supported in Classic API', icon='ERROR')
 
                 self.layout.prop_search(current_vol, "nodetree", bpy.data, "node_groups")
@@ -138,16 +138,16 @@ class volumes_base(object):
                 self.layout.prop(current_vol, 'name')
 
                 col = self.layout.column()
-                col.enabled = UseLuxCore()
+                col.enabled = UsePBRTv3Core()
                 col.operator('luxrender.add_volume_nodetree', icon='NODETREE')
-                if not UseLuxCore():
+                if not UsePBRTv3Core():
                     self.layout.label('Volume nodes not supported in Classic API', icon='INFO')
                 self.layout.separator()
 
                 # Here we draw the currently selected pbrtv3_volumes_data property group
                 for control in current_vol.controls:
                     # Don't show the "Light Emitter" checkbox in Classic API mode, can't do this in properties/world.py
-                    if not (not UseLuxCore() and control == 'use_emission'):
+                    if not (not UsePBRTv3Core() and control == 'use_emission'):
                         self.draw_column(
                             control,
                             self.layout,

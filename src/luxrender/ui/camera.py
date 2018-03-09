@@ -29,7 +29,7 @@ import bpy
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from .. import PBRTv3Addon
 from ..export import get_worldscale
 
@@ -78,11 +78,11 @@ class camera(camera_panel):
             sub_distance.prop(blender_cam, "dof_distance", text="Distance")
 
             column = split.column(align=True)
-            column.enabled = not UseLuxCore()
+            column.enabled = not UsePBRTv3Core()
             column.label("Bokeh Shape:")
 
-            if UseLuxCore():
-                column.label("No LuxCore support", icon="INFO")
+            if UsePBRTv3Core():
+                column.label("No PBRTv3Core support", icon="INFO")
             else:
                 sub_bokeh = column.column()
                 sub_bokeh.prop(lux_cam, "blades", text="Blades")
@@ -91,7 +91,7 @@ class camera(camera_panel):
 
             layout.label("DoF strength is controlled by f/Stop value", icon="INFO")
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             if lux_cam.enable_clipping_plane or lux_cam.use_dof:
                 layout.separator()
 
@@ -106,14 +106,14 @@ class film(camera_panel):
     bl_label = 'PBRTv3 Film'
 
     display_property_groups = [
-        ( ('camera', 'pbrtv3_camera'), 'pbrtv3_film', lambda: not UseLuxCore() ),
-        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_colorspace', lambda: not UseLuxCore() ),
-        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_tonemapping', lambda: not UseLuxCore() ),
-        ( ('camera', 'pbrtv3_camera'), 'luxcore_imagepipeline', lambda: UseLuxCore() ),
+        ( ('camera', 'pbrtv3_camera'), 'pbrtv3_film', lambda: not UsePBRTv3Core() ),
+        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_colorspace', lambda: not UsePBRTv3Core() ),
+        ( ('camera', 'pbrtv3_camera', 'pbrtv3_film'), 'pbrtv3_tonemapping', lambda: not UsePBRTv3Core() ),
+        ( ('camera', 'pbrtv3_camera'), 'luxcore_imagepipeline', lambda: UsePBRTv3Core() ),
     ]
 
     def draw_crf_preset_menu(self, context):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             self.layout.menu('IMAGEPIPELINE_MT_pbrtv3_crf',
                          text=context.camera.pbrtv3_camera.luxcore_imagepipeline.crf_preset)
         else:
@@ -123,7 +123,7 @@ class film(camera_panel):
     def draw(self, context):
         layout = self.layout
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             imagepipeline_settings = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
 
             # Show warning in case of missing passes
@@ -141,6 +141,6 @@ class film(camera_panel):
 
         super().draw(context)
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             imagepipeline_settings = context.scene.camera.data.pbrtv3_camera.luxcore_imagepipeline
             layout.label('Framerate: %d fps' % (1 / (imagepipeline_settings.viewport_interval / 1000)))

@@ -253,7 +253,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
         if light.pbrtv3_lamp.pbrtv3_lamp_area.null_lamp:
             mat_params = ParamSet()
 
-            # Workaround: LuxCoreRenderer supports only area lights with constant ConstantRGBColorTexture
+            # Workaround: PBRTv3CoreRenderer supports only area lights with constant ConstantRGBColorTexture
             if scene.pbrtv3_rendermode.renderer == 'luxcore':
                 mat_params.add_string('type', 'matte')
             else:

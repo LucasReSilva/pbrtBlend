@@ -28,7 +28,7 @@ import bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 from .. import PBRTv3Addon
 
 
@@ -42,8 +42,8 @@ class meshes(bl_ui.properties_data_mesh.MeshButtonsPanel, property_group_rendere
     ]
 
     def draw(self, context):
-        if UseLuxCore():
-            self.layout.label('Displacement and portals not yet supported by LuxCore', icon='INFO')
+        if UsePBRTv3Core():
+            self.layout.label('Displacement and portals not yet supported by PBRTv3Core', icon='INFO')
 
             if context.object.data.pbrtv3_mesh.portal:
                 self.layout.label('This mesh was flagged as portal and won\'t be exported', icon='INFO')

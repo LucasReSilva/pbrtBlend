@@ -68,7 +68,7 @@ def detect_cpu_corecount():
 @PBRTv3Addon.addon_register_class
 class luxcore_enginesettings(declarative_property_group):
     """
-    Storage class for LuxCore engine settings.
+    Storage class for PBRTv3Core engine settings.
 
     Labels are used to minimize visual noise of non-equal button widths:
     Instead of this
@@ -326,7 +326,7 @@ class luxcore_enginesettings(declarative_property_group):
             'type': 'string',
             'attr': 'custom_properties',
             'name': '',
-            'description': 'LuxCore custom properties (separated by \'|\', suggested only for advanced users)',
+            'description': 'PBRTv3Core custom properties (separated by \'|\', suggested only for advanced users)',
             'default': '',
             'save_in_preset': True
         },

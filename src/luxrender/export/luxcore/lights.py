@@ -28,7 +28,7 @@
 import bpy, mathutils, math, os
 
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 from ...export import is_obj_visible
 from ...export import get_worldscale
 from ...export import matrix_to_list
@@ -90,7 +90,7 @@ class LightExporter(object):
         if self.is_dupli:
             name += self.dupli_name_suffix
 
-        self.luxcore_name = ToValidLuxCoreName(name)
+        self.luxcore_name = ToValidPBRTv3CoreName(name)
 
 
     def __multiply_gain(self, main_gain, gain_r, gain_g, gain_b):

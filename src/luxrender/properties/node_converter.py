@@ -34,7 +34,7 @@ from .. import PBRTv3Addon
 
 from ..export import ParamSet, get_worldscale
 
-from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
+from ..outputs.luxcore_api import UsePBRTv3Core, set_prop_tex
 
 from ..properties import pbrtv3_texture_node, get_linked_node, check_node_export_texture
 from ..properties.node_material import get_socket_paramsets
@@ -904,7 +904,7 @@ class pbrtv3_manipulate_3d_mapping_node(pbrtv3_texture_node):
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             row = layout.row()
 
             row.column().prop(self, 'translate')
@@ -966,7 +966,7 @@ class pbrtv3_manipulate_2d_mapping_node(pbrtv3_texture_node):
     def draw_buttons(self, context, layout):
         warning_luxcore_node(layout)
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.label('Scale:')
             row = layout.row(align=True)
             row.prop(self, 'uscale')

@@ -34,7 +34,7 @@ from .. import PBRTv3Addon
 @PBRTv3Addon.addon_register_class
 class luxcore_translatorsettings(declarative_property_group):
     """
-    Storage class for LuxCore translator settings.
+    Storage class for PBRTv3Core translator settings.
     """
 
     ef_attach_to = ['Scene']
@@ -145,15 +145,15 @@ class luxcore_translatorsettings(declarative_property_group):
             'default': 'internal',
             'items': [
                 ('internal', 'Internal', 'Do not export any files, render inside of Blender'),
-                ('luxcoreui', 'LuxCoreUI', 'Export scene files to output path and render using LuxCoreUI'),
+                ('luxcoreui', 'PBRTv3CoreUI', 'Export scene files to output path and render using PBRTv3CoreUI'),
             ],
             'save_in_preset': True
         },
         {
             'type': 'bool',
             'attr': 'run_luxcoreui',
-            'name': 'Run LuxCoreUI',
-            'description': 'After exporting, start LuxCoreUI with the exported scene files',
+            'name': 'Run PBRTv3CoreUI',
+            'description': 'After exporting, start PBRTv3CoreUI with the exported scene files',
             'default': True,
             'save_in_preset': True
         },
@@ -162,7 +162,7 @@ class luxcore_translatorsettings(declarative_property_group):
             'attr': 'use_rtpathcpu',
             'name': 'Use RTPathCPU',
             'description': 'Use RTPathCPU instead of PathCPU for viewport render. Note that you need to compile the '
-                           'very latest LuxCore from source for this to work, daily builds do not contain it yet',
+                           'very latest PBRTv3Core from source for this to work, daily builds do not contain it yet',
             'default': False,
         },
     ]

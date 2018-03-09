@@ -35,7 +35,7 @@ from .. import PBRTv3Addon
 from ..export import ParamSet, process_filepath_data, get_worldscale
 
 from ..outputs import PBRTv3Manager
-from ..outputs.luxcore_api import UseLuxCore, set_prop_tex
+from ..outputs.luxcore_api import UsePBRTv3Core, set_prop_tex
 
 from ..properties import pbrtv3_texture_node
 from ..properties.node_sockets import mapping_2d_socketname, mapping_3d_socketname
@@ -63,7 +63,7 @@ class pbrtv3_3d_coordinates_node(pbrtv3_texture_node):
     use_uniform_scale = bpy.props.BoolProperty(name='Uniform', default=False,
                                                description='Use the same scale value for all axis')
 
-    # LuxCore uses different names for the mapping types
+    # PBRTv3Core uses different names for the mapping types
     luxcore_mapping_type_map = {
         'global': 'globalmapping3d',
         'local': 'localmapping3d',
@@ -76,8 +76,8 @@ class pbrtv3_3d_coordinates_node(pbrtv3_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
 
-        if UseLuxCore():
-            # LuxCore layout
+        if UsePBRTv3Core():
+            # PBRTv3Core layout
             if self.coordinates in self.luxcore_mapping_type_map:
                 row = layout.row()
 
@@ -93,7 +93,7 @@ class pbrtv3_3d_coordinates_node(pbrtv3_texture_node):
 
                 scale_column.prop(self, 'use_uniform_scale')
             else:
-                layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
+                layout.label(text='Mapping not supported by PBRTv3Core', icon='ERROR')
         else:
             # Classic layout
             if self.coordinates == 'smoke_domain':
@@ -179,7 +179,7 @@ class pbrtv3_2d_coordinates_node(pbrtv3_texture_node):
     v1 = bpy.props.FloatVectorProperty(name='V1', default=(1.0, 0.0, 0.0))
     v2 = bpy.props.FloatVectorProperty(name='V2', default=(0.0, 1.0, 0.0))
 
-    # LuxCore uses different names for the mapping types
+    # PBRTv3Core uses different names for the mapping types
     luxcore_mapping_type_map = {
         'uv': 'uvmapping2d'
     }
@@ -190,8 +190,8 @@ class pbrtv3_2d_coordinates_node(pbrtv3_texture_node):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'coordinates')
 
-        if UseLuxCore() and not self.coordinates in self.luxcore_mapping_type_map:
-            layout.label(text='Mapping not supported by LuxCore', icon='ERROR')
+        if UsePBRTv3Core() and not self.coordinates in self.luxcore_mapping_type_map:
+            layout.label(text='Mapping not supported by PBRTv3Core', icon='ERROR')
         else:
             if self.coordinates == 'planar':
                 layout.prop(self, 'v1')
@@ -200,14 +200,14 @@ class pbrtv3_2d_coordinates_node(pbrtv3_texture_node):
             else:
                 layout.label('Scale:')
 
-                if self.use_uniform_scale and UseLuxCore():
+                if self.use_uniform_scale and UsePBRTv3Core():
                     layout.prop(self, 'uniform_scale')
                 else:
                     sub = layout.row(align=True)
                     sub.prop(self, 'uscale')
                     sub.prop(self, 'vscale')
 
-                if UseLuxCore():
+                if UsePBRTv3Core():
                     layout.prop(self, 'use_uniform_scale')
 
                 layout.label('Offset:')
@@ -338,7 +338,7 @@ class pbrtv3_texture_type_node_gaussian(pbrtv3_texture_node):
 
         return make_texture('color', 'gaussian', self.name, gaussian_params)
 
-    # TODO: LuxCore export once supported by LuxCore
+    # TODO: PBRTv3Core export once supported by PBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class  # Drawn in "input" menu, since it does not have any input sockets
@@ -394,7 +394,7 @@ class pbrtv3_texture_type_node_tabulateddata(pbrtv3_texture_node):
 
         return make_texture('color', 'tabulateddata', self.name, tabulateddata_params)
 
-    # TODO: LuxCore export once supported by LuxCore
+    # TODO: PBRTv3Core export once supported by PBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class
@@ -537,7 +537,7 @@ class pbrtv3_texture_type_node_hitpointgrey(pbrtv3_texture_node):
         self.outputs.new('NodeSocketFloat', 'Float')
 
     def draw_buttons(self, context, layout):
-        if UseLuxCore():
+        if UsePBRTv3Core():
             layout.prop(self, 'channel_luxcore', expand=True)
         else:
             layout.prop(self, 'channel')

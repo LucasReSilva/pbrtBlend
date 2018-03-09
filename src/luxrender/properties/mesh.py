@@ -34,7 +34,7 @@ from ..properties.material import texture_append_visibility
 from ..properties.texture import FloatTextureParameter
 from ..util import dict_merge
 from ..outputs import PBRTv3Manager
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 
 class MeshFloatTextureParameter(FloatTextureParameter):
@@ -76,8 +76,8 @@ class pbrtv3_mesh(declarative_property_group):
                ]
 
     visibility = dict_merge({
-                                'mesh_type': lambda: not UseLuxCore(),
-                                'instancing_mode': lambda: not UseLuxCore(),
+                                'mesh_type': lambda: not UsePBRTv3Core(),
+                                'instancing_mode': lambda: not UsePBRTv3Core(),
                                 'nsmooth': {'subdiv': 'loop'},
                                 'sharpbound': {'subdiv': 'loop'},
                                 'splitnormal': {'subdiv': 'loop'},

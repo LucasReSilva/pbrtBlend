@@ -32,7 +32,7 @@ from ..extensions_framework.validate import Logic_OR as O, Logic_AND as A, Logic
 
 from .. import PBRTv3Addon
 from ..outputs.pure_api import PYLUX_AVAILABLE
-from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UseLuxCore
+from ..outputs.luxcore_api import PYLUXCORE_AVAILABLE, UsePBRTv3Core
 
 
 def check_renderer_settings(context):
@@ -238,7 +238,7 @@ class pbrtv3_engine(declarative_property_group):
             'items': [
                          ('classic', 'Classic API', 'Use PBRTv3 v1.x API', 'NONE', 0),
                      ] + ([
-                         ('luxcore', 'LuxCore API (Experimental)', 'Use PBRTv3 v2.x API (experimental and unstable!)',
+                         ('luxcore', 'PBRTv3Core API (Experimental)', 'Use PBRTv3 v2.x API (experimental and unstable!)',
                           'ERROR', 1)
                      ] if PYLUXCORE_AVAILABLE else []),
             'save_in_preset': True

@@ -172,5 +172,5 @@ class VolumeExporter(object):
         except Exception as err:
             message = 'Volume export failed, skipping volume: %s\n%s' % (volume.name, err)
             log_exception(self.luxcore_exporter, message)
-            # define a clear volume instead of actual volume so LuxCore will still start to render
+            # define a clear volume instead of actual volume so PBRTv3Core will still start to render
             self.properties.Set(pyluxcore.Property(prefix + '.type', 'clear'))

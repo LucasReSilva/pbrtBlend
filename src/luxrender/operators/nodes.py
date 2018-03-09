@@ -123,7 +123,7 @@ class PBRTv3_OT_add_material_nodetree(bpy.types.Operator):
         # Get the mat type set in editor, todo: find a more iterative way to get context
         node_type = 'pbrtv3_material_%s_node' % ctx_mat.type
 
-        # Some nodes were merged during the introduction of LuxCore node support
+        # Some nodes were merged during the introduction of PBRTv3Core node support
         if ctx_mat.type in ['glass2', 'roughglass']:
             node_type = 'pbrtv3_material_glass_node'
         elif ctx_mat.type == 'metal':

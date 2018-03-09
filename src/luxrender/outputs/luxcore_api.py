@@ -37,21 +37,21 @@ PREFIX_VOLUMES = 'scene.volumes'
 PREFIX_CAMERA = 'scene.camera'
 
 
-def ToValidLuxCoreName(name):
+def ToValidPBRTv3CoreName(name):
     return re.sub('[^_0-9a-zA-Z]+', '_', name)
 
 
 def set_prop(prefix, properties, luxcore_name, property, value):
     """
-    Set a LuxCore property.
+    Set a PBRTv3Core property.
     Example: set_prop('materials', properties, 'type', 'matte') is the equivalent of
     properties.Set(pyluxcore.Property('scene.materials.<name>.type', 'matte'))
     For materials, textures, volumes and the camera you can use the shorter set_prop_mat,
     set_prop_tex, etc. convenience functions where you can omit the prefix.
 
-    :param prefix: LuxCore property prefix (e.g. 'scene.materials')
-    :param properties: LuxCore properties that are edited. Type: pyluxcore.Properties
-    :param luxcore_name: LuxCore name of the material
+    :param prefix: PBRTv3Core property prefix (e.g. 'scene.materials')
+    :param properties: PBRTv3Core properties that are edited. Type: pyluxcore.Properties
+    :param luxcore_name: PBRTv3Core name of the material
     :param property: Property string that is set, e.g. 'type' or 'kd'
     :param value: Value for the property (string, number or list)
     """
@@ -82,7 +82,7 @@ def FlattenStrCollection(coll):
                     yield subc
 
 
-def UseLuxCore():
+def UsePBRTv3Core():
     return True if bpy.context.scene.pbrtv3_engine.selected_pbrtv3_api == 'luxcore' else False
 
 

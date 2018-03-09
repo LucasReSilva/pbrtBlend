@@ -28,7 +28,7 @@ import bpy, bl_ui
 
 from ..extensions_framework.ui import property_group_renderer
 
-from ..outputs.luxcore_api import UseLuxCore, pyluxcore
+from ..outputs.luxcore_api import UsePBRTv3Core, pyluxcore
 from .. import PBRTv3Addon
 
 from .lamps import lamps_panel
@@ -116,8 +116,8 @@ class lightgroups_base(object):
 
     # overridden in order to draw a 'non-standard' panel
     def draw(self, context):
-        if UseLuxCore() and not hasattr(pyluxcore.RenderSession, 'Parse'):
-            self.layout.label('Outdated LuxCore version!', icon='INFO')
+        if UsePBRTv3Core() and not hasattr(pyluxcore.RenderSession, 'Parse'):
+            self.layout.label('Outdated PBRTv3Core version!', icon='INFO')
             self.layout.separator()
 
         def lightgroup_icon(enabled):
@@ -169,7 +169,7 @@ class lightgroups_base(object):
                 row = box.row()
                 row.prop(lg, 'gain')
 
-                if UseLuxCore():
+                if UsePBRTv3Core():
                     # RGB gain and temperature are not supported by Classic API
                     row = box.row()
                     row.prop(lg, 'use_rgb_gain')
@@ -188,8 +188,8 @@ class lightgroups_base(object):
             row = self.layout.row()
             row.prop(context.scene.pbrtv3_lightgroups, 'ignore')
 
-        # Default lightgroup (LuxCore only)
-        if UseLuxCore():
+        # Default lightgroup (PBRTv3Core only)
+        if UsePBRTv3Core():
             draw_lightgroup(context.scene.pbrtv3_lightgroups)
 
         # Normal light groups, this is a "special" panel section
@@ -232,7 +232,7 @@ class materialgroups(render_layers_panel):
 
     # overridden in order to draw a 'non-standard' panel
     def draw(self, context):
-        if not UseLuxCore():
+        if not UsePBRTv3Core():
             self.layout.label('Not supported in Classic API mode.')
             return
 
@@ -294,7 +294,7 @@ class passes_aov(render_layers_panel):
         layout = self.layout
         scene = context.scene
 
-        if UseLuxCore():
+        if UsePBRTv3Core():
             # Show AOV channel panel
             channels = context.scene.pbrtv3_channels
             split = layout.split()

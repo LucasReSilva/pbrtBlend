@@ -36,7 +36,7 @@ from ..export import get_worldscale, get_output_filename
 from ..export import ParamSet, PBRTv3Manager
 from ..export import fix_matrix_order
 from ..outputs.pure_api import PBRTv3_VERSION
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 
 @PBRTv3Addon.addon_register_class
@@ -59,8 +59,8 @@ class pbrtv3_hair(declarative_property_group):
     ]
 
     visibility = {
-        'use_binary_output': lambda: not UseLuxCore(),
-        'acceltype': lambda: not UseLuxCore(),
+        'use_binary_output': lambda: not UsePBRTv3Core(),
+        'acceltype': lambda: not UsePBRTv3Core(),
         'adaptive_maxdepth': {'tesseltype': O(['ribbonadaptive', 'solidadaptive'])},
         'adaptive_error': {'tesseltype': O(['ribbonadaptive', 'solidadaptive'])},
         'solid_sidecount': {'tesseltype': O(['solid', 'solidadaptive'])},

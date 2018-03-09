@@ -30,7 +30,7 @@ import time
 import bpy
 
 from ...outputs.luxcore_api import pyluxcore
-from ...outputs.luxcore_api import ToValidLuxCoreName
+from ...outputs.luxcore_api import ToValidPBRTv3CoreName
 
 
 class ExportedShape(object):
@@ -166,7 +166,7 @@ class MeshExporter(object):
         if matIndex != -1:
             shape_name += '_%d' % matIndex
 
-        return ToValidLuxCoreName(shape_name)
+        return ToValidPBRTv3CoreName(shape_name)
 
 
 

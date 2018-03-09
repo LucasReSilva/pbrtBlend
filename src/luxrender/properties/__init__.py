@@ -26,7 +26,7 @@
 #
 
 import bpy
-from ..outputs.luxcore_api import ToValidLuxCoreName, UseLuxCore, set_prop_mat, set_prop_vol
+from ..outputs.luxcore_api import ToValidPBRTv3CoreName, UsePBRTv3Core, set_prop_mat, set_prop_vol
 
 
 class pbrtv3_node(bpy.types.Node):
@@ -139,31 +139,31 @@ def check_node_get_paramset(node):
         return False
     return True
 
-# LuxCore node UI functions (e.g. warning labels)
+# PBRTv3Core node UI functions (e.g. warning labels)
 
 def warning_luxcore_node(layout):
     """
-    Show a warning label if API mode is Classic (this node only works in LuxCore mode)
+    Show a warning label if API mode is Classic (this node only works in PBRTv3Core mode)
     """
-    if not UseLuxCore():
+    if not UsePBRTv3Core():
         layout.label('No Classic support!', icon='ERROR')
 
 def warning_classic_node(layout):
     """
-    Show a warning label if API mode is LuxCore (this node only works in Classic mode)
+    Show a warning label if API mode is PBRTv3Core (this node only works in Classic mode)
     """
-    if UseLuxCore():
-        layout.label('No LuxCore support!', icon='ERROR')
+    if UsePBRTv3Core():
+        layout.label('No PBRTv3Core support!', icon='ERROR')
 
-# LuxCore node export functions
+# PBRTv3Core node export functions
 
 def create_luxcore_name(node, suffix=None, name=None):
     """
-    Construct a unique name for the node to be used in the LuxCore scene definitions.
+    Construct a unique name for the node to be used in the PBRTv3Core scene definitions.
     Note: node can also be a socket or anything else with an "id_data" attribute that points to the parent nodetree
     """
     if name is not None:
-        # We got passed a valid LuxCore name for the first node in the nodetree.
+        # We got passed a valid PBRTv3Core name for the first node in the nodetree.
         # Use it without changes so switching from non-node to node materials works during viewport renders.
         return name
 
@@ -178,7 +178,7 @@ def create_luxcore_name(node, suffix=None, name=None):
     if suffix:
         name_parts.append(suffix)
 
-    return ToValidLuxCoreName('_'.join(name_parts))
+    return ToValidPBRTv3CoreName('_'.join(name_parts))
 
 def create_luxcore_name_mat(node, name=None):
     return create_luxcore_name(node, 'mat', name)

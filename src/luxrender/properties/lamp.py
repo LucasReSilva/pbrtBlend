@@ -36,7 +36,7 @@ from ..export import ParamSet
 from ..properties.texture import ColorTextureParameter, FloatTextureParameter
 from ..properties.material import texture_append_visibility
 from ..util import dict_merge
-from ..outputs.luxcore_api import UseLuxCore
+from ..outputs.luxcore_api import UsePBRTv3Core
 
 
 def LampVolumeParameter(attr, name):
@@ -116,7 +116,7 @@ class pbrtv3_lamp(declarative_property_group):
     ]
 
     visibility = {
-        'importance': lambda: not UseLuxCore(),
+        'importance': lambda: not UsePBRTv3Core(),
     }
 
     properties = [
@@ -172,7 +172,7 @@ class pbrtv3_lamp_point(pbrtv3_lamp_basic):
 
     controls = TC_L.controls[:] + [
         'projector',
-        'mapname', # Only supported by LuxCore
+        'mapname', # Only supported by PBRTv3Core
         'flipz',
         'power',
         'efficacy',
@@ -184,12 +184,12 @@ class pbrtv3_lamp_point(pbrtv3_lamp_basic):
 
     visibility = dict_merge(
         pbrtv3_lamp_basic.visibility,
-        {'projector': lambda: UseLuxCore()},
-        {'mapname': A([{'projector': True}, lambda: UseLuxCore()])}, # Only supported by LuxCore
-        {'usesphere': lambda: not UseLuxCore()},
-        {'pointsize': A([{'usesphere': True}, lambda: not UseLuxCore()])},
-        {'nsamples': A([{'usesphere': True}, lambda: not UseLuxCore()])},
-        {'null_lamp': A([{'usesphere': True}, lambda: not UseLuxCore()])},
+        {'projector': lambda: UsePBRTv3Core()},
+        {'mapname': A([{'projector': True}, lambda: UsePBRTv3Core()])}, # Only supported by PBRTv3Core
+        {'usesphere': lambda: not UsePBRTv3Core()},
+        {'pointsize': A([{'usesphere': True}, lambda: not UsePBRTv3Core()])},
+        {'nsamples': A([{'usesphere': True}, lambda: not UsePBRTv3Core()])},
+        {'null_lamp': A([{'usesphere': True}, lambda: not UsePBRTv3Core()])},
     )
 
     properties = TC_L.properties[:] + [
@@ -388,7 +388,7 @@ class pbrtv3_lamp_sun(declarative_property_group):
                    :]  # Pin this at the end so the sun type menu isn't jumping around when you select the distant lamp
 
     visibility = {  # Do L visibility manually because we only need it for distant
-                    'nsamples': {lambda: not UseLuxCore()},
+                    'nsamples': {lambda: not UsePBRTv3Core()},
                     'L_colorlabel': {'sunsky_type': 'distant'},
                     'L_color': {'sunsky_type': 'distant'},
                     'L_usecolortexture': {'sunsky_type': 'distant'},
@@ -398,12 +398,12 @@ class pbrtv3_lamp_sun(declarative_property_group):
                     'turbidity': {'sunsky_type': LO({'!=': 'distant'})},
                     'theta': {'sunsky_type': 'distant'},
                     'relsize': {'sunsky_type': O(['sunsky', 'sun'])},
-                    # These legacy sky options are not supported by LuxCore
-                    'horizonbrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
-                    'horizonsize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
-                    'sunhalobrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
-                    'sunhalosize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
-                    'backscattering':     A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UseLuxCore()]),
+                    # These legacy sky options are not supported by PBRTv3Core
+                    'horizonbrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UsePBRTv3Core()]),
+                    'horizonsize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UsePBRTv3Core()]),
+                    'sunhalobrightness':  A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UsePBRTv3Core()]),
+                    'sunhalosize':        A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UsePBRTv3Core()]),
+                    'backscattering':     A([{'legacy_sky': True}, {'sunsky_type': O(['sunsky', 'sky'])}, lambda: not UsePBRTv3Core()]),
     }
 
     properties = TC_L.properties[:] + [
@@ -615,17 +615,17 @@ class pbrtv3_lamp_area(declarative_property_group):
 
     visibility = dict_merge(
         TC_L.visibility,
-        {'null_lamp': lambda: not UseLuxCore()},
-        {'nsamples': lambda: not UseLuxCore()},
-        {'theta': lambda: UseLuxCore()},
+        {'null_lamp': lambda: not UsePBRTv3Core()},
+        {'nsamples': lambda: not UsePBRTv3Core()},
+        {'theta': lambda: UsePBRTv3Core()},
         TF_opacity.visibility,
     )
     visibility = texture_append_visibility(visibility, TF_opacity,
         {
-            'opacity_multiplyfloat': lambda: UseLuxCore(),
-            'opacity_usefloattexture': lambda: UseLuxCore(),
-            'opacity_floatvalue': lambda: UseLuxCore(),
-            'opacity_floattexturename': lambda: UseLuxCore(),
+            'opacity_multiplyfloat': lambda: UsePBRTv3Core(),
+            'opacity_usefloattexture': lambda: UsePBRTv3Core(),
+            'opacity_floatvalue': lambda: UsePBRTv3Core(),
+            'opacity_floattexturename': lambda: UsePBRTv3Core(),
         })
 
     properties = TC_L.properties[:] + [
@@ -714,12 +714,12 @@ class pbrtv3_lamp_hemi(declarative_property_group):
     ]
 
     visibility = {
-        'mapping_type': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
+        'mapping_type': A([{'infinite_map': LO({'!=': ''})}, lambda: not UsePBRTv3Core()]),
         'hdri_multiply': {'infinite_map': LO({'!=': ''})},
         'gamma': {'infinite_map': LO({'!=': ''})},
-        'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
-        'hdri_infinitesample': A([{'infinite_map': LO({'!=': ''})}, lambda: not UseLuxCore()]),
-        'sampleupperhemisphereonly': A([{'infinite_map': LO({'!=': ''})}, lambda: UseLuxCore()]),
+        'nsamples': A([{'infinite_map': LO({'!=': ''})}, lambda: not UsePBRTv3Core()]),
+        'hdri_infinitesample': A([{'infinite_map': LO({'!=': ''})}, lambda: not UsePBRTv3Core()]),
+        'sampleupperhemisphereonly': A([{'infinite_map': LO({'!=': ''})}, lambda: UsePBRTv3Core()]),
     }
 
     properties = TC_L.properties[:] + [
