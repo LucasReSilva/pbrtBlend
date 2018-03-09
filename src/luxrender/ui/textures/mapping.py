@@ -33,7 +33,7 @@ class ui_texture_mapping(pbrtv3_texture_base):
     bl_label = 'PBRTv3 2D Texture Mapping'
     bl_options = {'DEFAULT_CLOSED'}
 
-    LUX_COMPAT = {'BLENDER', 'bilerp', 'checkerboard', 'dots', 'imagemap', 'normalmap', 'uv', 'uvmask'}
+    PBRTv3_COMPAT = {'BLENDER', 'bilerp', 'checkerboard', 'dots', 'imagemap', 'normalmap', 'uv', 'uvmask'}
     BL_COMPAT = {'IMAGE'}
 
     display_property_groups = [

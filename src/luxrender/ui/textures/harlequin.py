@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_harlequin(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Harlequin Texture'
 
-    LUX_COMPAT = {'harlequin'}
+    PBRTv3_COMPAT = {'harlequin'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_harlequin' )

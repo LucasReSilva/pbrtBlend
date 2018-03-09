@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_uvmask(pbrtv3_texture_base):
     bl_label = 'PBRTv3 UV Mask Texture'
 
-    LUX_COMPAT = {'uvmask'}
+    PBRTv3_COMPAT = {'uvmask'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_uvmask' )

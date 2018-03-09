@@ -32,7 +32,7 @@ from ...ui.materials import pbrtv3_material_sub
 class ui_material_layered(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Layered Material'
 
-    LUX_COMPAT = {'layered'}
+    PBRTv3_COMPAT = {'layered'}
 
     display_property_groups = [
         ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_layered' )

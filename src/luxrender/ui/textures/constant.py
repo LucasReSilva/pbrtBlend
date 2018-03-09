@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_constant(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Constant Texture'
 
-    LUX_COMPAT = {'constant'}
+    PBRTv3_COMPAT = {'constant'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_constant' )

@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_scale(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Scale Texture'
 
-    LUX_COMPAT = {'scale'}
+    PBRTv3_COMPAT = {'scale'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_scale' )

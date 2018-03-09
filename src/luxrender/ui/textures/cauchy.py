@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_cauchy(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Cauchy Texture'
 
-    LUX_COMPAT = {'cauchy'}
+    PBRTv3_COMPAT = {'cauchy'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_cauchy' )

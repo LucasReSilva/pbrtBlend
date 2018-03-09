@@ -36,14 +36,14 @@ class pbrtv3_material_base(bl_ui.properties_material.MaterialButtonsPanel, prope
 
 
 class pbrtv3_material_sub(pbrtv3_material_base):
-    LUX_COMPAT = set()
+    PBRTv3_COMPAT = set()
 
     @classmethod
     def poll(cls, context):
         """
-        Only show PBRTv3 panel if pbrtv3_material.material in LUX_COMPAT
+        Only show PBRTv3 panel if pbrtv3_material.material in PBRTv3_COMPAT
         """
-        return super().poll(context) and (context.material.pbrtv3_material.type in cls.LUX_COMPAT) and (
+        return super().poll(context) and (context.material.pbrtv3_material.type in cls.PBRTv3_COMPAT) and (
             not context.material.pbrtv3_material.nodetree)
 
 

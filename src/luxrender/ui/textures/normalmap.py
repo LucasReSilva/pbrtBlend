@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_normalmap(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Normal Map Texture'
 
-    LUX_COMPAT = {'normalmap'}
+    PBRTv3_COMPAT = {'normalmap'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_normalmap' )

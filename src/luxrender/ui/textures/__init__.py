@@ -43,13 +43,13 @@ class pbrtv3_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property
 
     # bl_options		= {'HIDE_HEADER'}
     COMPAT_ENGINES = 'PBRTv3_RENDER'
-    LUX_COMPAT = set()
+    PBRTv3_COMPAT = set()
     BL_COMPAT = set()
 
     @classmethod
     def poll(cls, context):
         """
-        Only show PBRTv3 panel if pbrtv3_texture.type in LUX_COMPAT
+        Only show PBRTv3 panel if pbrtv3_texture.type in PBRTv3_COMPAT
         """
 
         tex = context.texture
@@ -63,5 +63,5 @@ class pbrtv3_texture_base(bl_ui.properties_texture.TextureButtonsPanel, property
         else:
             return tex and \
                    (context.scene.render.engine in cls.COMPAT_ENGINES) and \
-                   context.texture.pbrtv3_texture.type in cls.LUX_COMPAT
+                   context.texture.pbrtv3_texture.type in cls.PBRTv3_COMPAT
 

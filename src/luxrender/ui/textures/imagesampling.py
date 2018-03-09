@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_imagesampling(pbrtv3_texture_base):
     bl_label = 'Image Sampling'
 
-    LUX_COMPAT = {'BLENDER'}
+    PBRTv3_COMPAT = {'BLENDER'}
     BL_COMPAT = {'IMAGE'}
 
     display_property_groups = [

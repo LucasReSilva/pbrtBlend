@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_blender(pbrtv3_texture_base):
     bl_label = 'Blender Texture Settings'
 
-    LUX_COMPAT = {'BLENDER'}
+    PBRTv3_COMPAT = {'BLENDER'}
     BL_COMPAT = {'BLEND', 'CLOUDS', 'DISTORTED_NOISE', 'MAGIC', 'MARBLE', 'MUSGRAVE', 'STUCCI', 'VORONOI', 'WOOD'}
 
     def draw(self, context):

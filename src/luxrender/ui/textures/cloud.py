@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_cloud(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Cloud Texture'
 
-    LUX_COMPAT = {'cloud'}
+    PBRTv3_COMPAT = {'cloud'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_cloud' )

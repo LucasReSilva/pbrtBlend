@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_exponential(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Exponential Texture'
 
-    LUX_COMPAT = {'exponential'}
+    PBRTv3_COMPAT = {'exponential'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_exponential' )

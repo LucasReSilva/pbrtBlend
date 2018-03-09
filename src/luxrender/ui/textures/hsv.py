@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_hsv(pbrtv3_texture_base):
     bl_label = 'PBRTv3 HSV Texture'
 
-    LUX_COMPAT = {'hsv'}
+    PBRTv3_COMPAT = {'hsv'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_hsv' )

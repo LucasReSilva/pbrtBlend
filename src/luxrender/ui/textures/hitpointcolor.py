@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_hitpointcolor(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Vertex Color (hitpointcolor) Texture'
 
-    LUX_COMPAT = {'hitpointcolor'}
+    PBRTv3_COMPAT = {'hitpointcolor'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_hitpointcolor' )

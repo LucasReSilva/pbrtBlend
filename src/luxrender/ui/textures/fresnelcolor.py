@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_fresnelcolor(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Fresnel Color Texture'
 
-    LUX_COMPAT = {'fresnelcolor'}
+    PBRTv3_COMPAT = {'fresnelcolor'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_fresnelcolor' )

@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_wrinkled(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Wrinkled Texture'
 
-    LUX_COMPAT = {'wrinkled'}
+    PBRTv3_COMPAT = {'wrinkled'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_wrinkled' )

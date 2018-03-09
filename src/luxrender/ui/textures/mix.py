@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_mix(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Mix Texture'
 
-    LUX_COMPAT = {'mix'}
+    PBRTv3_COMPAT = {'mix'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_mix' )

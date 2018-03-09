@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_hitpointalpha(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Vertex Alpha (hitpointalpha) Texture'
 
-    LUX_COMPAT = {'hitpointalpha'}
+    PBRTv3_COMPAT = {'hitpointalpha'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_hitpointalpha' )

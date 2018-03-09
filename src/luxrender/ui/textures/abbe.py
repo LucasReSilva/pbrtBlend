@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_abbe(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Abbe Texture'
 
-    LUX_COMPAT = {'abbe'}
+    PBRTv3_COMPAT = {'abbe'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_abbe' )

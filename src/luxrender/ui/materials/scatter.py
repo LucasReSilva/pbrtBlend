@@ -32,7 +32,7 @@ from ...ui.materials import pbrtv3_material_sub
 class ui_material_scatter(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Scatter Material'
 
-    LUX_COMPAT = {'scatter'}
+    PBRTv3_COMPAT = {'scatter'}
 
     display_property_groups = [
         ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_scatter' )

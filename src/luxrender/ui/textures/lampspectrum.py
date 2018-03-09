@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_lampspectrum(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Lamp spectrum Texture'
 
-    LUX_COMPAT = {'lampspectrum'}
+    PBRTv3_COMPAT = {'lampspectrum'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_lampspectrum' )

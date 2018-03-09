@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_windy(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Windy Texture'
 
-    LUX_COMPAT = {'windy'}
+    PBRTv3_COMPAT = {'windy'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_windy' )

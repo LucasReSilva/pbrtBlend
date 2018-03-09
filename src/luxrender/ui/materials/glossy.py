@@ -32,7 +32,7 @@ from ...ui.materials import pbrtv3_material_sub
 class ui_material_glossy(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Glossy Material'
 
-    LUX_COMPAT = {'glossy'}
+    PBRTv3_COMPAT = {'glossy'}
 
     display_property_groups = [
         ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_glossy' )

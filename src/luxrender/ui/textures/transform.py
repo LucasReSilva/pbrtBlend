@@ -33,7 +33,7 @@ class ui_texture_transform(pbrtv3_texture_base):
     bl_label = 'PBRTv3 3D Texture Transform'
     bl_options = {'DEFAULT_CLOSED'}
 
-    LUX_COMPAT = {'BLENDER', 'brick', 'checkerboard', 'cloud', 'densitygrid', 'exponential', 'fbm', 'marble', 'windy',
+    PBRTv3_COMPAT = {'BLENDER', 'brick', 'checkerboard', 'cloud', 'densitygrid', 'exponential', 'fbm', 'marble', 'windy',
                   'wrinkled'}
     BL_COMPAT = {'BLEND', 'CLOUDS', 'DISTORTED_NOISE', 'MAGIC', 'MARBLE', 'MUSGRAVE', 'STUCCI', 'VORONOI', 'WOOD'}
 

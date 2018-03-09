@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_equalenergy(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Equal Energy Texture'
 
-    LUX_COMPAT = {'equalenergy'}
+    PBRTv3_COMPAT = {'equalenergy'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_equalenergy' )

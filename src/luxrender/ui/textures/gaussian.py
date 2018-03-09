@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_gaussian(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Gaussian Texture'
 
-    LUX_COMPAT = {'gaussian'}
+    PBRTv3_COMPAT = {'gaussian'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_gaussian' )

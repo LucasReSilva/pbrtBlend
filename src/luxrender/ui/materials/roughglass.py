@@ -32,7 +32,7 @@ from ...ui.materials import pbrtv3_material_sub
 class ui_material_roughglass(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Rough Glass Material'
 
-    LUX_COMPAT = {'roughglass'}
+    PBRTv3_COMPAT = {'roughglass'}
 
     display_property_groups = [
         ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_roughglass' )

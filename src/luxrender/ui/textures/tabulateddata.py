@@ -32,7 +32,7 @@ from ...ui.textures import pbrtv3_texture_base
 class ui_texture_tabulateddata(pbrtv3_texture_base):
     bl_label = 'PBRTv3 Tabulated Data Texture'
 
-    LUX_COMPAT = {'tabulateddata'}
+    PBRTv3_COMPAT = {'tabulateddata'}
 
     display_property_groups = [
         ( ('texture', 'pbrtv3_texture'), 'pbrtv3_tex_tabulateddata' )

@@ -32,7 +32,7 @@ from ...ui.materials import pbrtv3_material_sub
 class ui_material_mirror(pbrtv3_material_sub):
     bl_label = 'PBRTv3 Mirror Material'
 
-    LUX_COMPAT = {'mirror'}
+    PBRTv3_COMPAT = {'mirror'}
 
     display_property_groups = [
         ( ('material', 'pbrtv3_material'), 'pbrtv3_mat_mirror' )
