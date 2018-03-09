@@ -97,7 +97,7 @@ class pbrtv3_rendermode(declarative_property_group):
             'attr': 'rendermode',
             'name': 'Rendering Mode',
             'description': 'Renderer and surface integrator combination to use',
-            'default': 'bidirectional',
+            'default': 'path',
             'items': [
                 ('bidirectional', 'Bidirectional', 'Bidirectional path tracer'),
                 ('path', 'Path', 'Simple (eye-only) Path tracer'),
