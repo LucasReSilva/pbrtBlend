@@ -894,7 +894,7 @@ class pbrtv3_film(declarative_property_group):
             params.add_string('cameraresponse', self.pbrtv3_colorspace.crf_preset)
 
         # Output types
-        params.add_string('filename', get_output_filename(scene))
+        params.add_string('filename', get_output_filename(scene)+'.png')
         params.add_bool('write_resume_flm', self.write_flm)
         params.add_bool('restart_resume_flm', self.restart_flm)
         params.add_bool('write_flm_direct', self.write_flm_direct)
