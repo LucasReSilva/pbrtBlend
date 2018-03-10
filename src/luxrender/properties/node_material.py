@@ -1702,14 +1702,14 @@ class pbrtv3_light_area_node(pbrtv3_material_node):
     def export(self, make_texture):
         arealight_params = ParamSet()
         arealight_params.update(get_socket_paramsets(self.inputs, make_texture))
-        arealight_params.add_float('gain', self.gain)
-        arealight_params.add_float('power', self.power)
-        arealight_params.add_float('efficacy', self.efficacy)
+        #arealight_params.add_float('gain', self.gain)
+        #arealight_params.add_float('power', self.power)
+        #arealight_params.add_float('efficacy', self.efficacy)
 
         if self.iesname:
             process_filepath_data(PBRTv3Manager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
 
-        arealight_params.add_float('importance', self.importance)
+        #arealight_params.add_float('importance', self.importance)
         arealight_params.add_integer('samples', self.nsamples)
 
         return 'area', arealight_params

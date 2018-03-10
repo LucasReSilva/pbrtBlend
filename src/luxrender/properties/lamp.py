@@ -145,7 +145,7 @@ class pbrtv3_lamp(declarative_property_group):
 
     def get_paramset(self):
         params = ParamSet()
-        params.add_float('importance', self.importance)
+        #params.add_float('importance', self.importance)
 
         return params
 
@@ -690,8 +690,8 @@ emitting side, as it emits its own light',
 
     def get_paramset(self, lamp_object):
         params = ParamSet()
-        params.add_float('power', self.power)
-        params.add_float('efficacy', self.efficacy)
+        #params.add_float('power', self.power)
+        #params.add_float('efficacy', self.efficacy)
         params.update(TC_L.get_paramset(self))
         params.add_integer('samples', self.nsamples)
 
