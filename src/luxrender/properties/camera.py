@@ -490,7 +490,7 @@ class pbrtv3_camera(declarative_property_group):
             params.add_float('fov', math.degrees(scene.camera.data.angle))
 
         params.add_float('screenwindow', self.screenwindow(xr, yr, scene, cam))
-        params.add_bool('autofocus', False)
+        # params.add_bool('autofocus', False)
         fps = scene.render.fps / scene.render.fps_base
 
         if self.exposure_mode == 'normalised':
@@ -516,13 +516,13 @@ class pbrtv3_camera(declarative_property_group):
 
         ws = get_worldscale(as_scalematrix=False)
 
-        if self.autofocus and self.use_dof:
-            params.add_bool('autofocus', True)
-        else:
-            if cam.dof_object is not None:
-                params.add_float('focaldistance', ws * ((scene.camera.location - cam.dof_object.location).length))
-            elif cam.dof_distance > 0:
-                params.add_float('focaldistance', ws * cam.dof_distance)
+        # if self.autofocus and self.use_dof:
+        #     params.add_bool('autofocus', True)
+        # else:
+        #     if cam.dof_object is not None:
+        #         params.add_float('focaldistance', ws * ((scene.camera.location - cam.dof_object.location).length))
+        #     elif cam.dof_distance > 0:
+        #         params.add_float('focaldistance', ws * cam.dof_distance)
 
         if self.use_clipping:
             params.add_float('hither', ws * cam.clip_start)
@@ -867,11 +867,11 @@ class pbrtv3_film(declarative_property_group):
         else:
             cs_object = self.pbrtv3_colorspace
 
-        params.add_float('gamma', self.get_gamma())
-        params.add_float('colorspace_white', [cs_object.cs_whiteX, cs_object.cs_whiteY])
-        params.add_float('colorspace_red', [cs_object.cs_redX, cs_object.cs_redY])
-        params.add_float('colorspace_green', [cs_object.cs_greenX, cs_object.cs_greenY])
-        params.add_float('colorspace_blue', [cs_object.cs_blueX, cs_object.cs_blueY])
+        # params.add_float('gamma', self.get_gamma())
+        # params.add_float('colorspace_white', [cs_object.cs_whiteX, cs_object.cs_whiteY])
+        # params.add_float('colorspace_red', [cs_object.cs_redX, cs_object.cs_redY])
+        # params.add_float('colorspace_green', [cs_object.cs_greenX, cs_object.cs_greenY])
+        # params.add_float('colorspace_blue', [cs_object.cs_blueX, cs_object.cs_blueY])
 
         # Camera Response Function
         if self.pbrtv3_colorspace.use_crf == 'file' and self.pbrtv3_colorspace.crf_file:
@@ -895,9 +895,9 @@ class pbrtv3_film(declarative_property_group):
 
         # Output types
         params.add_string('filename', get_output_filename(scene)+'.png')
-        params.add_bool('write_resume_flm', self.write_flm)
-        params.add_bool('restart_resume_flm', self.restart_flm)
-        params.add_bool('write_flm_direct', self.write_flm_direct)
+        # params.add_bool('write_resume_flm', self.write_flm)
+        # params.add_bool('restart_resume_flm', self.restart_flm)
+        # params.add_bool('write_flm_direct', self.write_flm_direct)
 
         if self.output_alpha:
             output_channels = 'RGBA'
@@ -905,59 +905,59 @@ class pbrtv3_film(declarative_property_group):
         else:
             output_channels = 'RGB'
 
-        if scene.pbrtv3_engine.export_type == 'INT' and scene.pbrtv3_engine.integratedimaging:
+        # if scene.pbrtv3_engine.export_type == 'INT' and scene.pbrtv3_engine.integratedimaging:
             # Set up params to enable z buffer
             # we use the colorspace gamma, else autolinear gives wrong estimation,
             # gamma 1.0 per pixel is recalculated in pylux after
             # Also, this requires tonemapped EXR output
-            params.add_string('write_exr_channels', 'RGBA')
-            params.add_bool('write_exr_halftype', False)
-            params.add_bool('write_exr_applyimaging', True)
-            params.add_bool('premultiplyalpha',
-                            True if self.output_alpha else False)  # Blender 2.66 always expects premultiplyalpha
-            params.add_bool('write_exr_ZBuf', True)
-            params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
-        else:
+            # params.add_string('write_exr_channels', 'RGBA')
+            # params.add_bool('write_exr_halftype', False)
+            # params.add_bool('write_exr_applyimaging', True)
+            # params.add_bool('premultiplyalpha',
+                            # True if self.output_alpha else False)  # Blender 2.66 always expects premultiplyalpha
+            # params.add_bool('write_exr_ZBuf', True)
+            # params.add_string('write_exr_zbuf_normalizationtype', 'Camera Start/End clip')
+        # else:
             # Otherwise let the user decide on tonemapped EXR and other EXR settings
-            params.add_bool('write_exr_halftype', self.write_exr_halftype)
-            params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
-            params.add_bool('write_exr_ZBuf', self.write_zbuf)
-            params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
-            params.add_string('write_exr_zbuf_normalizationtype', self.zbuf_normalization)
-            params.add_bool('write_exr', self.write_exr)
-            params.add_string('write_exr_channels', output_channels)
+            # params.add_bool('write_exr_halftype', self.write_exr_halftype)
+            # params.add_bool('write_exr_applyimaging', self.write_exr_applyimaging)
+            # params.add_bool('write_exr_ZBuf', self.write_zbuf)
+            # params.add_string('write_exr_compressiontype', self.write_exr_compressiontype)
+            # params.add_string('write_exr_zbuf_normalizationtype', self.zbuf_normalization)
+            # params.add_bool('write_exr', self.write_exr)
+            # params.add_string('write_exr_channels', output_channels)
 
-        params.add_bool('write_png', self.write_png)
-        params.add_string('write_png_channels', output_channels)
+        # params.add_bool('write_png', self.write_png)
+        # params.add_string('write_png_channels', output_channels)
 
-        if self.write_png:
-            params.add_bool('write_png_16bit', self.write_png_16bit)
+        # if self.write_png:
+            # params.add_bool('write_png_16bit', self.write_png_16bit)
 
-        params.add_bool('write_tga', self.write_tga)
-        params.add_string('write_tga_channels', output_channels)
+        # params.add_bool('write_tga', self.write_tga)
+        # params.add_string('write_tga_channels', output_channels)
 
         if self.write_tga:
             params.add_bool('write_tga_ZBuf', self.write_zbuf)
             params.add_string('write_tga_zbuf_normalizationtype', self.zbuf_normalization)
 
-        params.add_string('ldr_clamp_method', self.ldr_clamp_method)
+        # params.add_string('ldr_clamp_method', self.ldr_clamp_method)
 
-        if scene.pbrtv3_engine.export_type == 'EXT':
-            params.add_integer('displayinterval', self.displayinterval)
-            params.add_integer('writeinterval', self.writeinterval)
-            params.add_integer('flmwriteinterval', self.flmwriteinterval)
-        else:
-            params.add_integer('writeinterval', self.internal_updateinterval)
+        # if scene.pbrtv3_engine.export_type == 'EXT':
+        #     params.add_integer('displayinterval', self.displayinterval)
+        #     params.add_integer('writeinterval', self.writeinterval)
+        #     params.add_integer('flmwriteinterval', self.flmwriteinterval)
+        # else:
+        #     params.add_integer('writeinterval', self.internal_updateinterval)
 
         # Halt conditions
-        if scene.pbrtv3_halt.haltspp > 0:
-            params.add_integer('haltspp', scene.pbrtv3_halt.haltspp)
+        # if scene.pbrtv3_halt.haltspp > 0:
+            # params.add_integer('haltspp', scene.pbrtv3_halt.haltspp)
 
-        if scene.pbrtv3_halt.halttime > 0:
-            params.add_integer('halttime', scene.pbrtv3_halt.halttime)
+        # if scene.pbrtv3_halt.halttime > 0:
+            # params.add_integer('halttime', scene.pbrtv3_halt.halttime)
 
-        if scene.pbrtv3_halt.haltthreshold > 0:
-            params.add_float('haltthreshold', 1 / 10.0 ** scene.pbrtv3_halt.haltthreshold)
+        # if scene.pbrtv3_halt.haltthreshold > 0:
+            # params.add_float('haltthreshold', 1 / 10.0 ** scene.pbrtv3_halt.haltthreshold)
 
         # Convergence Test
         if scene.pbrtv3_halt.convergencestep != 32:
@@ -970,10 +970,10 @@ class pbrtv3_film(declarative_property_group):
             else:
                 params.add_string('usersamplingmap_filename', scene.pbrtv3_sampler.usersamplingmap_filename + '.exr')
 
-        if self.outlierrejection_k > 0 and scene.pbrtv3_rendermode.renderer != 'sppm':
-            params.add_integer('outlierrejection_k', self.outlierrejection_k)
+        # if self.outlierrejection_k > 0 and scene.pbrtv3_rendermode.renderer != 'sppm':
+            # params.add_integer('outlierrejection_k', self.outlierrejection_k)
 
-        params.add_integer('tilecount', self.tilecount)
+        # params.add_integer('tilecount', self.tilecount)
 
         # update the film settings with tonemapper settings
         params.update(self.pbrtv3_tonemapping.get_paramset())
@@ -1613,7 +1613,7 @@ class pbrtv3_tonemapping(declarative_property_group):
     def get_paramset(self):
         cam = PBRTv3Manager.CurrentScene.camera.data
         params = ParamSet()
-        params.add_string('tonemapkernel', self.type)
+        # params.add_string('tonemapkernel', self.type)
 
         if self.type == 'reinhard':
             params.add_float('reinhard_prescale', self.reinhard_prescale)

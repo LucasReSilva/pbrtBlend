@@ -1091,8 +1091,8 @@ class pbrtv3_integrator(declarative_property_group):
                 .add_integer('hitpointperpass', self.hitpointperpass) \
                 .add_float('startradius', self.startradius) \
                 .add_float('alpha', self.alpha) \
-                .add_bool('includeenvironment', self.includeenvironment) \
-                .add_bool('directlightsampling', self.directlightsampling)
+                # .add_bool('includeenvironment', self.includeenvironment) \
+                # .add_bool('directlightsampling', self.directlightsampling)
 
             if self.advanced:
                 params.add_bool('storeglossy', self.storeglossy) \
@@ -1145,9 +1145,9 @@ class pbrtv3_integrator(declarative_property_group):
                 .add_bool('finalgather', self.finalgather) \
                 .add_integer('finalgathersamples', self.finalgathersamples) \
                 .add_string('renderingmode', self.renderingmode) \
-                .add_float('gatherangle', self.gatherangle) \
-                .add_string('rrstrategy', self.rrstrategy) \
-                .add_float('rrcontinueprob', self.rrcontinueprob)
+                .add_float('gatherangle', self.gatherangle)
+                # .add_float('rrcontinueprob', self.rrcontinueprob) \
+                # .add_string('rrstrategy', self.rrstrategy) \
 
             # Export maxeyedepth as maxdepth, since that is actually the switch the scene file accepts
             if self.advanced:
@@ -1169,16 +1169,16 @@ class pbrtv3_integrator(declarative_property_group):
                 .add_float('mindist', self.mindist)
 
         if self.surfaceintegrator == 'path':
-            params.add_integer('maxdepth', self.maxdepth) \
-                .add_float('rrcontinueprob', self.rrcontinueprob) \
-                .add_string('rrstrategy', self.rrstrategy) \
-                .add_bool('includeenvironment', self.includeenvironment) \
-                .add_bool('directlightsampling', self.directlightsampling)
+            params.add_integer('maxdepth', self.maxdepth)
+                # .add_bool('includeenvironment', self.includeenvironment) \
+                # .add_bool('directlightsampling', self.directlightsampling) \
+                # .add_float('rrcontinueprob', self.rrcontinueprob) \
+                # .add_string('rrstrategy', self.rrstrategy) \
 
             if self.advanced:
                 params.add_integer('shadowraycount', self.shadowraycount)
 
-        if self.surfaceintegrator not in ('sppm', 'distributedpath'):
-            params.add_string('lightstrategy', self.lightstrategy if not hybrid_compat else 'one')
+        # if self.surfaceintegrator not in ('sppm', 'distributedpath'):
+            # params.add_string('lightstrategy', self.lightstrategy if not hybrid_compat else 'one')
 
         return self.surfaceintegrator, params
