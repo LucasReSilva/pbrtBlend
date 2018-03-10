@@ -215,11 +215,11 @@ class SceneExporter(object):
                 lux_context.set_output_file(Files.MAIN)
 
             # Set up render engine parameters
-            lux_context.renderer(*scene.pbrtv3_rendermode.api_output())
+            #lux_context.renderer(*scene.pbrtv3_rendermode.api_output())
+            lux_context.accelerator(*scene.pbrtv3_accelerator.api_output())            
             lux_context.sampler(*scene.pbrtv3_sampler.api_output())
-            lux_context.accelerator(*scene.pbrtv3_accelerator.api_output())
             lux_context.surfaceIntegrator(*scene.pbrtv3_integrator.api_output(scene))
-            lux_context.volumeIntegrator(*scene.pbrtv3_volumeintegrator.api_output())
+            #lux_context.volumeIntegrator(*scene.pbrtv3_volumeintegrator.api_output())
             lux_context.pixelFilter(*scene.pbrtv3_filter.api_output())
 
             # Set up camera, view and film

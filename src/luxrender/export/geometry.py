@@ -668,7 +668,7 @@ class GeometryExporter(object):
         if obj.type == 'MESH' and obj.data.pbrtv3_mesh.portal:
             self.lux_context.transform(matrix_to_list(obj.matrix_world, apply_worldscale=True))
 
-        me_shape_params.add_string('name', obj.name)
+        #me_shape_params.add_string('name', obj.name)
 
         if parent is not None:
             mat_object = parent
@@ -784,7 +784,7 @@ class GeometryExporter(object):
 
         use_inner_scope = len(mesh_definitions) > 1
         for me_name, me_mat_index, me_shape_type, me_shape_params in mesh_definitions:
-            me_shape_params.add_string('name', obj.name)
+            #me_shape_params.add_string('name', obj.name)
 
             if me_mat_index == '':
                 me_mat_index = 0
@@ -1146,7 +1146,7 @@ class GeometryExporter(object):
             hair_shape_params = ParamSet()
 
             hair_shape_params.add_string('filename', hair_file_path)
-            hair_shape_params.add_string('name', bpy.path.clean_name(partsys_name))
+            #hair_shape_params.add_string('name', bpy.path.clean_name(partsys_name))
             hair_shape_params.add_point('camerapos', bpy.context.scene.camera.location)
             hair_shape_params.add_string('tesseltype', psys.settings.pbrtv3_hair.tesseltype)
             hair_shape_params.add_string('acceltype', psys.settings.pbrtv3_hair.acceltype)

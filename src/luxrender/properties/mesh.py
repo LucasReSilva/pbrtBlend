@@ -208,7 +208,7 @@ class pbrtv3_mesh(declarative_property_group):
         params = ParamSet()
 
         # Export generatetangents
-        params.add_bool('generatetangents', self.generatetangents)
+        #params.add_bool('generatetangents', self.generatetangents)
 
         # check if subdivision is used
         if self.subdiv != 'None':

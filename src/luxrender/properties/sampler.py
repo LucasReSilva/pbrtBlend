@@ -210,7 +210,7 @@ class pbrtv3_sampler(declarative_property_group):
         if self.sampler == 'metropolis':
             params.add_float('largemutationprob', self.largemutationprob)
 
-        params.add_bool('noiseaware', self.noiseaware)
+        #params.add_bool('noiseaware', self.noiseaware)
 
         if self.advanced:
             if self.sampler == 'metropolis':
