@@ -1710,7 +1710,7 @@ class pbrtv3_light_area_node(pbrtv3_material_node):
             process_filepath_data(PBRTv3Manager.CurrentScene, self, self.iesname, arealight_params, 'iesname')
 
         arealight_params.add_float('importance', self.importance)
-        arealight_params.add_integer('nsamples', self.nsamples)
+        arealight_params.add_integer('samples', self.nsamples)
 
         return 'area', arealight_params
 

@@ -561,7 +561,7 @@ class pbrtv3_lamp_sun(declarative_property_group):
     def get_paramset(self, lamp_object):
         params = ParamSet()
         # params = super().get_paramset(lamp_object)
-        params.add_integer('nsamples', self.nsamples)
+        params.add_integer('samples', self.nsamples)
 
         if self.sunsky_type == 'distant':
             params.add_float('theta', math.degrees(self.theta)),
@@ -693,7 +693,7 @@ emitting side, as it emits its own light',
         params.add_float('power', self.power)
         params.add_float('efficacy', self.efficacy)
         params.update(TC_L.get_paramset(self))
-        params.add_integer('nsamples', self.nsamples)
+        params.add_integer('samples', self.nsamples)
 
         return params
 
@@ -801,7 +801,7 @@ images. Will disable use of portals for this light!',
             params.add_string('mapname', efutil.path_relative_to_export(hdri_path))
             params.add_string('mapping', self.mapping_type)
             params.add_float('gamma', self.gamma)
-            params.add_integer('nsamples', self.nsamples)
+            params.add_integer('samples', self.nsamples)
 
         if not self.infinite_map or self.hdri_multiply:
             params.add_color('L', self.L_color)

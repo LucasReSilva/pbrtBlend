@@ -3608,7 +3608,7 @@ class pbrtv3_emission(declarative_property_group):
             .add_float('gain', self.gain * lg_gain) \
             .add_float('power', self.power) \
             .add_float('efficacy', self.efficacy) \
-            .add_integer('nsamples', self.nsamples)
+            .add_integer('samples', self.nsamples)
         arealightsource_params.update(TC_L.get_paramset(self))
 
         if self.iesname:

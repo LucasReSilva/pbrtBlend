@@ -193,7 +193,7 @@ def exportLight(scene, lux_context, ob, matrix, portals=[]):
                         scene.pbrtv3_rendermode.renderer != 'hybrid':  # no sphere primitives with hybrid!
             light_params.add_float('gain', light.energy * lg_gain * (get_worldscale(as_scalematrix=False) ** 2))
             # Add this in manually, it is not used for the true point and thus is not in the normal parameter set
-            light_params.add_integer('nsamples', [light.pbrtv3_lamp.pbrtv3_lamp_point.nsamples])
+            light_params.add_integer('samples', [light.pbrtv3_lamp.pbrtv3_lamp_point.nsamples])
             lux_context.attributeBegin(ob.name, file=Files.MAIN)
             lux_context.transform(matrix_to_list(matrix, apply_worldscale=True))
             lux_context.lightGroup(light_group, [])
