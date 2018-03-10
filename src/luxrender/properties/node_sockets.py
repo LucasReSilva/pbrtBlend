@@ -909,7 +909,7 @@ class pbrtv3_TC_L_socket(bpy.types.NodeSocket):
         pass
 
     color = bpy.props.FloatVectorProperty(name='Color', description='Color', default=get_default(TC_L), subtype='COLOR',
-                                          min=0.0, max=1.0, update=color_update)
+                                          min=0.0, update=color_update)
 
     # helper property
     def default_value_get(self):
@@ -919,7 +919,7 @@ class pbrtv3_TC_L_socket(bpy.types.NodeSocket):
         self.color = value
 
     default_value = bpy.props.FloatVectorProperty(name='Color', default=get_default(TC_L), subtype='COLOR',
-                                                  min=0.0, max=1.0, get=default_value_get, set=default_value_set)
+                                                  min=0.0, get=default_value_get, set=default_value_set)
 
     def draw(self, context, layout, node, text):
         if self.is_linked:
