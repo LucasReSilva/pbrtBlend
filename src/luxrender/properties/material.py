@@ -3458,7 +3458,7 @@ class EmissionColorTextureParameter(ColorTextureParameter):
         return lambda s, c: c.pbrtv3_emission
 
 
-TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(1.0, 1.0, 1.0))
+TC_L = EmissionColorTextureParameter('L', 'Emission color', default=(100.0, 100.0, 100.0))
 
 
 @PBRTv3Addon.addon_register_class
