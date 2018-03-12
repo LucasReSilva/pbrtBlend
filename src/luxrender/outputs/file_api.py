@@ -120,6 +120,7 @@ class Custom_Context(object):
         self.file_names.append('%s.PBRTv3s' % name)
         self.files.append(open(self.file_names[Files.MAIN], 'w'))
         self.wf(Files.MAIN, '# Main Scene File')
+        self.wf(Files.MAIN, 'Scale -1 1 1')
 
         subdir = '%s%s/%s/%05d' % (efutil.export_path, efutil.scene_filename(), bpy.path.clean_name(scene.name),
                                    scene.frame_current)
@@ -131,7 +132,7 @@ class Custom_Context(object):
         self.files.append(open(self.file_names[Files.MATS], 'w'))
         self.wf(Files.MATS, '# Materials File')
 
-        self.file_names.append('%s/PBRTv3-Geometry.PBRTv3o' % subdir)
+        self.file_names.append('%s/PBRTv3-Geometry.PBRTv3g' % subdir)
         self.files.append(open(self.file_names[Files.GEOM], 'w'))
         self.wf(Files.GEOM, '# Geometry File')
 
