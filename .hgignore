@@ -11,7 +11,7 @@ syntax: glob
 *.DS_Store
 liblzo2*
 liblzmadec*
-liblux*
+libpbrtv3*
 *.dll
 *.dylib
 *.orig
