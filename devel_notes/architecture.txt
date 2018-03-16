@@ -85,7 +85,7 @@ Operators
 =========
 
 LuxBlend25 also defines several Blender operators to perform tasks.
-The most important one is EXPORT_OT_pbrtv3render, which exports the current scene
+The most important one is EXPORT_OT_luxrender, which exports the current scene
 to an .lxs file. This is registered as an operator in order to add it to the 
 File -> Export menu. The actual implementation of the export process is defined
 elsewhere (in the export/scene module).
@@ -100,31 +100,31 @@ RenderEngine
 ============
 
 LuxBlend25 primarily registers itself as a Render Engine within Blender. The
-RENDERENGINE_pbrtv3render class in the core/ package is the implementation of
+RENDERENGINE_luxrender class in the core/ package is the implementation of
 this interface. The render() method of that class is called when the user
 presses the Render button in blender (or, more precisely, when Blender calls
 it's bpy.ops.render.render() operator).
 
 Note that at the present time, Blender makes no distinction to the RenderEngine
 whether it is rendering a single frame, animation or a material preview. It is
-RENDERENGINE_pbrtv3render that has to do the guesswork and act accordingly.
+RENDERENGINE_luxrender that has to do the guesswork and act accordingly.
 
-The RENDERENGINE_pbrtv3render class contains all the process-management needed to
-run PBRTv3 either as an external process, or fully integrated via the pypbrtv3
+The RENDERENGINE_luxrender class contains all the process-management needed to
+run PBRTv3 either as an external process, or fully integrated via the pylux
 python module. It uses the same scene-export process as is used by the
-EXPORT_OT_pbrtv3render operator.
+EXPORT_OT_luxrender operator.
 
 
 How the Scene is exported
 =========================
 
-The output of data from Blender to PBRTv3 is abstracted through a pbrtv3_context
-object. This object may be writing to file, or calling API methods on pypbrtv3.
+The output of data from Blender to PBRTv3 is abstracted through a lux_context
+object. This object may be writing to file, or calling API methods on pylux.
 It should not be assumed at any time that either of these methods is being used,
 though occasionally checks need to be made in order to perform tasks specific
-to one method or the other. The classes which implement the pbrtv3_context
+to one method or the other. The classes which implement the lux_context
 interface are defined in the outputs/ package. In fact, the interface is the
-same as the pypbrtv3.Context API - the file_api module emulates this in order to
+same as the pylux.Context API - the file_api module emulates this in order to
 write .lx* files.
 
 The lbm2_api and lxm_api interfaces are simplified version of the file_api
@@ -135,13 +135,13 @@ definitions to file.
 The export process
 ==================
 
-The process of exporting a Blender Scene to a pbrtv3_context starts in the export/
+The process of exporting a Blender Scene to a lux_context starts in the export/
 package. This package defines classes and functions which translate various
 Blender objects/types into the format needed by PBRTv3. The entire process
 starts with export/scene. The SceneExporter class has an export() method,
 which does the following:
 * Check that the scene to be exported is valid
-* Create a pbrtv3_context object the required type (file output or api calls)
+* Create a lux_context object the required type (file output or api calls)
 * For file output, construct the correct file path and file names
 * Export the render engine settings to the context (integrator, sampler etc)
 * Export the Camera and Film settings
@@ -150,7 +150,7 @@ which does the following:
 * Export the (non-mesh) light sources (deferred to export/lights)
 
 Most of these export processes call upon the custom property groups to return
-an Identifier and a ParamSet to be passed to the pbrtv3_context using a method
+an Identifier and a ParamSet to be passed to the lux_context using a method
 usually named api_output(). Geometry and lights in particular defer to other
 modules which perform additional tasks to export the correct items.
 
@@ -208,9 +208,9 @@ Material/Texture export
 The entry point for exporting a material is in
 properties/material/pbrtv3_material.export()
 
-This method takes a pbrtv3_context and the parent Blender material as arguments
+This method takes a lux_context and the parent Blender material as arguments
 and exports the material, and its constituent textures and sub-materials to the
-pbrtv3_context.
+lux_context.
 
 When called in 'direct' mode, the entire stack of materials and textures needed
 to create this material are exported for every material, using the traditional
